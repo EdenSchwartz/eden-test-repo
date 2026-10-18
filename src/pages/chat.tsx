@@ -293,7 +293,8 @@ export default function ChatPage() {
         <div className="absolute top-3 right-4 z-20"><InfoToggle open={infoOpen} onClick={toggleInfo} /></div>
       )}
       {/* Customizing: the chat keeps most of the room, the preview gets a narrower column on the right */}
-      <section className={cn("relative flex min-w-0 flex-1 flex-col overflow-hidden", customizing && "border-r")}>
+      {/* data-chat-thread: the Hex look gives the conversation a graph-paper canvas (src/looks/hex.css) */}
+      <section data-chat-thread className={cn("relative flex min-w-0 flex-1 flex-col overflow-hidden", customizing && "border-r")}>
         {active ? (
           <>
             <Thread key={active.id} className="flex-1">

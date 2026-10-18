@@ -3,6 +3,8 @@ import { ArrowRight, Check, Play } from "lucide-react"
 import { AgentChip, Composer, Greeting, useLaunch } from "@/components/home/composer"
 import { SuperAgentPanel, usePanelWidth } from "@/components/super-agent-panel"
 import { AgentMeta, SuperAgentOrb } from "@/components/super-agents"
+import { HexHomeGrid } from "@/components/home/hex-home"
+import { useLook } from "@/lib/look"
 import { blockers, getSuperAgent, matchSuperAgent, type SuperAgent } from "@/data/super-agents"
 import { useNav } from "@/lib/nav"
 import { cn } from "@/lib/utils"
@@ -44,6 +46,7 @@ export function ConceptHome({ initial, created }: { initial?: SuperAgent; create
   const startChat = (sa: SuperAgent) => navigate("chat", { superAgentId: sa.id, startChat: true }) // a conversation with it (pages/chat.tsx)
   const [panelWidth, setPanelWidth] = usePanelWidth()
   const [resizing, setResizing] = useState(false)
+  const hex = useLook() === "hex" // Hex look: a tight, ruled Home (components/home/hex-home.tsx)
 
   return (
     // Wide screens: leave room for the docked panel so the chat stays visible beside it. Narrow: the panel slides over.
@@ -126,14 +129,15 @@ export function ConceptHome({ initial, created }: { initial?: SuperAgent; create
           )}
         </div>
 
-        {/* Templates have their own page now (Tasks); Home is just the chat, with a way there */}
-        <button
+        {/* Templates have their own page now (Agent explorer); Home is just the chat, with a way there.
+            Hex look: a ruled grid instead (Needs you · Recent · Start from) */}
+        {hex && !picked ? <HexHomeGrid /> : <button
           onClick={() => navigate("explorer")}
           className="rise-in flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           style={{ "--delay": "160ms" } as React.CSSProperties}
         >
           Looking for a ready-made workflow? <span className="font-medium text-foreground">Browse agent templates</span> <ArrowRight className="size-3.5" />
-        </button>
+        </button>}
       </div>
 
       {profile && <SuperAgentPanel key={profile.id} sa={profile} onClose={clear} onStartChat={startChat} onClone={clone} onResize={setPanelWidth} onResizing={setResizing} />}
