@@ -293,8 +293,17 @@ export default function ChatPage() {
         <div className="absolute top-3 right-4 z-20"><InfoToggle open={infoOpen} onClick={toggleInfo} /></div>
       )}
       {/* Customizing: the chat keeps most of the room, the preview gets a narrower column on the right */}
-      {/* data-chat-thread: the Hex look gives the conversation a graph-paper canvas (src/looks/hex.css) */}
-      <section data-chat-thread className={cn("relative flex min-w-0 flex-1 flex-col overflow-hidden", customizing && "border-r")}>
+      {/* data-chat-thread: in a conversation, the Hex look shows a faint grid around the mouse (src/looks/hex.css);
+          the pointer position goes straight to CSS variables, no re-render */}
+      <section
+        data-chat-thread={active ? "conversation" : "home"}
+        onPointerMove={(e) => {
+          const r = e.currentTarget.getBoundingClientRect()
+          e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`)
+          e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`)
+        }}
+        className={cn("relative flex min-w-0 flex-1 flex-col overflow-hidden", customizing && "border-r")}
+      >
         {active ? (
           <>
             <Thread key={active.id} className="flex-1">
