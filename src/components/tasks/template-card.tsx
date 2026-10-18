@@ -1,4 +1,4 @@
-import { ArrowRight, Bot, Clock } from "lucide-react"
+import { Bot, Clock } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import type { LucideIcon } from "lucide-react"
 import { StatusChip } from "@/components/tasks/status-chip"
@@ -96,8 +96,6 @@ export function CardShell({ id, name, icon: Icon, text, footer, selected, delay 
         <span className={cn("flex min-w-0 items-center gap-y-1.5 transition-opacity", status ? "gap-x-3" : "flex-wrap gap-x-4", off && "opacity-50")}>{footer}</span>
         {by && toggle && <Creator by={by} />}
       </span>
-      {/* Hex look: slides in on hover, bottom right (where the avatar sits on your own agents; it fades out). Hidden in Rival */}
-      <ArrowRight aria-hidden className="card-arrow pointer-events-none absolute right-4 bottom-[19px] hidden size-3.5 text-blue" strokeWidth={2.25} />
     </div>
   )
 }
@@ -105,7 +103,7 @@ export function CardShell({ id, name, icon: Icon, text, footer, selected, delay 
 // Who made it: you (your initials, like the header's avatar) or Rival (its logo)
 function Creator({ by }: { by: "you" | "rival" }) {
   return (
-    <span className="card-avatar pointer-events-auto relative ml-auto" title={by === "you" ? "Created by you" : "Created by Rival"}>
+    <span className="pointer-events-auto relative ml-auto" title={by === "you" ? "Created by you" : "Created by Rival"}>
       <Avatar className="size-5">
         {by === "you"
           ? <AvatarFallback className="text-[9px] font-semibold">IB</AvatarFallback>

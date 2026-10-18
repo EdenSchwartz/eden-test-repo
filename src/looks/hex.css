@@ -2,8 +2,8 @@
  * The Hex look: Hex's structure on Rival's colors (2026-10-18). Turned on by <html data-look="hex">
  * (the Rival | Hex switch in the header, components/look-switch.tsx). Colors: a warm soft sidebar, a white
  * workspace, one straight line between them; blue #0350d0 (Hex's own purple was tried and dropped). Structure and type:
- *   Lines:   square corners and small corner marks on cards, like Hex's framed windows (on hover they grow: the
- *            frame draws itself, and an arrow slides in); ruled lines only where
+ *   Lines:   square corners and small corner marks on cards, like Hex's framed windows (on hover the card floats
+ *            a bit and its frame draws itself); ruled lines only where
  *            they divide real content (Home's grid). No page rails or header rules (too much)
  *   Labels:  small uppercase mono labels (sidebar groups, panel sections, Home's grid), like Hex's technical labels
  *   Type:    Rival's own fonts (Mona Sans, Hubot Sans titles); only the small labels switch to IBM Plex Mono
@@ -66,9 +66,10 @@
    Used sparingly: only where they divide real content (Home's ruled grid, the dividers already inside panels
    and cards). Page-length rails and a rule under page headers were tried and dropped as too much. */
 
-/* Cards: square, flat, with corner marks. Hover = the frame draws itself: the marks grow along the edges and
-   darken (--tick-len / --tick are registered below so they animate), the icon's tile tints, and an arrow slides
-   in bottom right (on your own agents the avatar there fades out). No fill. */
+/* Cards: square, flat, with corner marks. Hover = the card floats a bit (rises 2px, a soft shadow appears under it)
+   while its frame draws itself (the marks grow along the edges and darken; --tick-len / --tick are registered below
+   so they animate) and the icon's tile tints. No fill. Uses `translate`, not `transform`, so it doesn't fight the
+   cards' rise-in entrance animation. (An arrow sliding in bottom right was tried and dropped.) */
 @property --tick-len { syntax: "<length>"; inherits: true; initial-value: 7px; }
 @property --tick { syntax: "<color>"; inherits: true; initial-value: rgb(0 0 0 / 0.4); }
 [data-look="hex"] .pressable {
@@ -83,47 +84,48 @@
     var(--tick-len) 1px, 1px var(--tick-len), var(--tick-len) 1px, 1px var(--tick-len),
     var(--tick-len) 1px, 1px var(--tick-len), var(--tick-len) 1px, 1px var(--tick-len);
   background-repeat: no-repeat;
-  box-shadow: inset 0 0 0 1px var(--color-border);
-  transition: --tick-len 280ms var(--ease-snappy), --tick 280ms ease, box-shadow 200ms ease, background-color 0s;
+  box-shadow: inset 0 0 0 1px var(--color-border), 0 0 0 0 transparent, 0 0 0 0 transparent;
+  transition: --tick-len 280ms var(--ease-snappy), --tick 280ms ease, translate 280ms var(--ease-snappy), box-shadow 280ms var(--ease-snappy), background-color 0s;
 }
 [data-look="hex"] .pressable:hover {
   --tick-len: 18px;
   --tick: color-mix(in oklab, var(--foreground) 75%, transparent);
   background-color: var(--color-card);
-  box-shadow: inset 0 0 0 1px var(--color-input);
+  translate: 0 -2px;
+  box-shadow: inset 0 0 0 1px var(--color-input), 0 10px 24px -14px rgb(16 24 40 / 0.22), 0 2px 6px -3px rgb(16 24 40 / 0.08);
 }
 [data-look="hex"] .pressable[aria-pressed="true"],
 [data-look="hex"] .pressable[data-selected] { box-shadow: inset 0 0 0 1px var(--blue); }
+/* Needs you keeps its amber edge and glow (index.css) in the Hex look too, resting and floating */
+[data-look="hex"] .pressable[data-attention] {
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--warning) 45%, transparent), 0 0 0 3px color-mix(in oklab, var(--warning) 12%, transparent), 0 0 0 0 transparent;
+}
+[data-look="hex"] .pressable[data-attention]:hover {
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--warning) 55%, transparent), 0 0 0 3px color-mix(in oklab, var(--warning) 14%, transparent), 0 10px 24px -14px rgb(16 24 40 / 0.22);
+}
 
 [data-look="hex"] .pressable .card-icon { transition: background-color 200ms ease; }
 [data-look="hex"] .pressable:hover .card-icon { background-color: color-mix(in oklab, var(--blue) 14%, var(--wash)); }
 
-[data-look="hex"] .pressable .card-arrow {
-  display: block;
-  opacity: 0;
-  transform: translateX(-6px);
-  transition: opacity 200ms ease, transform 280ms var(--ease-snappy);
-}
-[data-look="hex"] .pressable:hover .card-arrow { opacity: 1; transform: none; }
-[data-look="hex"] .pressable .card-avatar { transition: opacity 150ms ease; }
-[data-look="hex"] .pressable:hover .card-avatar { opacity: 0; }
-
 @media (prefers-reduced-motion: reduce) {
-  [data-look="hex"] .pressable, [data-look="hex"] .pressable .card-arrow { transition: none; }
+  [data-look="hex"] .pressable { transition: none; }
+  [data-look="hex"] .pressable:hover { translate: none; }
 }
 
 /* ---------- Switchers ----------
    The Agents | Sub agents switch (kindSwitch in pages/gallery.tsx) as separate chips, the user's favorite look:
    no shared track, a small gap, soft grey chips with icon + label, the active one solid near-black with white text. */
 [data-look="hex"] [role="tablist"][aria-label="Show"] {
-  gap: 6px;
+  gap: 4px;
   padding: 0;
   background: transparent;
 }
 [data-look="hex"] [role="tablist"][aria-label="Show"] > button {
-  height: 2rem;
-  padding-inline: 0.75rem;
-  border-radius: 6px;
+  height: 1.625rem;
+  padding-inline: 0.5rem;
+  gap: 0.3rem;
+  border-radius: 5px;
+  font-size: 12.5px;
   background: var(--muted);
   color: var(--foreground);
   box-shadow: none;
@@ -135,7 +137,8 @@
   background: #1d1c1a;
   color: #fff;
 }
-[data-look="hex"] [role="tablist"][aria-label="Show"] > button > span { opacity: 0.55; }
+[data-look="hex"] [role="tablist"][aria-label="Show"] > button > span { opacity: 0.55; font-size: 11px; }
+[data-look="hex"] [role="tablist"][aria-label="Show"] > button > svg { width: 0.75rem; height: 0.75rem; }
 :root[data-look="hex"].dark [role="tablist"][aria-label="Show"] > button[aria-selected="true"] { background: #f1f0ee; color: #111; }
 
 /* ---------- AI chat ---------- */
