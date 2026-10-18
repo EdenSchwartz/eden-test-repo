@@ -47,11 +47,11 @@
   --border: color-mix(in oklab, #0b1020 10%, #fff);
   --input: color-mix(in oklab, #0b1020 16%, #fff);
   --ring: #0350d0;
-  --sidebar: #f6f5f2;
+  --sidebar: #f8f7f5; /* rgb(248, 247, 245) */
   --sidebar-foreground: #0b1020;
   --sidebar-primary: #0350d0;
-  --sidebar-accent: #ebe9e4;
-  --sidebar-border: color-mix(in oklab, #0b1020 10%, #f6f5f2);
+  --sidebar-accent: #edebe7;
+  --sidebar-border: color-mix(in oklab, #0b1020 10%, #f8f7f5);
   --sidebar-ring: #0350d0;
   --blue: #0350d0;
   --hairline: color-mix(in oklab, #0b1020 7%, #fff);
