@@ -1,7 +1,7 @@
 /*
  * The Hex look: Hex's structure on Rival's colors (2026-10-18). Turned on by <html data-look="hex">
- * (the Rival | Hex switch in the header, components/look-switch.tsx). Colors stay Rival's on purpose
- * (a recolor was tried and dropped); this layer only changes structure and type:
+ * (the Rival | Hex switch in the header, components/look-switch.tsx). Colors: the rival.security website's
+ * (warm surfaces, blue #0350d0; Hex's own purple recolor was tried and dropped). Structure and type:
  *   Lines:   square corners and small corner marks on cards, like Hex's framed windows; ruled lines only where
  *            they divide real content (Home's grid). No page rails or header rules (too much)
  *   Labels:  small uppercase mono labels (sidebar groups, panel sections, Home's grid), like Hex's technical labels
@@ -15,7 +15,7 @@
 
 :root[data-look="hex"] {
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --radius: 0.125rem;
+  --radius: 0.25rem; /* 4px: square-ish, softened by 2px from the first pass */
   /* corner marks: short dark ticks at a frame's four corners */
   --tick: color-mix(in oklab, var(--foreground) 45%, transparent);
   --ticks:
@@ -27,6 +27,33 @@
     linear-gradient(var(--tick), var(--tick)) bottom left / 1px 7px no-repeat,
     linear-gradient(var(--tick), var(--tick)) bottom right / 7px 1px no-repeat,
     linear-gradient(var(--tick), var(--tick)) bottom right / 1px 7px no-repeat;
+}
+
+/* Colors: rival.security's website palette (read from rival.security/blog, 2026-10-18), light mode only:
+   warm off-white surfaces instead of the app's cool blue-grey, white cards with ink-tinted hairlines,
+   and the site's deeper primary blue rgb(3, 80, 208). Dark mode keeps the app's own palette. */
+:root[data-look="hex"]:not(.dark) {
+  --background: #f8f7f5;
+  --foreground: #0b1020;
+  --card: #fff;
+  --popover: #fff;
+  --primary: #0350d0;
+  --primary-foreground: #fff;
+  --muted: #f0eeea;
+  --muted-foreground: #5a6072;
+  --accent: #f0eeea;
+  --border: color-mix(in oklab, #0b1020 10%, #f8f7f5);
+  --input: color-mix(in oklab, #0b1020 16%, #f8f7f5);
+  --ring: #0350d0;
+  --sidebar: #f3f1ee;
+  --sidebar-primary: #0350d0;
+  --sidebar-accent: #ebe8e3;
+  --sidebar-border: color-mix(in oklab, #0b1020 8%, #f3f1ee);
+  --sidebar-ring: #0350d0;
+  --blue: #0350d0;
+  --hairline: color-mix(in oklab, #0b1020 7%, #f8f7f5);
+  --chip: #f0eeea;
+  --frost: #fbfaf8;
 }
 
 /* ---------- Type ---------- */
