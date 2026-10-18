@@ -1,4 +1,5 @@
 import { Bell, Moon, Search, Sun } from "lucide-react"
+import { LookSwitch } from "@/components/look-switch"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -20,6 +21,8 @@ export function HeaderToolbar({ title }: { title: string }) {
           <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input placeholder="Search…" className="w-64 pl-8" />
         </div>
+        {/* Compare the Rival and Hex looks (src/looks/hex.css) */}
+        <LookSwitch />
         <Button variant="ghost" size="icon" aria-label="Notifications"><Bell /></Button>
         <Button
           variant="ghost" size="icon" aria-label="Toggle theme"
