@@ -55,6 +55,21 @@
         "--strictPort"
       ],
       "port": 5178
+    },
+    {
+      "name": "checkpoint-info-panel",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "/Users/edenschwartz/Downloads/rival-haness-demo-06-checkpoint-info-panel",
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5179",
+        "--strictPort"
+      ],
+      "port": 5179
     }
   ]
 }

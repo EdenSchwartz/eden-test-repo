@@ -14,6 +14,7 @@ demo-06 is a local git repo (nothing is pushed anywhere; the user doesn't use gi
 - **List them**: `git tag -n`. **Look at / run an old one**: `git worktree add ../demo-06-<name> checkpoint-<name>` (a separate folder; copy or link `node_modules`), never rewrite history.
 - **Go back for real**: ask the user first; then commit current work as its own checkpoint before restoring.
 - Checkpoints so far: `checkpoint-info-panel` (Oct 18: outcomes, sources stack, floating info panel, sections closed).
+  It's open as its own folder `../rival-haness-demo-06-checkpoint-info-panel` (a git worktree, `node_modules` linked to demo-06's) and runs with the `checkpoint-info-panel` launch config on **port 5179** (config is in both demo-06's and demo-05's `.claude/launch.json`, since the preview tool reads the session's original folder). Don't edit files there.
 - Exploring UI: build variants side by side with a small in-demo variant switcher, pick one, delete the rest.
 
 ## Goal of this version
