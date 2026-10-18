@@ -7,7 +7,8 @@
  *   Labels:  small uppercase mono labels (sidebar groups, panel sections, Home's grid), like Hex's technical labels
  *   Type:    Rival's own fonts (Mona Sans, Hubot Sans titles); only the small labels switch to IBM Plex Mono
  *            (Google Fonts in index.html). Instrument Sans / Serif were tried and dropped.
- *   Chat:    no background by default; a faint grid appears only around the mouse, in conversations (not Home).
+ *   Chat:    no background by default; a faint grid appears only around the mouse on New chat (Home), not in
+ *            conversations (it was there first; moved).
  *            An always-on graph paper everywhere was tried and dropped as too much
  *   Home:    tight: the composer framed, then a ruled grid of Needs you · Recent · Start from (components/home/hex-home.tsx)
  */
@@ -55,10 +56,10 @@
 [data-look="hex"] .pressable[data-selected] { box-shadow: inset 0 0 0 1px var(--blue); }
 
 /* ---------- AI chat ---------- */
-/* No paper by default. In a conversation, a faint grid shows only around the mouse (a soft ~200px circle that
+/* No paper by default. On New chat (Home, not in conversations), a faint grid shows only around the mouse (a soft ~200px circle that
    follows it, --mx/--my set by pages/chat.tsx) and fades in on hover, out on leave. Behind everything else. */
-[data-look="hex"] [data-chat-thread="conversation"] { isolation: isolate; }
-[data-look="hex"] [data-chat-thread="conversation"]::before {
+[data-look="hex"] [data-chat-thread="home"] { isolation: isolate; }
+[data-look="hex"] [data-chat-thread="home"]::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -72,9 +73,7 @@
   opacity: 0;
   transition: opacity 400ms ease;
 }
-[data-look="hex"] [data-chat-thread="conversation"]:hover::before { opacity: 1; }
-/* The conversation column stays a solid page (no edges), so the grid only shows in the margins around it */
-[data-look="hex"] [data-chat-thread="conversation"] .max-w-3xl { background: var(--background); }
+[data-look="hex"] [data-chat-thread="home"]:hover::before { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
-  [data-look="hex"] [data-chat-thread="conversation"]::before { transition: none; }
+  [data-look="hex"] [data-chat-thread="home"]::before { transition: none; }
 }
