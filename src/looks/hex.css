@@ -112,6 +112,32 @@
   [data-look="hex"] .pressable, [data-look="hex"] .pressable .card-arrow { transition: none; }
 }
 
+/* ---------- Switchers ----------
+   The Agents | Sub agents switch (kindSwitch in pages/gallery.tsx) as separate chips, the user's favorite look:
+   no shared track, a small gap, soft grey chips with icon + label, the active one solid near-black with white text. */
+[data-look="hex"] [role="tablist"][aria-label="Show"] {
+  gap: 6px;
+  padding: 0;
+  background: transparent;
+}
+[data-look="hex"] [role="tablist"][aria-label="Show"] > button {
+  height: 2rem;
+  padding-inline: 0.75rem;
+  border-radius: 6px;
+  background: var(--muted);
+  color: var(--foreground);
+  box-shadow: none;
+  font-weight: 500;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+[data-look="hex"] [role="tablist"][aria-label="Show"] > button:hover { background: color-mix(in oklab, var(--foreground) 8%, var(--muted)); }
+[data-look="hex"] [role="tablist"][aria-label="Show"] > button[aria-selected="true"] {
+  background: #1d1c1a;
+  color: #fff;
+}
+[data-look="hex"] [role="tablist"][aria-label="Show"] > button > span { opacity: 0.55; }
+:root[data-look="hex"].dark [role="tablist"][aria-label="Show"] > button[aria-selected="true"] { background: #f1f0ee; color: #111; }
+
 /* ---------- AI chat ---------- */
 /* No paper by default. On New chat (Home, not in conversations), a faint grid shows only around the mouse (a soft ~200px circle that
    follows it, --mx/--my set by pages/chat.tsx) and fades in on hover, out on leave. Behind everything else. */
