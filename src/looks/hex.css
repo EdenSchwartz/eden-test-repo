@@ -2,7 +2,8 @@
  * The Hex look: Hex's structure on Rival's colors (2026-10-18). Turned on by <html data-look="hex">
  * (the Rival | Hex switch in the header, components/look-switch.tsx). Colors: a warm soft sidebar, a white
  * workspace, one straight line between them; blue #0350d0 (Hex's own purple was tried and dropped). Structure and type:
- *   Lines:   square corners and small corner marks on cards, like Hex's framed windows; ruled lines only where
+ *   Lines:   square corners and small corner marks on cards, like Hex's framed windows (on hover they grow: the
+ *            frame draws itself, and an arrow slides in); ruled lines only where
  *            they divide real content (Home's grid). No page rails or header rules (too much)
  *   Labels:  small uppercase mono labels (sidebar groups, panel sections, Home's grid), like Hex's technical labels
  *   Type:    Rival's own fonts (Mona Sans, Hubot Sans titles); only the small labels switch to IBM Plex Mono
@@ -16,17 +17,6 @@
 :root[data-look="hex"] {
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --radius: 0.25rem; /* 4px: square-ish, softened by 2px from the first pass */
-  /* corner marks: short dark ticks at a frame's four corners */
-  --tick: color-mix(in oklab, var(--foreground) 45%, transparent);
-  --ticks:
-    linear-gradient(var(--tick), var(--tick)) top left / 7px 1px no-repeat,
-    linear-gradient(var(--tick), var(--tick)) top left / 1px 7px no-repeat,
-    linear-gradient(var(--tick), var(--tick)) top right / 7px 1px no-repeat,
-    linear-gradient(var(--tick), var(--tick)) top right / 1px 7px no-repeat,
-    linear-gradient(var(--tick), var(--tick)) bottom left / 7px 1px no-repeat,
-    linear-gradient(var(--tick), var(--tick)) bottom left / 1px 7px no-repeat,
-    linear-gradient(var(--tick), var(--tick)) bottom right / 7px 1px no-repeat,
-    linear-gradient(var(--tick), var(--tick)) bottom right / 1px 7px no-repeat;
 }
 
 /* Colors (light mode only; dark keeps the app palette). A warm, soft frame and a white workspace:
@@ -76,14 +66,51 @@
    Used sparingly: only where they divide real content (Home's ruled grid, the dividers already inside panels
    and cards). Page-length rails and a rule under page headers were tried and dropped as too much. */
 
-/* Cards: square, flat, with corner marks */
+/* Cards: square, flat, with corner marks. Hover = the frame draws itself: the marks grow along the edges and
+   darken (--tick-len / --tick are registered below so they animate), the icon's tile tints, and an arrow slides
+   in bottom right (on your own agents the avatar there fades out). No fill. */
+@property --tick-len { syntax: "<length>"; inherits: true; initial-value: 7px; }
+@property --tick { syntax: "<color>"; inherits: true; initial-value: rgb(0 0 0 / 0.4); }
 [data-look="hex"] .pressable {
-  background-image: var(--ticks);
+  --tick: color-mix(in oklab, var(--foreground) 40%, transparent);
+  background-image:
+    linear-gradient(var(--tick), var(--tick)), linear-gradient(var(--tick), var(--tick)),
+    linear-gradient(var(--tick), var(--tick)), linear-gradient(var(--tick), var(--tick)),
+    linear-gradient(var(--tick), var(--tick)), linear-gradient(var(--tick), var(--tick)),
+    linear-gradient(var(--tick), var(--tick)), linear-gradient(var(--tick), var(--tick));
+  background-position: top left, top left, top right, top right, bottom left, bottom left, bottom right, bottom right;
+  background-size:
+    var(--tick-len) 1px, 1px var(--tick-len), var(--tick-len) 1px, 1px var(--tick-len),
+    var(--tick-len) 1px, 1px var(--tick-len), var(--tick-len) 1px, 1px var(--tick-len);
+  background-repeat: no-repeat;
   box-shadow: inset 0 0 0 1px var(--color-border);
+  transition: --tick-len 280ms var(--ease-snappy), --tick 280ms ease, box-shadow 200ms ease, background-color 0s;
 }
-[data-look="hex"] .pressable:hover { box-shadow: inset 0 0 0 1px var(--color-line); }
+[data-look="hex"] .pressable:hover {
+  --tick-len: 18px;
+  --tick: color-mix(in oklab, var(--foreground) 75%, transparent);
+  background-color: var(--color-card);
+  box-shadow: inset 0 0 0 1px var(--color-input);
+}
 [data-look="hex"] .pressable[aria-pressed="true"],
 [data-look="hex"] .pressable[data-selected] { box-shadow: inset 0 0 0 1px var(--blue); }
+
+[data-look="hex"] .pressable .card-icon { transition: background-color 200ms ease; }
+[data-look="hex"] .pressable:hover .card-icon { background-color: color-mix(in oklab, var(--blue) 14%, var(--wash)); }
+
+[data-look="hex"] .pressable .card-arrow {
+  display: block;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 200ms ease, transform 280ms var(--ease-snappy);
+}
+[data-look="hex"] .pressable:hover .card-arrow { opacity: 1; transform: none; }
+[data-look="hex"] .pressable .card-avatar { transition: opacity 150ms ease; }
+[data-look="hex"] .pressable:hover .card-avatar { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-look="hex"] .pressable, [data-look="hex"] .pressable .card-arrow { transition: none; }
+}
 
 /* ---------- AI chat ---------- */
 /* No paper by default. On New chat (Home, not in conversations), a faint grid shows only around the mouse (a soft ~200px circle that
