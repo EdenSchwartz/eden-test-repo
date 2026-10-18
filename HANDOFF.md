@@ -8,6 +8,14 @@ npm run dev -- --port 5178 --strictPort
 
 Never modify `rival-haness-demo-05` (port 5177), `rival-haness-demo-04` (port 5176) or `rival-haness-demo-03` (port 5175): they are frozen saved versions.
 
+## Checkpoints (local git, no GitHub)
+demo-06 is a local git repo (nothing is pushed anywhere; the user doesn't use git, so Claude does it for them).
+- **Save a checkpoint** ("save a checkpoint"): commit everything, then `git tag -a checkpoint-<short-name> -m "<what it is>"`.
+- **List them**: `git tag -n`. **Look at / run an old one**: `git worktree add ../demo-06-<name> checkpoint-<name>` (a separate folder; copy or link `node_modules`), never rewrite history.
+- **Go back for real**: ask the user first; then commit current work as its own checkpoint before restoring.
+- Checkpoints so far: `checkpoint-info-panel` (Oct 18: outcomes, sources stack, floating info panel, sections closed).
+- Exploring UI: build variants side by side with a small in-demo variant switcher, pick one, delete the rest.
+
 ## Goal of this version
 Mix what the real product's Agents page has (app.us1-dev.rival-internal.io/investigations/agents, read on 2026-10-18) into the demo:
 - **Outcomes** on every agent: the results a run ends in, as chips (e.g. Exploitable · Not Exploitable · Unclear · Failed).
