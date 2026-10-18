@@ -5,14 +5,13 @@
  *   Lines:   square corners; thin vertical rails along the content column; a full-width rule under page
  *            headers; small corner marks on cards, like Hex's framed windows
  *   Labels:  small uppercase mono labels (sidebar groups, panel sections, Home's grid), like Hex's technical labels
- *   Type:    Instrument Sans text, Instrument Serif titles (fonts from Google Fonts in index.html)
+ *   Type:    Rival's own fonts (Mona Sans, Hubot Sans titles); only the small labels switch to IBM Plex Mono
+ *            (Google Fonts in index.html). Instrument Sans / Serif were tried and dropped.
  *   Chat:    a faint graph-paper canvas that fades out behind the messages, rails on the conversation column
  *   Home:    tight: the composer framed, then a ruled grid of Needs you · Recent · Start from (components/home/hex-home.tsx)
  */
 
 :root[data-look="hex"] {
-  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-title: "Instrument Serif", ui-serif, Georgia, serif;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --radius: 0.125rem;
   /* corner marks: short dark ticks at a frame's four corners */
@@ -29,15 +28,6 @@
 }
 
 /* ---------- Type ---------- */
-[data-look="hex"] .font-title {
-  font-family: var(--font-title);
-  font-variation-settings: normal;
-  font-stretch: normal;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-}
-[data-look="hex"] h1.font-title { font-size: 2.25rem; line-height: 1.05; }
-
 /* Mono labels: anything already uppercase, sidebar group labels, panel section labels */
 [data-look="hex"] .uppercase,
 [data-look="hex"] [data-slot="sidebar-group-label"],
