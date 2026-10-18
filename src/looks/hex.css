@@ -30,30 +30,30 @@
 }
 
 /* Colors: rival.security's website palette (read from rival.security/blog, 2026-10-18), light mode only:
-   off-white surfaces with only a hint of warmth (the site's #f8f7f5 felt too warm), instead of the app's cool blue-grey, white cards with ink-tinted hairlines,
+   neutral off-white surfaces with the faintest cool tint (the site's #f8f7f5 and a half-warm step both felt too warm), instead of the app's cool blue-grey, white cards with ink-tinted hairlines,
    and the site's deeper primary blue rgb(3, 80, 208). Dark mode keeps the app's own palette. */
 :root[data-look="hex"]:not(.dark) {
-  --background: #f8f8f6;
+  --background: #f7f8f8;
   --foreground: #0b1020;
   --card: #fff;
   --popover: #fff;
   --primary: #0350d0;
   --primary-foreground: #fff;
-  --muted: #f1f1ee;
+  --muted: #eff0f1;
   --muted-foreground: #5a6072;
-  --accent: #f1f1ee;
-  --border: color-mix(in oklab, #0b1020 10%, #f8f8f6);
-  --input: color-mix(in oklab, #0b1020 16%, #f8f8f6);
+  --accent: #eff0f1;
+  --border: color-mix(in oklab, #0b1020 10%, #f7f8f8);
+  --input: color-mix(in oklab, #0b1020 16%, #f7f8f8);
   --ring: #0350d0;
-  --sidebar: #f4f4f1;
+  --sidebar: #f3f4f4;
   --sidebar-primary: #0350d0;
-  --sidebar-accent: #eaeae6;
-  --sidebar-border: color-mix(in oklab, #0b1020 8%, #f4f4f1);
+  --sidebar-accent: #e8e9eb;
+  --sidebar-border: color-mix(in oklab, #0b1020 8%, #f3f4f4);
   --sidebar-ring: #0350d0;
   --blue: #0350d0;
-  --hairline: color-mix(in oklab, #0b1020 7%, #f8f8f6);
-  --chip: #f1f1ee;
-  --frost: #fbfbfa;
+  --hairline: color-mix(in oklab, #0b1020 7%, #f7f8f8);
+  --chip: #eff0f1;
+  --frost: #fafbfb;
 }
 
 /* ---------- Type ---------- */
