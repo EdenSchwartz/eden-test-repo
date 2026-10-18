@@ -2,8 +2,8 @@
  * The Hex look: Hex's structure on Rival's colors (2026-10-18). Turned on by <html data-look="hex">
  * (the Rival | Hex switch in the header, components/look-switch.tsx). Colors stay Rival's on purpose
  * (a recolor was tried and dropped); this layer only changes structure and type:
- *   Lines:   square corners; thin vertical rails along the content column; a full-width rule under page
- *            headers; small corner marks on cards, like Hex's framed windows
+ *   Lines:   square corners and small corner marks on cards, like Hex's framed windows; ruled lines only where
+ *            they divide real content (Home's grid). No page rails or header rules (too much)
  *   Labels:  small uppercase mono labels (sidebar groups, panel sections, Home's grid), like Hex's technical labels
  *   Type:    Rival's own fonts (Mona Sans, Hubot Sans titles); only the small labels switch to IBM Plex Mono
  *            (Google Fonts in index.html). Instrument Sans / Serif were tried and dropped.
@@ -41,18 +41,9 @@
 }
 [data-look="hex"] h3.text-\[13px\] svg { display: none; }
 
-/* ---------- Lines ---------- */
-/* Pages with a centered column (My agents, Agent explorer): rails down both edges, full height */
-[data-look="hex"] .max-w-\[55\.5rem\] {
-  min-height: 100%;
-  border-inline: 1px solid var(--border);
-}
-/* Their header: a full-width rule under it, edge to edge between the rails */
-[data-look="hex"] header[style*="templates-head"] {
-  margin-inline: -1.5rem;
-  padding: 0 1.5rem 1.25rem;
-  border-bottom: 1px solid var(--border);
-}
+/* ---------- Lines ----------
+   Used sparingly: only where they divide real content (Home's ruled grid, the dividers already inside panels
+   and cards). Page-length rails and a rule under page headers were tried and dropped as too much. */
 
 /* Cards: square, flat, with corner marks */
 [data-look="hex"] .pressable {
@@ -82,11 +73,8 @@
   transition: opacity 400ms ease;
 }
 [data-look="hex"] [data-chat-thread="conversation"]:hover::before { opacity: 1; }
-/* The conversation column: ruled edges and a solid page, so the grid only shows in the margins around it */
-[data-look="hex"] [data-chat-thread="conversation"] .max-w-3xl {
-  border-inline: 1px solid var(--hairline);
-  background: var(--background);
-}
+/* The conversation column stays a solid page (no edges), so the grid only shows in the margins around it */
+[data-look="hex"] [data-chat-thread="conversation"] .max-w-3xl { background: var(--background); }
 @media (prefers-reduced-motion: reduce) {
   [data-look="hex"] [data-chat-thread="conversation"]::before { transition: none; }
 }
