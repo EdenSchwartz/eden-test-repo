@@ -1,7 +1,7 @@
 /*
  * The Hex look: Hex's structure on Rival's colors (2026-10-18). Turned on by <html data-look="hex">
- * (the Rival | Hex switch in the header, components/look-switch.tsx). Colors: the rival.security website's
- * (warm surfaces, blue #0350d0; Hex's own purple recolor was tried and dropped). Structure and type:
+ * (the Rival | Hex switch in the header, components/look-switch.tsx). Colors: a warm soft sidebar, a white
+ * workspace, one straight line between them; blue #0350d0 (Hex's own purple was tried and dropped). Structure and type:
  *   Lines:   square corners and small corner marks on cards, like Hex's framed windows; ruled lines only where
  *            they divide real content (Home's grid). No page rails or header rules (too much)
  *   Labels:  small uppercase mono labels (sidebar groups, panel sections, Home's grid), like Hex's technical labels
@@ -29,31 +29,34 @@
     linear-gradient(var(--tick), var(--tick)) bottom right / 1px 7px no-repeat;
 }
 
-/* Colors: rival.security's website palette (read from rival.security/blog, 2026-10-18), light mode only:
-   neutral off-white surfaces with the faintest cool tint (the site's #f8f7f5 and a half-warm step both felt too warm), instead of the app's cool blue-grey, white cards with ink-tinted hairlines,
-   and the site's deeper primary blue rgb(3, 80, 208). Dark mode keeps the app's own palette. */
+/* Colors (light mode only; dark keeps the app palette). A warm, soft frame and a white workspace:
+   the sidebar is a soft warm off-white, the main screen (header + page) is plain white, and one straight
+   1px line separates them (like Attio, Hex, Supabase), rather than a floating inset panel.
+   Primary blue is the website's rgb(3, 80, 208). Cards stay white with ink-tinted hairlines.
+   Tried and dropped: warm surfaces everywhere (#f8f7f5, #f8f8f6: too warm), cool grey everywhere (#f7f8f8). */
 :root[data-look="hex"]:not(.dark) {
-  --background: #f7f8f8;
+  --background: #fff;
   --foreground: #0b1020;
   --card: #fff;
   --popover: #fff;
   --primary: #0350d0;
   --primary-foreground: #fff;
-  --muted: #eff0f1;
+  --muted: #f5f5f3;
   --muted-foreground: #5a6072;
-  --accent: #eff0f1;
-  --border: color-mix(in oklab, #0b1020 10%, #f7f8f8);
-  --input: color-mix(in oklab, #0b1020 16%, #f7f8f8);
+  --accent: #f4f4f2;
+  --border: color-mix(in oklab, #0b1020 10%, #fff);
+  --input: color-mix(in oklab, #0b1020 16%, #fff);
   --ring: #0350d0;
-  --sidebar: #f3f4f4;
+  --sidebar: #f6f5f2;
+  --sidebar-foreground: #0b1020;
   --sidebar-primary: #0350d0;
-  --sidebar-accent: #e8e9eb;
-  --sidebar-border: color-mix(in oklab, #0b1020 8%, #f3f4f4);
+  --sidebar-accent: #ebe9e4;
+  --sidebar-border: color-mix(in oklab, #0b1020 10%, #f6f5f2);
   --sidebar-ring: #0350d0;
   --blue: #0350d0;
-  --hairline: color-mix(in oklab, #0b1020 7%, #f7f8f8);
-  --chip: #eff0f1;
-  --frost: #fafbfb;
+  --hairline: color-mix(in oklab, #0b1020 7%, #fff);
+  --chip: #f4f4f2;
+  --frost: #fafaf9;
 }
 
 /* ---------- Type ---------- */
