@@ -1,0 +1,503 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "./fonts.css";
+@source "../node_modules/streamdown/dist/*.js";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+    /* Rival Harness type: Mona Sans for text, Hubot Sans (condensed) for titles */
+    --font-sans: "Mona Sans", "Mona Sans Fallback", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --font-title: "Hubot Sans", "Hubot Sans Fallback", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    /* One easing for every animation. Tweak here to change the feel app-wide. */
+    --ease-snappy: cubic-bezier(0.32, 0.72, 0, 1);
+    --default-transition-timing-function: var(--ease-snappy);
+}
+
+@theme inline {
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+    /* Rival Harness extras: the blue accent and its washes, hairlines, status colors */
+    --color-blue: var(--blue);
+    --color-bright: var(--bright);
+    --color-wash: var(--wash);
+    --color-line: var(--line);
+    --color-hairline: var(--hairline);
+    --color-chip: var(--chip);
+    --color-chip-ink: var(--chip-ink);
+    --color-frost: var(--frost);
+    --color-success: var(--success);
+    --color-success-wash: var(--success-wash);
+    --color-danger: var(--danger);
+    --color-danger-wash: var(--danger-wash);
+    --color-warning: var(--warning);
+    --color-warning-wash: var(--warning-wash);
+}
+
+:root {
+    /* Rival Harness palette (from the reference demo): blue-tinted neutrals, one blue accent */
+    --radius: 0.5rem;
+    --background: #fbfcfd;
+    --foreground: #0b1020;
+    --card: #fff;
+    --card-foreground: #0b1020;
+    --popover: #fff;
+    --popover-foreground: #0b1020;
+    --primary: #1372f6;
+    --primary-foreground: #f8f7f5;
+    --secondary: #eaf2ff;
+    --secondary-foreground: #1372f6;
+    --muted: #edf2fb;
+    --muted-foreground: #5a6072;
+    --accent: #edf2fb;
+    --accent-foreground: #0b1020;
+    --destructive: #b42318;
+    --border: #dee6f1;
+    --input: #c1d4ec;
+    --ring: #1372f6;
+    --chart-1: #5ba3f7;
+    --chart-2: #e8726a;
+    --chart-3: #8bbdfb;
+    --chart-4: #f0a29c;
+    --chart-5: #afcdf5;
+    --sidebar: #f5f7fa;
+    --sidebar-foreground: #0b1020;
+    --sidebar-primary: #1372f6;
+    --sidebar-primary-foreground: #f8f7f5;
+    --sidebar-accent: #e7edf6;
+    --sidebar-accent-foreground: #0b1020;
+    --sidebar-border: #e4ebf5;
+    --sidebar-ring: #1372f6;
+    --blue: #1372f6;
+    --bright: #096ff5;
+    --wash: #eaf2ff;
+    --line: #afcdf5;
+    --hairline: #eaf0f8;
+    --chip: #eef2f9;
+    --chip-ink: #3d64a0;
+    --frost: #fafbfe;
+    --success: #157f3d;
+    --success-wash: #e5f6e8;
+    --danger: #b42318;
+    --danger-wash: #fde8e8;
+    --warning: #9a6b00;
+    --warning-wash: #fff4d6;
+}
+
+.dark {
+    --background: #0b1020;
+    --foreground: #f8f7f5;
+    --card: #121a2d;
+    --card-foreground: #f8f7f5;
+    --popover: #121a2d;
+    --popover-foreground: #f8f7f5;
+    --primary: #096ff5;
+    --primary-foreground: #f8f7f5;
+    --secondary: #16233f;
+    --secondary-foreground: #afcdf5;
+    --muted: #16233f;
+    --muted-foreground: #949db2;
+    --accent: #16233f;
+    --accent-foreground: #f8f7f5;
+    --destructive: #f97066;
+    --border: #25365a;
+    --input: #25365a;
+    --ring: #096ff5;
+    --chart-1: #5ba3f7;
+    --chart-2: #e8726a;
+    --chart-3: #8bbdfb;
+    --chart-4: #f0a29c;
+    --chart-5: #afcdf5;
+    --sidebar: #0e1528;
+    --sidebar-foreground: #f8f7f5;
+    --sidebar-primary: #096ff5;
+    --sidebar-primary-foreground: #f8f7f5;
+    --sidebar-accent: #16233f;
+    --sidebar-accent-foreground: #f8f7f5;
+    --sidebar-border: #25365a;
+    --sidebar-ring: #096ff5;
+    --blue: #1372f6;
+    --bright: #096ff5;
+    --wash: #16233f;
+    --line: #25365a;
+    --hairline: #1e2a44;
+    --chip: #16233f;
+    --chip-ink: #afcdf5;
+    --frost: #0e1528;
+    --success: #4ade80;
+    --success-wash: #0f2a1b;
+    --danger: #f97066;
+    --danger-wash: #3a1414;
+    --warning: #fdb022;
+    --warning-wash: #33260a;
+}
+
+@layer base {
+  /* Big screens: scale the whole UI (everything is rem-based) so it isn't tiny on large monitors */
+  html {
+    @media (min-width: 1800px) { font-size: 17px; }
+    @media (min-width: 2200px) { font-size: 19px; }
+    @media (min-width: 2800px) { font-size: 21px; }
+  }
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground;
+    }
+
+  /* Thin scrollbars everywhere; the thumb only shows while hovering the scrollable area.
+     ponytail: scrollbar-color can't style thumb hover/rounding; use ::-webkit-scrollbar if that's needed */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  *:hover {
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+}
+
+:root {
+  --scrollbar-thumb: oklch(0 0 0 / 0.2);
+  /* Chat step rail: opaque so overlapping segments don't darken */
+  --rail: color-mix(in oklab, var(--foreground) 18%, var(--background));
+}
+.dark {
+  --scrollbar-thumb: oklch(1 0 0 / 0.18);
+}
+/* Circular reveal (new-chat-fab.tsx): JS animates --reveal-r, CSS draws the soft mask + glowing edge */
+@property --reveal-r {
+  syntax: "<length>";
+  inherits: true; /* so the rim specks inside .reveal-glow follow the radius */
+  initial-value: 0px;
+}
+
+:root {
+  --reveal-glow: oklch(0.62 0.17 255 / 0.18); /* light mode: soft blue matching the neutral palette */
+  --reveal-edge: oklch(0.7 0.14 250 / 0.2);
+  --reveal-speck: oklch(0.6 0.17 255);
+  --aurora-1: oklch(0.65 0.16 245 / 0.22);
+  --aurora-2: oklch(0.7 0.13 220 / 0.16);
+}
+.dark {
+  --reveal-glow: oklch(0.78 0.16 215 / 0.22); /* dark mode: electric cyan */
+  --reveal-edge: oklch(0.9 0.12 205 / 0.3);
+  --reveal-speck: oklch(0.96 0.09 200);
+  --aurora-1: oklch(0.78 0.16 215 / 0.32);
+  --aurora-2: oklch(0.65 0.18 250 / 0.24);
+}
+
+::view-transition-old(root),
+::view-transition-new(root),
+::view-transition-new(reveal-glow) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Blurry edge: fade the new screen in over the last 90px of the circle */
+::view-transition-new(root) {
+  mask-image: radial-gradient(
+    circle at var(--reveal-x) var(--reveal-y),
+    #000 calc(var(--reveal-r) - 90px),
+    transparent var(--reveal-r)
+  );
+}
+
+.reveal-glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  view-transition-name: reveal-glow;
+}
+
+/* Blurred halo on a pseudo-element so the blur doesn't also smear the specks */
+.reveal-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    /* thin bright core right at the edge */
+    radial-gradient(
+      circle at var(--reveal-x) var(--reveal-y),
+      transparent calc(var(--reveal-r) - 50px),
+      var(--reveal-edge) calc(var(--reveal-r) - 42px),
+      transparent calc(var(--reveal-r) - 30px)
+    ),
+    /* wide soft halo */
+    radial-gradient(
+      circle at var(--reveal-x) var(--reveal-y),
+      transparent calc(var(--reveal-r) - 160px),
+      var(--reveal-glow) calc(var(--reveal-r) - 45px),
+      transparent calc(var(--reveal-r) + 20px)
+    );
+  filter: blur(18px);
+}
+
+/* Tiny pixel specks riding the rim. --a angle, --j offset from the rim, --s size, --d/--delay twinkle (set in JS) */
+.reveal-glow > i {
+  position: absolute;
+  left: var(--reveal-x);
+  top: var(--reveal-y);
+  width: var(--s);
+  height: var(--s);
+  background: var(--reveal-speck);
+  box-shadow: 0 0 8px 1px var(--reveal-speck);
+  will-change: transform, opacity;
+  transform: rotate(var(--a)) translateX(calc(var(--reveal-r) + var(--j)));
+  animation: reveal-twinkle var(--d) var(--delay) ease-in-out infinite alternate;
+}
+
+@keyframes reveal-twinkle {
+  from { opacity: 0.35; }
+  to { opacity: 1; }
+}
+
+/* Conversation empty state: aurora rises from the bottom (continuing the reveal), then content rises through it */
+.aurora {
+  position: absolute;
+  inset-inline: -10%;
+  bottom: -15%;
+  height: 85%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 55% 65% at 50% 90%, var(--aurora-1), transparent 70%),
+    radial-gradient(ellipse 35% 45% at 28% 85%, var(--aurora-2), transparent 70%),
+    radial-gradient(ellipse 35% 45% at 72% 88%, var(--aurora-2), transparent 70%);
+  filter: blur(40px);
+  animation:
+    aurora-rise 1400ms cubic-bezier(0.3, 0, 0, 1) 150ms both,
+    aurora-drift 9s ease-in-out 1550ms infinite alternate;
+}
+
+@keyframes aurora-rise {
+  from { opacity: 0; transform: translateY(35%) scaleY(0.6); }
+}
+
+@keyframes aurora-drift {
+  to { opacity: 0.75; transform: translateY(-4%) scaleX(1.08); }
+}
+
+.rise-in {
+  animation: rise-in 700ms cubic-bezier(0.3, 0, 0, 1) var(--delay, 0ms) both;
+}
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(16px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora, .rise-in { animation: none; }
+}
+
+/* Super agent flow (components/super-agents.tsx PatternFlow): dashes march left→right, "work flows through" */
+.flow-line {
+  background: repeating-linear-gradient(90deg, color-mix(in oklab, var(--foreground) 35%, transparent) 0 5px, transparent 5px 10px);
+  background-size: 20px 1px;
+  animation: flow-march 900ms linear infinite;
+}
+
+@keyframes flow-march {
+  to { background-position: 20px 0; }
+}
+
+/* Typewriter caret for rotating composer placeholders (components/home/composer.tsx) */
+.caret::after {
+  content: "";
+  display: inline-block;
+  width: 1px;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: currentColor;
+  animation: caret-blink 1s steps(1) infinite;
+}
+
+@keyframes caret-blink {
+  50% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-line, .caret::after { animation: none; }
+}
+
+/* Clone draft panel (components/clone/draft-panel.tsx): a section glows in the agent's hue (--hue) when the chat just changed it */
+.draft-flash {
+  animation: draft-flash 1600ms cubic-bezier(0.3, 0, 0, 1);
+}
+
+@keyframes draft-flash {
+  0%, 20% {
+    border-color: oklch(0.72 0.13 var(--hue) / 0.7);
+    background-color: oklch(0.6 0.14 var(--hue) / 0.12);
+    box-shadow: 0 0 0 3px oklch(0.6 0.14 var(--hue) / 0.18);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .draft-flash { animation: none; }
+}
+
+/* Task templates split (pages/gallery.tsx): picking a template moves the cards into the narrower list and fades
+   the details in (a short ease-out, no spring); closing reverses it. Scoped with data-vt so it doesn't pick up the circular reveal above. */
+html[data-vt="split"]::view-transition-new(root) {
+  mask-image: none;
+  animation: vt-fade-in 180ms ease-out both;
+}
+html[data-vt="split"]::view-transition-old(root) {
+  animation: vt-fade-out 140ms ease-in both;
+}
+html[data-vt="split"]::view-transition-group(*) {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+html[data-vt="split"]::view-transition-new(template-detail):only-child {
+  animation: vt-detail-in 260ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+html[data-vt="split"]::view-transition-old(template-detail):only-child {
+  animation: vt-detail-out 180ms ease-in both;
+}
+
+@keyframes vt-fade-in { from { opacity: 0; } }
+@keyframes vt-fade-out { to { opacity: 0; } }
+@keyframes vt-detail-in { from { opacity: 0; transform: translateX(12px); } }
+@keyframes vt-detail-out { to { opacity: 0; transform: translateX(12px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-vt="split"]::view-transition-group(*),
+  html[data-vt="split"]::view-transition-old(*),
+  html[data-vt="split"]::view-transition-new(*) { animation: none !important; }
+}
+
+/* ---------- Rival Harness components (matching the reference demo) ---------- */
+
+/* Titles: Hubot Sans, condensed; weight via --title-wght (e.g. [--title-wght:450]) */
+.font-title {
+  font-family: var(--font-title);
+  font-variation-settings: "wdth" 85, "wght" var(--title-wght, 700);
+  font-stretch: 85%;
+}
+
+/* A clickable card: hairline ring instead of a border, a soft lift on hover */
+.pressable {
+  cursor: pointer;
+  background-color: var(--color-card);
+  box-shadow: inset 0 0 0 1px var(--color-border), 0 1px 2px #1018280d;
+  transition-property: background-color, box-shadow;
+  transition-duration: 0.15s;
+}
+.pressable:hover {
+  background-color: var(--color-frost);
+  box-shadow: inset 0 0 0 1px var(--color-line), 0 1px 3px #10182814;
+}
+.pressable:focus-visible { box-shadow: inset 0 0 0 2px var(--color-bright); outline: none; }
+.pressable[aria-pressed="true"], .pressable[data-selected] {
+  background-color: var(--color-frost);
+  box-shadow: inset 0 0 0 1.5px var(--color-blue), 0 1px 3px #10182814;
+}
+
+/* An agent's status chip (components/tasks/status-chip.tsx): one fixed-height pill, a little motion per state */
+.status-chip {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.375rem;
+  height: 1.375rem;
+  padding: 0 0.5rem;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+.status-chip[data-tone="running"] { background: var(--wash); color: var(--blue); }
+.status-chip[data-tone="running"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(100deg, transparent 30%, color-mix(in oklab, var(--blue) 18%, transparent) 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: chip-sweep 2.4s ease-in-out infinite;
+}
+.status-chip[data-tone="attention"] { background: var(--warning-wash); color: var(--warning); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--warning) 35%, transparent); }
+.status-chip[data-tone="stopped"] {
+  color: var(--muted-foreground);
+  background: repeating-linear-gradient(-45deg, color-mix(in oklab, var(--muted-foreground) 16%, var(--card)) 0 3px, var(--card) 3px 6px);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.status-chip[data-tone="idle"] { color: var(--muted-foreground); box-shadow: none; outline: 1px dashed color-mix(in oklab, var(--muted-foreground) 45%, transparent); outline-offset: -1px; }
+.status-chip[data-tone="done"] { background: var(--success-wash); color: var(--success); }
+
+.status-bars { display: flex; align-items: flex-end; gap: 1.5px; height: 0.625rem; }
+.status-bars i { width: 2px; height: 100%; border-radius: 1px; background: currentColor; transform-origin: bottom; animation: chip-bar 0.9s ease-in-out infinite; }
+.status-bars i:nth-child(2) { animation-delay: -0.3s; }
+.status-bars i:nth-child(3) { animation-delay: -0.6s; }
+.status-wave { transform-origin: 70% 80%; animation: chip-wave 2.6s ease-in-out infinite; }
+.status-check path { stroke-dasharray: 24; stroke-dashoffset: 24; animation: chip-draw 500ms 300ms ease-out forwards; }
+
+/* A card that needs you glows amber, so it stands out in a full grid (box-shadow only: no layout change) */
+.pressable[data-attention] { box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--warning) 45%, transparent), 0 0 0 3px color-mix(in oklab, var(--warning) 12%, transparent), 0 1px 2px #1018280d; }
+.pressable[data-attention][aria-pressed="true"], .pressable[data-attention][data-selected] { box-shadow: inset 0 0 0 1.5px var(--blue), 0 0 0 3px color-mix(in oklab, var(--warning) 14%, transparent); }
+
+@keyframes chip-sweep { 60%, 100% { transform: translateX(100%); } }
+@keyframes chip-bar { 0%, 100% { transform: scaleY(0.35); } 50% { transform: scaleY(1); } }
+@keyframes chip-wave { 0%, 60%, 100% { transform: rotate(0); } 10%, 30% { transform: rotate(14deg); } 20%, 40% { transform: rotate(-8deg); } }
+@keyframes chip-draw { to { stroke-dashoffset: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .status-chip::after, .status-bars i, .status-wave { animation: none; }
+  .status-check path { animation: none; stroke-dashoffset: 0; }
+}
+
+/* The template catalog sliding in over the Tasks page (pages/gallery.tsx) */
+.slide-in-right {
+  animation: slide-in-right 420ms cubic-bezier(0.3, 0, 0, 1) both;
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(6%); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide-in-right { animation: none; }
+}
