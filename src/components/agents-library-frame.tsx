@@ -403,8 +403,8 @@ const colorOf = (a: LibraryAgent) => colors.get(a) ?? flatColors[0]
 
 function FlatTile({ color }: { color: string }) {
   return (
-    <span aria-hidden className="grid size-10 shrink-0 place-items-center rounded-[0.375rem]" style={{ background: color }}>
-      <span className="size-3.5 rounded-[0.1875rem] bg-white" />
+    <span aria-hidden className="grid size-7 shrink-0 place-items-center rounded-[0.3125rem]" style={{ background: color }}>
+      <span className="size-2.5 rounded-[0.125rem] bg-white" />
     </span>
   )
 }
@@ -444,7 +444,7 @@ function AgentTile({ seed, hue }: { seed: string; hue: number }) {
 
 /*
  * An agent card (the design: Figma "Triage Hunter" card). White, a #ECEBE9 hairline, 6px corners, 24px padding.
- *   Top:    the agent's colour tile (40px, a white rounded square in the middle) and its name (Geist 16, #121212),
+ *   Top:    the agent's colour tile (28px, a white rounded square in the middle) and its name (Geist 16, #121212),
  *           its one or two categories as small mono chips (#F2F2F1), then the description (14/20, #6C6A68, up to two lines)
  *   Footer: under a hairline, three columns: Created by (the Rival mark) · Capabilities (icon + name) ·
  *           Context (only the integrations it pulls data from, as small marks; their names on hover). One line, never wraps.
