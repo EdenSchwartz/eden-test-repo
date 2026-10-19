@@ -567,12 +567,11 @@ html[data-vt="expand"]::view-transition-new(root) { animation: vt-fade-in 240ms 
   background:
     linear-gradient(to right, rgb(18 18 18 / 0.045) 1px, transparent 1px) 0 0 / 1.25rem 1.25rem,
     linear-gradient(to bottom, rgb(18 18 18 / 0.045) 1px, transparent 1px) 0 0 / 1.25rem 1.25rem;
-  /* Full strength in the body; near each edge it eases out (sides over ~13rem, top and bottom over ~4rem),
-     anchored to the edges themselves so it works at any width. The two fades multiply, so corners fade most */
+  /* Full strength in the body and all the way down to the bottom line; it eases out only toward the top
+     (over ~4rem) and the sides (over ~13rem), anchored to the edges so it works at any width */
   --fade-x: linear-gradient(to right, transparent 0, rgb(0 0 0 / 0.12) 2rem, rgb(0 0 0 / 0.36) 5rem, rgb(0 0 0 / 0.68) 9rem, #000 13rem,
     #000 calc(100% - 13rem), rgb(0 0 0 / 0.68) calc(100% - 9rem), rgb(0 0 0 / 0.36) calc(100% - 5rem), rgb(0 0 0 / 0.12) calc(100% - 2rem), transparent 100%);
-  --fade-y: linear-gradient(to bottom, transparent 0, rgb(0 0 0 / 0.3) 1rem, rgb(0 0 0 / 0.7) 2.5rem, #000 4rem,
-    #000 calc(100% - 4rem), rgb(0 0 0 / 0.7) calc(100% - 2.5rem), rgb(0 0 0 / 0.3) calc(100% - 1rem), transparent 100%);
+  --fade-y: linear-gradient(to bottom, transparent 0, rgb(0 0 0 / 0.3) 1rem, rgb(0 0 0 / 0.7) 2.5rem, #000 4rem);
   -webkit-mask-image: var(--fade-x), var(--fade-y);
   -webkit-mask-composite: source-in;
   mask-image: var(--fade-x), var(--fade-y);
