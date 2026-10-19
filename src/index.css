@@ -573,7 +573,7 @@ html[data-vt="expand"]::view-transition-new(root) { animation: vt-fade-in 240ms 
 /* The section's background: a very fine grain, only toward its edges (clear in the middle, where the grid is) */
 .alive-noise {
   position: absolute; inset: 0; z-index: -3; pointer-events: none;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.07 0 0 0 0 0.07 0 0 0 0 0.09 0 0 0 0.22 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E") 0 0 / 180px 180px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.32 0 0 0 0 0.35 0 0 0 0 0.42 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E") 0 0 / 180px 180px;
   opacity: 0.32;
   -webkit-mask-image: radial-gradient(ellipse 75% 140% at 50% 45%, transparent 45%, #000 100%);
   mask-image: radial-gradient(ellipse 75% 140% at 50% 45%, transparent 45%, #000 100%);

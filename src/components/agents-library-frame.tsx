@@ -194,7 +194,7 @@ function FluidGrid() {
       const len = Math.min(w * (0.18 + Math.random() * 0.2), 24 * cell)
       const ax = Math.cos(angle), ay = Math.sin(angle) * 0.35 // flatter: the box is wide and short
       const bend = (Math.random() - 0.5) * h * 0.3, waves = 0.8 + Math.random() * 1.2
-      const t0 = performance.now(), dur = 1300 + Math.random() * 700
+      const t0 = performance.now(), dur = 750 + Math.random() * 400
       let px = x0, py = y0
       const stroke = (t: number) => {
         const p = Math.min(1, (t - t0) / dur), e = p * p * (3 - 2 * p)
