@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { AppWindow, Bandage, Bot, Clock, Cloud, Crosshair, KeyRound, ShieldCheck, Swords, UsersRound, type LucideIcon } from "lucide-react"
+import { AppWindow, Bandage, Bot, Clock, Cloud, Crosshair, KeyRound, Search, ShieldCheck, Swords, UsersRound, X, type LucideIcon } from "lucide-react"
 import { agentOutcomes, subOutcomes, type Outcome } from "@/data/outcomes"
 import { blockers, getSuperAgent } from "@/data/super-agents"
 import { useNav } from "@/lib/nav"
@@ -192,7 +192,9 @@ export function AgentsLibraryFrame() {
   const [picked, setPicked] = useState<{ agent?: string; kind?: AgentKind; name: string } | null>(null)
   const [tab, setTab] = useState<"agents" | "subs">("agents")
   const switchTab = (t: typeof tab) => withTransition(() => { setTab(t); setPicked(null) })
-  const list = tab === "agents" ? library : subLibrary
+  const [query, setQuery] = useState("")
+  const q = query.trim().toLowerCase()
+  const list = (tab === "agents" ? library : subLibrary).filter((a) => !q || [a.name, a.tagline, ...a.outcomes.map((o) => o.label), ...a.runsOn].some((f) => f.toLowerCase().includes(q)))
   const pick = (a: LibraryAgent) => withTransition(() => setPicked(a.templateId ? { agent: a.templateId, name: a.name } : { kind: a.kind, name: a.name }))
   const close = () => withTransition(() => setPicked(null))
   useEffect(() => {
@@ -214,10 +216,13 @@ export function AgentsLibraryFrame() {
         </p>
       </div>
       {/* Agents | Sub Agents: a row of tabs under the header, its own line below */}
-      <div role="tablist" aria-label="Library" className="flex w-full items-center gap-2 border-b border-[#ecebe9] px-10 py-2">
-        {([["agents", "Agents"], ["subs", "Sub Agents"]] as const).map(([id, label]) => (
-          <button key={id} role="tab" aria-selected={tab === id} onClick={() => switchTab(id)} className="lib-tab">{label}</button>
-        ))}
+      <div className="flex w-full items-center gap-2 border-b border-[#ecebe9] px-10 py-2">
+        <div role="tablist" aria-label="Library" className="flex items-center gap-2">
+          {([["agents", "Agents"], ["subs", "Sub Agents"]] as const).map(([id, label]) => (
+            <button key={id} role="tab" aria-selected={tab === id} onClick={() => switchTab(id)} className="lib-tab">{label}</button>
+          ))}
+        </div>
+        <LibrarySearch value={query} onChange={setQuery} />
       </div>
       {/* The cards area: a drafting-sheet margin on both sides (fine diagonal hatching, a hairline rail), cards go between */}
       <div className="relative flex w-full flex-1">
@@ -228,6 +233,11 @@ export function AgentsLibraryFrame() {
           ? "mx-8 grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] px-2"
           : "mx-auto max-w-[68rem] grid-cols-[repeat(3,minmax(0,1fr))] px-10 min-[1800px]:mx-8 min-[1800px]:max-w-none min-[1800px]:grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] min-[1800px]:px-2")}>
           {list.map((a) => <AgentCard key={a.name} a={a} selected={picked?.name === a.name} onSelect={() => pick(a)} />)}
+          {list.length === 0 && (
+            <p className="col-span-full py-10 text-center text-[0.875rem] leading-5 whitespace-normal text-[#6c6a68]">
+              Nothing matches “{query.trim()}”. <button onClick={() => setQuery("")} className="cursor-pointer text-[#2e4eca] hover:underline">Clear search</button>
+            </p>
+          )}
         </div>
         {!picked && <span aria-hidden className="sheet-margin right-0 border-l" />}
       </div>
@@ -240,6 +250,52 @@ export function AgentsLibraryFrame() {
               : picked.kind && <SubAgentDetail key={picked.name} kind={picked.kind} template onClose={close} onOpenAgent={(sa) => withTransition(() => setPicked({ agent: sa.id, name: sa.name }))} />}
         </section>
       )}
+    </div>
+  )
+}
+
+/*
+ * Search, on the right of the tabs: a secondary button (white, hairline edge, soft shadow, like Ask Rival) that
+ * widens into a field when clicked and filters the cards as you type (name, tagline, outcomes, what it runs on).
+ * Esc, ✕, or clicking away while empty folds it back into the button. "/" opens it from anywhere on the page.
+ */
+function LibrarySearch({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false)
+  const input = useRef<HTMLInputElement>(null)
+  const show = () => { setOpen(true); requestAnimationFrame(() => input.current?.focus()) }
+  const hide = () => { onChange(""); setOpen(false) }
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const typing = e.target instanceof HTMLElement && e.target.closest("input, textarea, [contenteditable]")
+      if (e.key === "/" && !typing) { e.preventDefault(); show() }
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [])
+  return (
+    <div
+      className={cn(
+        "ml-auto flex h-6 items-center gap-1.5 overflow-hidden rounded-[0.25rem] border border-[#ecebe9] bg-white pl-1.5 text-[0.75rem] leading-4 text-[#121212] drop-shadow-[0px_1px_0.5px_rgba(119,131,152,0.2)] transition-[width,border-color] duration-300 ease-[cubic-bezier(.3,.7,.15,1)]",
+        open ? "w-64 border-[#dddcda] pr-1" : "w-[4.75rem] cursor-pointer pr-2 hover:border-[#dddcda] hover:bg-[#fcfcfa]",
+      )}
+      onClick={() => !open && show()}
+    >
+      <Search className="size-3.5 shrink-0 text-[#6c6a68]" />
+      {open ? <>
+        <input
+          ref={input}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Escape") { e.stopPropagation(); hide() } }}
+          onBlur={() => { if (!value.trim()) setOpen(false) }}
+          placeholder="Search agents"
+          aria-label="Search agents"
+          className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-[#9a9893]"
+        />
+        <button onMouseDown={(e) => e.preventDefault()} onClick={hide} aria-label="Close search" className="flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-[0.1875rem] text-[#9a9893] hover:bg-[#f4f4f2] hover:text-[#6c6a68]">
+          <X className="size-3" />
+        </button>
+      </> : <span className="whitespace-nowrap">Search</span>}
     </div>
   )
 }
