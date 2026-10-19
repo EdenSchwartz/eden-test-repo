@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils"
 
 /*
  * The sidebar, exactly as in the Figma "Frame 2147206359" (file "🏎️ Rival 2.0 Demo").
+
+ * Sizes are in rem (Figma px ÷ 16), so the frame is 1:1 at 16px and grows with the big-screen scaling in index.css.
  * 196px wide, background #FCFCFA, a #ECEBE9 line on its right, no line under its header, Geist 14/16.
  *   Navigation px 12 · py 6, gap 16; main nav gap 24; groups px 2 gap 12, title rows px 4, items pl 26,
  *   the tree line at left 14 / top 28 (#9A9893 at 20%)
@@ -36,20 +38,20 @@ const groups: { id: string; label: string; icon: React.ComponentType<{ className
   },
 ]
 
-const text = "text-[14px] leading-4 text-[#6c6a68]"
-const top = cn("flex h-6 w-full cursor-pointer items-center gap-1.5 rounded-[4px] py-1 pr-1 pl-1.5 text-left", text)
+const text = "text-[0.875rem] leading-4 text-[#6c6a68]"
+const top = cn("flex h-6 w-full cursor-pointer items-center gap-1.5 rounded-[0.25rem] py-1 pr-1 pl-1.5 text-left", text)
 
 export function AppSidebar() {
   const { navigate, page } = useNav()
 
   return (
-    <Sidebar collapsible="none" className="sticky top-0 h-svh w-[196px] shrink-0 border-r border-[#ecebe9] bg-[#fcfcfa] font-[Geist,ui-sans-serif,system-ui,sans-serif]">
+    <Sidebar collapsible="none" className="sticky top-0 h-svh w-[12.25rem] shrink-0 border-r border-[#ecebe9] bg-[#fcfcfa] font-[Geist,ui-sans-serif,system-ui,sans-serif]">
       <div className="flex h-full flex-col overflow-clip">
         <div className="flex h-12 w-full shrink-0 items-center justify-between pr-4 pl-3.5">
-          <button onClick={() => navigate("explorer")} aria-label="Rival" className="flex h-6 cursor-pointer items-center justify-center rounded-[4px] p-1.5 text-[#0350d0]">
-            <RivalWordmark className="h-[16.25px] w-[45px]" />
+          <button onClick={() => navigate("explorer")} aria-label="Rival" className="flex h-6 cursor-pointer items-center justify-center rounded-[0.25rem] p-1.5 text-[#0350d0]">
+            <RivalWordmark className="h-[1.0156rem] w-[2.8125rem]" />
           </button>
-          <button aria-label="Collapse" className="flex size-6 cursor-pointer items-center justify-center rounded-[4px] p-1.5 text-[#6c6a68]">
+          <button aria-label="Collapse" className="flex size-6 cursor-pointer items-center justify-center rounded-[0.25rem] p-1.5 text-[#6c6a68]">
             <CollapseIcon className="size-4 shrink-0" />
           </button>
         </div>
@@ -74,7 +76,7 @@ export function AppSidebar() {
                 <div className="relative flex w-full items-center gap-1.5 px-1">
                   <div className="flex min-w-px flex-[1_0_0] items-center gap-1.5">
                     <g.icon className="size-4 shrink-0 text-[#9a9893]" />
-                    <span className="truncate text-[14px] leading-4 text-[#9a9893]">{g.label}</span>
+                    <span className="truncate text-[0.875rem] leading-4 text-[#9a9893]">{g.label}</span>
                   </div>
                   {g.plus && (
                     <button onClick={() => navigate("chat")} aria-label="New chat" className="flex size-4 shrink-0 cursor-pointer items-center justify-center text-[#6c6a68]">
@@ -86,12 +88,12 @@ export function AppSidebar() {
                   {g.items.map((it) => {
                     const active = g.id !== "chats" && page === it.page
                     return active ? (
-                      <button key={it.label} onClick={() => navigate(it.page)} aria-current="page" className="flex w-full cursor-pointer items-center gap-3.5 rounded-[4px] border border-[#ecebe9] bg-white py-1.5 pr-1 pl-3 text-left drop-shadow-[0px_1px_0.5px_rgba(119,131,152,0.2)]">
+                      <button key={it.label} onClick={() => navigate(it.page)} aria-current="page" className="flex w-full cursor-pointer items-center gap-3.5 rounded-[0.25rem] border border-[#ecebe9] bg-white py-1.5 pr-1 pl-3 text-left drop-shadow-[0px_1px_0.5px_rgba(119,131,152,0.2)]">
                         <span aria-hidden className="relative h-3.5 w-0 shrink-0"><span className="absolute inset-y-0 -left-[0.75px] w-[1.5px] bg-[#0170fd]" /></span>
-                        <span className="min-w-px flex-[1_0_0] truncate text-[14px] leading-4 text-[#0170fd]">{it.label}</span>
+                        <span className="min-w-px flex-[1_0_0] truncate text-[0.875rem] leading-4 text-[#0170fd]">{it.label}</span>
                       </button>
                     ) : (
-                      <button key={it.label} onClick={() => navigate(it.page)} className={cn("flex h-6 w-full cursor-pointer items-center rounded-[4px] pr-1 pl-[26px] text-left", text)}>
+                      <button key={it.label} onClick={() => navigate(it.page)} className={cn("flex h-6 w-full cursor-pointer items-center rounded-[0.25rem] pr-1 pl-[1.625rem] text-left", text)}>
                         <span className="min-w-px flex-[1_0_0] truncate">{it.label}</span>
                       </button>
                     )
@@ -103,14 +105,14 @@ export function AppSidebar() {
         </nav>
 
         <div className="flex shrink-0 flex-col items-start gap-1.5 px-3.5 py-2">
-          <button onClick={() => navigate("connectors")} className={cn(top, "w-[168px]")}>
+          <button onClick={() => navigate("connectors")} className={cn(top, "w-[10.5rem]")}>
             <ConnectorsIcon className="size-4 shrink-0" /> <span className="min-w-px flex-[1_0_0] truncate">Connectors</span>
           </button>
-          <button onClick={() => navigate("settings")} className={cn(top, "w-[168px]")}>
+          <button onClick={() => navigate("settings")} className={cn(top, "w-[10.5rem]")}>
             <SettingsIcon className="size-4 shrink-0" /> <span className="min-w-px flex-[1_0_0] truncate">Settings</span>
           </button>
-          <button className="flex h-10 w-[168px] cursor-pointer items-center gap-1.5 rounded-[6px] px-0.5 py-1 text-left text-[14px] leading-4">
-            <span className="relative size-8 shrink-0 overflow-clip rounded-[6px] border border-[#ecebe9] bg-white shadow-[0px_1px_1px_0px_rgba(119,131,152,0.2)]">
+          <button className="flex h-10 w-[10.5rem] cursor-pointer items-center gap-1.5 rounded-[0.375rem] px-0.5 py-1 text-left text-[0.875rem] leading-4">
+            <span className="relative size-8 shrink-0 overflow-clip rounded-[0.375rem] border border-[#ecebe9] bg-white shadow-[0px_1px_1px_0px_rgba(119,131,152,0.2)]">
               <RivalMark className="absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2 text-[#0350d0]" />
             </span>
             <span className="flex min-w-px flex-[1_0_0] flex-col items-start justify-center">

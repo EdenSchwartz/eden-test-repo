@@ -19,7 +19,7 @@ export default function App() {
     <NavContext.Provider value={{ navigate, page: nav.page, params: nav.params }}>
     <ConversationsProvider>
     <TooltipProvider>
-      <SidebarProvider className="overflow-x-clip" style={{ "--sidebar-width": "196px" } as React.CSSProperties}>
+      <SidebarProvider className="overflow-x-clip" style={{ "--sidebar-width": "12.25rem" } as React.CSSProperties}>
         <AppSidebar />
         <Shell page={nav.page} />
       </SidebarProvider>
@@ -45,7 +45,7 @@ function Shell({ page: pageId }: { page: string }) {
         <header className="flex h-12 w-full shrink-0 items-center border-b border-[#ecebe9] px-4 py-3">
           <div className="flex items-center gap-1.5">
             <BreadcrumbRobotIcon className="size-4 shrink-0" />
-            <p className="max-w-[120px] overflow-hidden text-[12px] leading-4 text-ellipsis whitespace-nowrap text-[#121212]">{title}</p>
+            <p className="max-w-[7.5rem] overflow-hidden text-[0.75rem] leading-4 text-ellipsis whitespace-nowrap text-[#121212]">{title}</p>
           </div>
         </header>
         <main className={full ? "flex flex-1 flex-col" : "flex flex-1 flex-col overflow-auto p-6"}>

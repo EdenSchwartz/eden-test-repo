@@ -8,8 +8,8 @@ export function AgentsLibraryFrame() {
   return (
     <div className="flex flex-col items-start bg-white whitespace-nowrap">
       <div className="flex w-full flex-col items-start justify-center gap-3 border-b border-[#ecebe9] bg-white p-10">
-        <p className="text-[20px] leading-4 font-medium text-[#121212]">Agents Library</p>
-        <p className="text-[14px] leading-4 font-normal text-[#6c6a68]">
+        <p className="text-[1.25rem] leading-4 font-medium text-[#121212]">Agents Library</p>
+        <p className="text-[0.875rem] leading-4 font-normal text-[#6c6a68]">
           Ready-made security agents by Rival. Pick one, make it yours in a short chat, and it joins My Agents.
         </p>
       </div>
@@ -22,10 +22,10 @@ export function FrameCorners() {
   const sq = "absolute size-3 border border-[#dddcda] bg-white"
   return (
     <>
-      <div aria-hidden className={sq} style={{ left: -1, top: 167 }} />
-      <div aria-hidden className={sq} style={{ left: -1, top: 42 }} />
-      <div aria-hidden className={sq} style={{ right: 0, top: 42 }} />
-      <div aria-hidden className={sq} style={{ right: -1, top: 167 }} />
+      <div aria-hidden className={sq} style={{ left: -1, top: "10.4375rem" }} />
+      <div aria-hidden className={sq} style={{ left: -1, top: "2.625rem" }} />
+      <div aria-hidden className={sq} style={{ right: 0, top: "2.625rem" }} />
+      <div aria-hidden className={sq} style={{ right: -1, top: "10.4375rem" }} />
     </>
   )
 }
