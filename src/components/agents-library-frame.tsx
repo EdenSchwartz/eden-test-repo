@@ -138,7 +138,7 @@ function FluidGrid() {
     }
     const seg = (x: number, y: number, horiz: boolean, t: number) => {
       const k = sample(horiz ? x + res / 2 : x, horiz ? y : y + res / 2)
-      const a = Math.min(1, d[k] * 1.6) * 0.72 // the color, toned down (the movement is unchanged)
+      const a = Math.min(1, d[k] * 1.6) * 0.5 // kept subtle (the movement is unchanged)
       if (a < 0.02) return 0
       const speed = Math.hypot(u[k], v[k])
       let [r, g, b] = metal(x / w * 3.2 + y / h * 0.9 + d[k] * 0.6 + t * 0.00005, Math.min(1, speed * 0.25))
@@ -146,7 +146,7 @@ function FluidGrid() {
       const glint = Math.pow(Math.max(0, Math.sin(t * 0.0035 + x * 0.071 + y * 0.113)), 14) * Math.min(1, speed * 0.5)
       r += (248 - r) * glint; g += (250 - g) * glint; b += (255 - b) * glint
       // a soft 3px sheen around the line (the metal catching light), then the line itself
-      ctx.fillStyle = `rgba(${r | 0},${g | 0},${b | 0},${a * 0.16})`
+      ctx.fillStyle = `rgba(${r | 0},${g | 0},${b | 0},${a * 0.1})`
       if (horiz) ctx.fillRect(x, y - 1, res, 3); else ctx.fillRect(x - 1, y, 3, res)
       ctx.fillStyle = `rgba(${r | 0},${g | 0},${b | 0},${a})`
       if (horiz) ctx.fillRect(x, y, res, 1); else ctx.fillRect(x, y, 1, res)
