@@ -241,7 +241,6 @@ export function AgentsLibraryFrame() {
         </div>
         {!picked && <span aria-hidden className="sheet-margin right-0 border-l" />}
       </div>
-      <FrameCorners right={!picked} />
       {picked && (
         // The whole right side, from the top bar down, and stays put while the cards scroll
         <section aria-label={picked.name} className="fixed top-12 right-0 bottom-0 z-30 w-[35rem] overflow-hidden border-l border-[#ecebe9] bg-background whitespace-normal" style={{ viewTransitionName: "template-detail" }}>
@@ -301,8 +300,9 @@ function LibrarySearch({ value, onChange }: { value: string; onChange: (v: strin
 }
 
 // The four squares, on the top bar's line and the header's line, at both ends (as in the frame).
-// The right pair goes while the side panel covers that side.
-function FrameCorners({ right }: { right: boolean }) {
+// The right pair goes while the side panel covers that side. Not shown for now (felt like noise);
+// to bring them back, render <FrameCorners right={!picked} /> in AgentsLibraryFrame.
+export function FrameCorners({ right }: { right: boolean }) {
   const sq = "absolute size-3 border border-[#dddcda] bg-white"
   return (
     <>
