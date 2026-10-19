@@ -217,7 +217,7 @@ function SlimSidebar({ groups, onHome, onExpand }: { groups: Group[]; onHome: bo
         <div className="flex h-12 w-full shrink-0 items-center justify-center">
           {/* The Rival R; hovering it swaps in the expand button */}
           <button onClick={onExpand} aria-label="Expand sidebar" title="Expand sidebar" className="group/logo grid size-7 cursor-pointer place-items-center rounded-[0.375rem] text-[#6c6a68] transition-colors hover:bg-[#9a9893]/10">
-            <RivalMark className="col-start-1 row-start-1 size-5 text-[#0350d0] transition-opacity duration-150 group-hover/logo:opacity-0" />
+            <RivalMark className="col-start-1 row-start-1 size-7 text-[#0350d0] transition-opacity duration-150 group-hover/logo:opacity-0" />
             <CollapseIcon className="col-start-1 row-start-1 size-4 rotate-180 opacity-0 transition-opacity duration-150 group-hover/logo:opacity-100" />
           </button>
         </div>
