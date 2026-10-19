@@ -496,15 +496,41 @@ function ToolMark({ tool }: { tool: Tool }) {
   return <svg viewBox="0 0 16 16" className="size-[1.125rem] shrink-0" role="img" aria-label={toolNames[tool]}><title>{toolNames[tool]}</title>{art[tool]}</svg>
 }
 
+/*
+ * The cards' hover: a subtle 3D tilt toward the pointer (4° at most), a hair of lift, a shadow that leans away
+ * from the tilt, and a faint light under the pointer. Eases back flat on leave. Styles: .tilt-card in index.css.
+ */
+function useTilt() {
+  const still = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  const set = (el: HTMLElement, x: number, y: number) => {
+    el.style.setProperty("--rx", `${(-y * 4).toFixed(2)}deg`)
+    el.style.setProperty("--ry", `${(x * 4).toFixed(2)}deg`)
+    el.style.setProperty("--lx", `${((x + 1) * 50).toFixed(1)}%`)
+    el.style.setProperty("--ly", `${((y + 1) * 50).toFixed(1)}%`)
+    el.style.setProperty("--sx", `${(-x * 6).toFixed(1)}px`)
+    el.style.setProperty("--sy", `${(8 - y * 4).toFixed(1)}px`)
+  }
+  return still ? {} : {
+    onPointerMove: (e: React.PointerEvent<HTMLElement>) => {
+      const b = e.currentTarget.getBoundingClientRect()
+      set(e.currentTarget, ((e.clientX - b.left) / b.width) * 2 - 1, ((e.clientY - b.top) / b.height) * 2 - 1)
+    },
+    onPointerLeave: (e: React.PointerEvent<HTMLElement>) => set(e.currentTarget, 0, 0),
+  }
+}
+
 function AgentCard({ a, selected, onSelect }: { a: LibraryAgent; selected: boolean; onSelect: () => void }) {
+  const tilt = useTilt()
   const m = metaOf(a)
   const Cap = m.cap[1]
   return (
     <button
       onClick={onSelect}
       aria-pressed={selected}
-      className="group flex cursor-pointer flex-col items-stretch rounded-[0.375rem] border border-[#ecebe9] bg-white text-left shadow-[0px_1px_1px_rgba(0,0,0,0.04)] transition-[border-color,translate] duration-200 hover:-translate-y-px hover:border-[#dddcda] aria-pressed:border-[#2e4eca]/40"
+      {...tilt}
+      className="tilt-card group relative flex cursor-pointer flex-col items-stretch overflow-hidden rounded-[0.375rem] border border-[#ecebe9] bg-white text-left hover:border-[#dddcda] aria-pressed:border-[#2e4eca]/40"
     >
+      <span aria-hidden className="tilt-light" />
       <span className="flex flex-col items-start gap-3.5 p-5">
         <span className="flex w-full min-w-0 items-center gap-2.5">
           {TILE_STYLE === "flat" ? <FlatTile color={colorOf(a)} /> : <AgentTile seed={a.name} hue={hueOf(a)} />}

@@ -599,3 +599,25 @@ html[data-vt="expand"]::view-transition-new(root) { animation: vt-fade-in 240ms 
 }
 .lib-tab:hover { background: #fff; border-color: #ecebe9; color: #121212; }
 .lib-tab[aria-selected="true"] { background: #f8f8f7; border-color: #ecebe9; color: #121212; }
+
+/* Agent cards: a subtle 3D tilt toward the pointer (components/agents-library-frame.tsx sets the variables) */
+.tilt-card {
+  --rx: 0deg; --ry: 0deg; --sx: 0px; --sy: 8px; --lx: 50%; --ly: 50%;
+  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));
+  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.04);
+  transition: transform 450ms cubic-bezier(.2,.8,.2,1), box-shadow 450ms ease, border-color 200ms ease;
+  will-change: transform;
+}
+.tilt-card:hover {
+  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-2px) scale(1.012);
+  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.04), var(--sx) var(--sy) 24px -10px rgba(18, 18, 18, 0.16);
+  transition: transform 120ms ease-out, box-shadow 200ms ease, border-color 200ms ease;
+}
+/* the faint light under the pointer */
+.tilt-light {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 300ms ease;
+  background: radial-gradient(circle at var(--lx) var(--ly), rgb(46 78 202 / 0.045), transparent 55%);
+}
+.tilt-card:hover .tilt-light { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .tilt-card, .tilt-card:hover { transform: none; transition: none; } }
+.tilt-card > :not(.tilt-light) { position: relative; } /* content above the light */
