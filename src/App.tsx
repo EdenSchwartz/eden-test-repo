@@ -41,7 +41,7 @@ function Shell({ page: pageId }: { page: string }) {
     <>
       <SidebarInset className="relative min-w-0 bg-white font-[Geist,ui-sans-serif,system-ui,sans-serif]">
         {/* The top bar from the frame: h 48, px 16 · py 12, a #ECEBE9 line under it, the breadcrumb (robot 16 · gap 6 · Geist 12/16 #121212) */}
-        <header className="flex h-12 w-full shrink-0 items-center justify-between border-b border-[#ecebe9] bg-[#fcfcfa] px-4 py-3">
+        <header className="flex h-12 w-full shrink-0 items-center justify-between border-b border-[#ecebe9] px-4 py-3">
           <div className="flex items-center gap-1.5">
             <BreadcrumbRobotIcon className="size-4 shrink-0" />
             <p className="max-w-[7.5rem] overflow-hidden text-[0.75rem] leading-4 text-ellipsis whitespace-nowrap text-[#121212]">{title}</p>

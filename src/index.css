@@ -557,31 +557,7 @@ html[data-vt="expand"]::view-transition-new(root) { animation: vt-fade-in 240ms 
 .sheet-margin {
   position: absolute; top: 0; bottom: 0; width: 2rem; pointer-events: none;
   border-color: #ecebe9;
-  background-color: #fcfcfa; /* the frame's material, like the sidebar and the header */
-  background-image: repeating-linear-gradient(-45deg, rgb(154 152 147 / 0.1) 0 1px, transparent 1px 8px);
-}
-/* A ruler along the strip's inner edge: a 4px tick every 1.25rem (in step with the header's grid), a 7px one
-   every 5 ticks */
-.sheet-margin::after {
-  content: ""; position: absolute; top: 0; bottom: 0; width: 7px;
-  background:
-    linear-gradient(to bottom, #e2e1de 0 1px, transparent 1px) 0 0 / 7px 6.25rem repeat-y,
-    linear-gradient(to bottom, #e9e8e5 0 1px, transparent 1px) 0 0 / 4px 1.25rem repeat-y;
-}
-.sheet-left::after { right: 0; transform: scaleX(-1); }
-.sheet-right::after { left: 0; }
-
-/* A small registration cross where a strip's rail meets the tabs line above it */
-.reg-cross { position: absolute; top: 0; width: 9px; height: 9px; transform: translate(-50%, -50%); pointer-events: none; z-index: 1; }
-.reg-cross.right-8 { transform: translate(50%, -50%); }
-.reg-cross::before, .reg-cross::after { content: ""; position: absolute; background: #cfcdc9; }
-.reg-cross::before { left: 4px; top: 0; width: 1px; height: 9px; }
-.reg-cross::after { top: 4px; left: 0; width: 9px; height: 1px; }
-
-/* One material for the whole screen: an almost invisible paper grain over everything */
-body::after {
-  content: ""; position: fixed; inset: 0; z-index: 60; pointer-events: none; opacity: 0.035; mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  background: repeating-linear-gradient(-45deg, rgb(154 152 147 / 0.1) 0 1px, transparent 1px 8px);
 }
 
 /* The header box's grid at rest (like Hex's hero): always there, very faint, fading out toward the box's
