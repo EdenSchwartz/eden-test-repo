@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils"
  * bluish silver-white highlights sweeping through and, where the flow is fast, short white glints (the shine) with a cool steel / faint champagne tint, and faster flow
  * catches the light. Darker than the resting grid so it reads on white, at most 80% strength.
  * Coming near the box from outside (within 18rem) pours a little dye in at the closest edge, as a hint.
- * Left alone, it pulses on its own now and then (every 14 to 22s): one soft stroke drifts across and fades.
+ * Left alone, it pulses on its own now and then (every 8 to 13s, each from a shuffled place): one soft stroke drifts across and fades.
  * Runs only while there's dye to show; still (no fluid) if the user prefers reduced motion.
  */
 function FluidGrid() {
@@ -175,19 +175,30 @@ function FluidGrid() {
     }
     const start = () => { if (!raf) raf = requestAnimationFrame(loop) }
 
-    // The idle pulse: now and then (first a few seconds in, then every 14 to 22s; never while you're on or near it, never in a hidden tab)
+    // The idle pulse: now and then (first a few seconds in, then every 8 to 13s, each from a new place; never while you're on or near it, never in a hidden tab)
     // a soft stroke drifts across part of the header by itself, as if someone breathed on it, then fades
-    let pulseTimer = 0, pulseRaf = 0
-    const schedule = (first = false) => { pulseTimer = window.setTimeout(pulse, first ? 3500 + Math.random() * 1500 : 14000 + Math.random() * 8000) }
+    let pulseTimer = 0, pulseRaf = 0, lastStart = { x: -1e4, y: -1e4 }
+    const schedule = (first = false) => { pulseTimer = window.setTimeout(pulse, first ? 2500 + Math.random() * 1500 : 8000 + Math.random() * 5000) }
     const pulse = () => {
       if (document.hidden || box.matches(":hover") || performance.now() - touched < 6000 || !w) return schedule()
-      const dir = Math.random() < 0.5 ? 1 : -1
-      const len = Math.min(w * 0.35, 26 * cell), x0 = w * (dir > 0 ? 0.1 + Math.random() * 0.35 : 0.55 + Math.random() * 0.35)
-      const y0 = h * (0.3 + Math.random() * 0.4), t0 = performance.now(), dur = 1600
+      // Shuffled: a new start each time, anywhere in the box (but not where the last one began), heading any way
+      // that stays mostly inside, with its own length, curve and pace
+      let x0 = 0, y0 = 0
+      for (let k = 0; k < 8; k++) {
+        x0 = w * (0.08 + Math.random() * 0.84); y0 = h * (0.2 + Math.random() * 0.6)
+        if (Math.hypot(x0 - lastStart.x, y0 - lastStart.y) > w * 0.25) break
+      }
+      lastStart = { x: x0, y: y0 }
+      const toCenter = Math.atan2(h / 2 - y0, w / 2 - x0)
+      const angle = toCenter + (Math.random() - 0.5) * 2.2
+      const len = Math.min(w * (0.18 + Math.random() * 0.2), 24 * cell)
+      const ax = Math.cos(angle), ay = Math.sin(angle) * 0.35 // flatter: the box is wide and short
+      const bend = (Math.random() - 0.5) * h * 0.3, waves = 0.8 + Math.random() * 1.2
+      const t0 = performance.now(), dur = 1300 + Math.random() * 700
       let px = x0, py = y0
       const stroke = (t: number) => {
         const p = Math.min(1, (t - t0) / dur), e = p * p * (3 - 2 * p)
-        const x = x0 + dir * len * e, y = y0 + Math.sin(e * Math.PI * 1.4) * h * 0.14
+        const x = x0 + ax * len * e, y = y0 + ay * len * e + Math.sin(e * Math.PI * waves) * bend
         splat(x, y, (x - px) * 0.45, (y - py) * 0.45, 0.16 * Math.sin(p * Math.PI))
         px = x; py = y
         start()
@@ -234,6 +245,7 @@ export function AgentsLibraryFrame() {
     // With a panel open, the page makes room for it (the panel takes the whole right side, under the top bar)
     <div className={cn("flex flex-1 flex-col items-start bg-white whitespace-nowrap", picked && "mr-[35rem]")}>
       <div className="alive-box relative isolate flex w-full flex-col items-start justify-center gap-3 overflow-hidden border-b border-[#ecebe9] bg-white p-10">
+        <span aria-hidden className="alive-noise" />
         <span aria-hidden className="alive-base" />
         <FluidGrid />
         <p className="text-[1.25rem] leading-4 font-medium text-[#121212]">Agents Library</p>

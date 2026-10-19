@@ -567,8 +567,30 @@ html[data-vt="expand"]::view-transition-new(root) { animation: vt-fade-in 240ms 
   background:
     linear-gradient(to right, rgb(18 18 18 / 0.04) 1px, transparent 1px) 0 0 / 1.25rem 1.25rem,
     linear-gradient(to bottom, rgb(18 18 18 / 0.04) 1px, transparent 1px) 0 0 / 1.25rem 1.25rem;
-  -webkit-mask-image: radial-gradient(ellipse 70% 120% at 50% 30%, #000 0%, rgb(0 0 0 / 0.5) 50%, transparent 100%);
-  mask-image: radial-gradient(ellipse 70% 120% at 50% 30%, #000 0%, rgb(0 0 0 / 0.5) 50%, transparent 100%);
+  /* fades out softly on every side, most at the corners, so the grid has no hard seams */
+  -webkit-mask-image:
+    linear-gradient(to right, transparent, #000 22%, #000 78%, transparent),
+    linear-gradient(to bottom, transparent, #000 38%, #000 62%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent, #000 22%, #000 78%, transparent),
+    linear-gradient(to bottom, transparent, #000 38%, #000 62%, transparent);
+  mask-composite: intersect;
+}
+/* Under the grid: a grainy gradient. Two very soft light pools (a cool silver-blue up right, a warm paper tone
+   down left) with fine film grain over them, all fading out at the edges like the grid */
+.alive-noise {
+  position: absolute; inset: 0; z-index: -3; pointer-events: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.07 0 0 0 0 0.07 0 0 0 0 0.09 0 0 0 0.22 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E"),
+    radial-gradient(60% 140% at 82% 0%, rgb(222 229 244 / 0.7), transparent 70%),
+    radial-gradient(55% 140% at 12% 100%, rgb(240 236 228 / 0.6), transparent 70%);
+  background-size: 180px 180px, auto, auto;
+  opacity: 0.6;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent), linear-gradient(to bottom, transparent, #000 20%, #000 80%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent), linear-gradient(to bottom, transparent, #000 20%, #000 80%, transparent);
+  mask-composite: intersect;
 }
 
 /* Agents | Sub Agents tabs on the Agents Library (as drawn): resting is plain grey text; hover gets a white
