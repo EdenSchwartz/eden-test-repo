@@ -3,7 +3,7 @@ import {
   AgentsIcon, ChatsIcon, CollapseIcon, ConnectorsIcon, ExpandSimpleIcon, HomeIcon, PlatformIcon, PlusIcon,
   RivalMark, RivalWordmark, SectionToggleIcon, SettingsIcon,
 } from "@/components/nav-icons"
-import { useState } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 import { useConversations } from "@/lib/conversations"
 import { useNav } from "@/lib/nav"
 import { cn } from "@/lib/utils"
@@ -96,7 +96,7 @@ export function AppSidebar() {
                       <button key={it.params?.conversationId ?? it.label} onClick={() => navigate(it.page, it.params)} aria-current="page" className="relative z-10 flex h-6 w-full cursor-pointer items-center gap-3.5 pr-1 pl-3 text-left">
                         {/* The white box: 6px above and below the text (30px tall), drawn past the row so nothing moves */}
                         <span aria-hidden className="absolute inset-x-0 -top-[0.1875rem] -bottom-[0.1875rem] rounded-[0.375rem] border border-[#ecebe9] bg-white shadow-[0px_1px_1px_0px_rgba(119,131,152,0.2)]" />
-                        <span aria-hidden className="relative h-3.5 w-0 shrink-0"><span className="absolute inset-y-0 left-0 w-[1.5px] bg-[#2e4eca]" /></span>
+                        <span aria-hidden className="relative h-3.5 w-0 shrink-0"><SelectedBar /></span>
                         <span className="relative min-w-px flex-[1_0_0] truncate text-[0.875rem] leading-4 text-[#2e4eca]">{it.label}</span>
                       </button>
                     ) : (
@@ -134,4 +134,24 @@ export function AppSidebar() {
       </div>
     </Sidebar>
   )
+}
+
+// The selected item's 1.5px bar, nudged onto a whole screen pixel: the UI scales with the screen (rem), which
+// can leave it at e.g. 26.56px, where it smudges wider. Re-snaps when the window or the scaling changes.
+function SelectedBar() {
+  const ref = useRef<HTMLSpanElement>(null)
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const snap = () => {
+      el.style.transform = ""
+      const dpr = window.devicePixelRatio || 1
+      const x = el.getBoundingClientRect().left * dpr
+      el.style.transform = `translateX(${(Math.round(x) - x) / dpr}px)`
+    }
+    snap()
+    window.addEventListener("resize", snap)
+    return () => window.removeEventListener("resize", snap)
+  }, [])
+  return <span ref={ref} className="absolute inset-y-0 left-0 w-[1.5px] bg-[#2e4eca]" />
 }
