@@ -93,7 +93,7 @@ export function AppSidebar() {
                   {g.items.map((it) => {
                     const active = it.params ? page === "chat" && params.conversationId === it.params.conversationId : page === it.page
                     return active ? (
-                      <button key={it.params?.conversationId ?? it.label} onClick={() => navigate(it.page, it.params)} aria-current="page" className="flex w-full cursor-pointer items-center gap-3.5 rounded-[0.25rem] border border-[#ecebe9] bg-white py-1.5 pr-1 pl-3 text-left drop-shadow-[0px_1px_0.5px_rgba(119,131,152,0.2)]">
+                      <button key={it.params?.conversationId ?? it.label} onClick={() => navigate(it.page, it.params)} aria-current="page" className="flex w-full cursor-pointer items-center gap-3.5 rounded-[0.375rem] border border-[#ecebe9] bg-white py-1.5 pr-1 pl-3 text-left shadow-[0px_1px_1px_0px_rgba(119,131,152,0.2)]">
                         <span aria-hidden className="relative h-3.5 w-0 shrink-0"><span className="absolute inset-y-0 -left-[0.75px] w-[1.5px] bg-[#2e4eca]" /></span>
                         <span className="min-w-px flex-[1_0_0] truncate text-[0.875rem] leading-4 text-[#2e4eca]">{it.label}</span>
                       </button>
