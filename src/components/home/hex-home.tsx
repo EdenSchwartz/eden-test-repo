@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
  * a tight, ruled grid in three columns, like Hex's home. Each column has a mono label and short rows:
  *   Needs you   conversations waiting on an approval
  *   Recent      the latest conversations
- *   Start from  a few of Rival's templates (opens Agent explorer)
+ *   Start from  a few of Rival's templates (opens Agent Library)
  */
 // Waiting on you: Rival's last message has an approval in it (anywhere, including inside a sub agent's run)
 const flat = (parts: Part[]): Part[] => parts.flatMap((p) => (p.type === "agent" ? [p, ...flat(p.parts)] : [p]))

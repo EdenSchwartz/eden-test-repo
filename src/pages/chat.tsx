@@ -286,7 +286,7 @@ export default function ChatPage() {
   return (
     // -m-6 cancels main's padding; fixed height so the thread (or Home) scrolls inside, not the page.
     // A focused, full-width conversation: no details panel beside it.
-    <div className="relative -m-6 flex h-[calc(100svh-3.5rem)] [contain:inline-size]">
+    <div className="relative -m-6 flex h-[calc(100svh-3rem)] [contain:inline-size]">
       {/* Conversation info's toggle (components/chat/conversation-info.tsx): pinned to the page's top-right corner,
           right above the floating cards when they're open */}
       {active && !customizing && (
@@ -330,7 +330,7 @@ export default function ChatPage() {
                               <button
                                 key={r}
                                 // Open in Tasks goes to the Tasks page with your new task open; everything else is your reply
-                                onClick={() => (r === "Open in My agents" ? navigate("gallery", { superAgentId: active.superAgentId }) : send(r))}
+                                onClick={() => (r === "Open in My Agents" ? navigate("gallery", { superAgentId: active.superAgentId }) : send(r))}
                                 className={cn(
                                   "flex h-8 cursor-pointer items-center gap-1.5 rounded-full px-3.5 text-sm font-medium transition-colors",
                                   r === "Approve and create" || r === "Run now"
@@ -341,7 +341,7 @@ export default function ChatPage() {
                                 {(r === "Yes" || r === "Approve and create") && <Check className="size-3.5" />}
                                 {r === "Run now" && <Play className="size-3.5" />}
                                 {r}
-                                {r === "Open in My agents" && <ArrowRight className="size-3.5" />}
+                                {r === "Open in My Agents" && <ArrowRight className="size-3.5" />}
                               </button>
                             ))}
                           </div>

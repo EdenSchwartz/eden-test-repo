@@ -41,7 +41,7 @@ export const triggerQuestion = (sa: SuperAgent): AskQuestion => ({
   id: "trigger",
   title: `When should ${sa.name} run?`, // Rival's message already says it can change later
   options: [
-    { label: "Manually", hint: "Only when you run it, from My agents or right here in the chat", recommended: true },
+    { label: "Manually", hint: "Only when you run it, from My Agents or right here in the chat", recommended: true },
     { label: "Scheduled", hint: "On a schedule you describe in your own words", input: { placeholder: "e.g. Every Monday at 9 AM", action: "Set schedule" } },
     { label: "Event", hint: "When something happens, like a scanner reporting a new critical", disabled: true, badge: "Coming soon" },
   ],

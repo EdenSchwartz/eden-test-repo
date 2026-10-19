@@ -73,7 +73,7 @@ export function TemplateDetail({ sa, onUse, onClose, wide }: { sa: SuperAgent; o
         {/* Properties in one row, spread across the panel, each on one line (never wraps; the panel is 35rem for this, the widest that keeps two cards beside it at 1440).
             ponytail: capabilities are the same for every template in the demo. "from <template>" shows on Created by's hover */}
         <dl className="flex justify-between gap-x-4">
-          {/* Your own: everything in My agents is yours (the card shows your avatar), so no Created by; it makes room for Scope and Trigger */}
+          {/* Your own: everything in My Agents is yours (the card shows your avatar), so no Created by; it makes room for Scope and Trigger */}
           {!sa.custom && <Prop label="Created by">Rival</Prop>}
           <Prop label="Agents">{sa.pattern.flat().length}</Prop>
           <Prop label="Capabilities">Read only</Prop>

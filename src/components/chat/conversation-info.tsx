@@ -152,7 +152,7 @@ function SetupCard({ setup, created, assets = 0, name }: { setup?: Setup; create
   const note = (i: number) =>
     i === 0 ? assets > 0 ? `${assets} assets${at === 0 ? " found · confirm the filter" : ""}` : "Pick the assets it runs on"
     : i === 1 ? at > 1 ? (setup?.structure ? "Customized" : "As the template") : "Keep the flow or customize it"
-    : created ? "Created · in My agents" : "Approve to create it"
+    : created ? "Created · in My Agents" : "Approve to create it"
   return (
     <section className={cn(float, "p-3")}>
       <div className="mb-3 flex items-baseline justify-between">

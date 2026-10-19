@@ -19,14 +19,14 @@ import { cn } from "@/lib/utils"
 
 /*
  * Two pages share this file (pages.tsx), one component with a mode, each keeping its own state:
- *   Agent explorer (ExplorerPage, mode "explore"): Rival's templates, and sub agents as templates, to start from.
+ *   Agent Library (ExplorerPage, mode "explore"): Rival's templates, and sub agents as templates, to start from.
  *              Plain cards, no statuses or switches. Before you have an agent: the three steps to a first one.
- *              Use template → the setup chat (pages/chat.tsx) → it joins My agents.
- *   My agents (default export, mode "mine"): your agents: search, a Status filter, and Cards | List. List groups them
+ *              Use template → the setup chat (pages/chat.tsx) → it joins My Agents.
+ *   My Agents (default export, mode "mine"): your agents: search, a Status filter, and Cards | List. List groups them
  *              Linear-style under the template they were made from (components/tasks/task-table.tsx).
  *              Clicking an agent card expands it into a full page (the card's box grows into the page's, a shared
  *              view-transition name; data-vt="expand" in index.css); ✕ or Esc shrinks it back into its card.
- *              None yet: an empty state pointing at Agent explorer.
+ *              None yet: an empty state pointing at Agent Library.
  *   Agents | Sub agents: a switch under the intro. Agents = the multi-step ones above (templates or yours);
  *              Sub agents = the single-mission helpers they're built from (components/tasks/sub-agent-card.tsx),
  *              each with its status and an Enabled switch, one grid, its own search and Status filter.
@@ -81,7 +81,7 @@ function Gallery({ mode }: { mode: "explore" | "mine" }) {
   const [subId, setSubId] = useState<AgentKind | null>(null)
   // An agent opened from the sub agent's "Part of" list: shown in the same panel, under a breadcrumb back to the sub agent
   const [nestedId, setNestedId] = useState<string | null>(null)
-  // My agents: the agent expanded into a full page (its card grows into it), or none. Esc shrinks it back
+  // My Agents: the agent expanded into a full page (its card grows into it), or none. Esc shrinks it back
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const expanded = expandedId ? getSuperAgent(expandedId) ?? null : null
   // After an expand, the grid comes back without its entrance animation: the shrink-back needs the card visible
@@ -101,14 +101,14 @@ function Gallery({ mode }: { mode: "explore" | "mine" }) {
   const setView = (v: typeof view) => withTransition(() => { setViewState(v); try { localStorage.setItem("tasks-view", v) } catch { /* ok */ } })
   // ponytail: the panel layout; Docked for now (Floating and Wide still work in Split, the switch to compare them is gone)
   const layout = "docked" as "docked" | "floating" | "wide"
-  // The picked one (split view): what you arrived with (e.g. "Open in My agents" after creating it), else none
+  // The picked one (split view): what you arrived with (e.g. "Open in My Agents" after creating it), else none
   const [selectedId, setSelectedId] = useState<string | null>(() => {
     const sa = getSuperAgent(params.superAgentId)
-    return sa && !!sa.custom === (mode === "mine") ? sa.id : null // yours open on My agents, templates on the explorer
+    return sa && !!sa.custom === (mode === "mine") ? sa.id : null // yours open on My Agents, templates on the explorer
   })
-  // You haven't made an agent yet: Explorer shows the three steps, My agents an empty state pointing at Explorer
+  // You haven't made an agent yet: Explorer shows the three steps, My Agents an empty state pointing at Explorer
   const hasAgents = superAgents.some((sa) => sa.custom)
-  // Agent explorer: Rival's templates, plain cards, no statuses or switches
+  // Agent Library: Rival's templates, plain cards, no statuses or switches
   const explore = mode === "explore"
   const tq = taskQuery.trim().toLowerCase()
   const mine = superAgents.filter((sa) => sa.custom && (status === "all" || taskStatus(sa, convs).tone === status) && (!tq || matches(sa, tq)))
@@ -182,11 +182,11 @@ function Gallery({ mode }: { mode: "explore" | "mine" }) {
     </p>
   )
 
-  // My agents, one expanded: a full page in place of the grid. It carries the card's view-transition name
+  // My Agents, one expanded: a full page in place of the grid. It carries the card's view-transition name
   // (tpl-<id>), so the browser grows the card's box into this one, and shrinks it back on close
   if (!explore && expanded) {
     return (
-      <div className="relative -m-6 h-[calc(100svh-3.5rem)] [contain:inline-size]">
+      <div className="relative -m-6 h-[calc(100svh-3rem)] [contain:inline-size]">
         <section aria-label={expanded.name} className="h-full overflow-hidden bg-background" style={{ viewTransitionName: `tpl-${expanded.id}` }}>
           <div className="mx-auto h-full max-w-5xl border-x border-hairline">
             <TemplateDetail key={expanded.id} sa={expanded} onUse={use} onClose={collapse} wide />
@@ -198,7 +198,7 @@ function Gallery({ mode }: { mode: "explore" | "mine" }) {
 
   return (
     // -m-6 cancels main's padding: the page fills the area, both sides scroll on their own
-    <div className="relative -m-6 h-[calc(100svh-3.5rem)] [contain:inline-size]" data-settled={settled || undefined}>
+    <div className="relative -m-6 h-[calc(100svh-3rem)] [contain:inline-size]" data-settled={settled || undefined}>
       <Split
         layout={layout}
         panelName="template-detail"
@@ -215,27 +215,27 @@ function Gallery({ mode }: { mode: "explore" | "mine" }) {
           : selected && <TemplateDetail key={selected.id} sa={selected} onUse={use} onClose={close} wide={layout === "wide"} />}
       >
         <header className="space-y-1" style={{ viewTransitionName: "templates-head" }}>
-          <h1 className="font-title text-[28px] leading-[1.08] tracking-[-0.01em] [--title-wght:450]">{explore ? "Agent explorer" : "My agents"}</h1>
+          <h1 className="font-title text-[28px] leading-[1.08] tracking-[-0.01em] [--title-wght:450]">{explore ? "Agent Library" : "My Agents"}</h1>
           <p className="max-w-2xl pt-1.5 text-sm text-muted-foreground">
             {explore
-              ? "Ready-made security agents by Rival. Pick one, make it yours in a short chat, and it joins My agents."
+              ? "Ready-made security agents by Rival. Pick one, make it yours in a short chat, and it joins My Agents."
               : "Security jobs your agents run for you, end to end."}
           </p>
           {explore && !hasAgents && <div className="pt-3"><StepsLine /></div>}
         </header>
         {!explore && !hasAgents ? (
-          // My agents, none yet: point at the explorer
+          // My Agents, none yet: point at the explorer
           <div className="flex flex-col items-start gap-3 rounded-xl border border-dashed px-6 py-8">
             <span className="flex size-9 items-center justify-center rounded-lg bg-wash text-blue"><Bot className="size-4.5" /></span>
             <span className="space-y-1">
               <span className="block text-sm font-semibold">No agents yet</span>
-              <span className="block max-w-md text-sm text-muted-foreground">Start from one of Rival's templates in Agent explorer and make it yours in a few minutes.</span>
+              <span className="block max-w-md text-sm text-muted-foreground">Start from one of Rival's templates in Agent Library and make it yours in a few minutes.</span>
             </span>
             <button
               onClick={() => navigate("explorer")}
               className="flex h-8 cursor-pointer items-center gap-1.5 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80"
             >
-              Open Agent explorer <ArrowRight className="size-3.5" />
+              Open Agent Library <ArrowRight className="size-3.5" />
             </button>
           </div>
         ) : <>

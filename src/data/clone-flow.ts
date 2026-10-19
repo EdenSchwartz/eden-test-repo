@@ -303,7 +303,7 @@ export function questions(sa: SuperAgent): Question[] {
       detail: (d) => fixes(d) ? "Hands-off is a lot of trust. Anything beyond the guardrail comes back to you." : "It won't change anything, but it will reach people without asking.",
       options: (d) => [
         ...(fixes(d) ? c.limits : ["Business hours only", "Never page, only post", "At most 5 notifications a day"]).map((label, i) => ({ label, hint: i === 0 ? "Smallest blast radius while you build trust" : "Anything beyond it waits for you", recommended: i === 0, why: "it keeps the blast radius small while you build trust", note: `Guardrail set: ${label.toLowerCase()}. Anything beyond that comes back to you.`, apply: () => ({ limits: label }) })),
-        { label: "No limits", hint: "Every action is still logged in Agent activity", note: "No limits. I'll still log everything it does in Agent activity.", apply: () => ({ limits: "None" }) },
+        { label: "No limits", hint: "Every action is still logged in Activity", note: "No limits. I'll still log everything it does in Activity.", apply: () => ({ limits: "None" }) },
       ],
     },
     {

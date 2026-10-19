@@ -408,7 +408,7 @@ export function ScheduleTab({ sa }: { sa: SuperAgent }) {
       <TriggersSection sa={sa} />
 
       <section className="space-y-2.5">
-        {/* Show all runs: a tertiary link to the Agent activity page, filtered to this agent (pages/agents.tsx) */}
+        {/* Show all runs: a tertiary link to the Activity page, filtered to this agent (pages/agents.tsx) */}
         <h3 className="flex items-center justify-between text-xs text-muted-foreground">
           <span>Runs <span className="ml-1 tabular-nums">{runs.length}</span></span>
           <button

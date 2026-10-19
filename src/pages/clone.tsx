@@ -335,7 +335,7 @@ function CloneChat({ sa, editing }: { sa: SuperAgent; editing?: SuperAgent }) {
   return (
     // -m-6 cancels main's padding; fixed height so the thread scrolls inside, like the chat page.
     // contain-inline-size: one-line (truncated) text inside must not widen the whole shell
-    <div className="relative -m-6 flex h-[calc(100svh-3.5rem)] [contain:inline-size]" style={{ "--hue": sa.hue } as React.CSSProperties}>
+    <div className="relative -m-6 flex h-[calc(100svh-3rem)] [contain:inline-size]" style={{ "--hue": sa.hue } as React.CSSProperties}>
       {/* With agent details open, the panel docks as a column on the right and the chat makes room (narrow screens: it overlays) */}
       <section className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
         <Thread className="flex-1">
@@ -499,7 +499,7 @@ function ReviewCard({ sa, draft, creating, created, onCreate, onEdit, onOpenGall
             >
               <Sparkles className="size-4" /> {creating ? "Creating…" : `Create ${draft.name}`}
             </button>
-            <span className="text-xs text-muted-foreground">Adds it to My agents{draft.trigger && draft.trigger.kind !== "manual" ? " and Scheduled" : ""}. You can change it any time.</span>
+            <span className="text-xs text-muted-foreground">Adds it to My Agents{draft.trigger && draft.trigger.kind !== "manual" ? " and Scheduled" : ""}. You can change it any time.</span>
           </>
         )}
       </div>

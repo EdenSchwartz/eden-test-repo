@@ -72,7 +72,7 @@ export async function playSetupTurn(sa: SuperAgent, setup: Setup, text: string, 
     await wait(300)
     update((p) => [...p, { type: "workflow", superAgentId: sa.id, scope: `${setup.assets} assets` }])
     await wait(500)
-    await stream(update, "Should I keep the flow as is for now? You can change it anytime from My agents.")
+    await stream(update, "Should I keep the flow as is for now? You can change it anytime from My Agents.")
     await wait(150)
     patch({ setup: { ...setup, stage: "keep-flow" }, replies: ["Yes"] })
     return
@@ -116,13 +116,13 @@ export async function playSetupTurn(sa: SuperAgent, setup: Setup, text: string, 
     }
     update(() => [tool])
     await wait(1100)
-    update(() => [{ ...tool, state: "output-available", title: `Created ${task.name}`, output: { id: task.id, library: "My agents" } }])
+    update(() => [{ ...tool, state: "output-available", title: `Created ${task.name}`, output: { id: task.id, library: "My Agents" } }])
     mapParts((x) => (x.type === "task" && x.superAgentId === sa.id && !x.created ? { ...x, superAgentId: task.id, created: true } : x))
     await wait(300)
-    await stream(update, `Done! **${task.name}** is in My agents. Run it now, or open it there.`)
+    await stream(update, `Done! **${task.name}** is in My Agents. Run it now, or open it there.`)
     await wait(150)
     // From here on the conversation is with your new task: Run now plays its run (pages/chat.tsx)
-    patch({ setup: undefined, superAgentId: task.id, title: task.name, replies: ["Run now", "Open in My agents"] })
+    patch({ setup: undefined, superAgentId: task.id, title: task.name, replies: ["Run now", "Open in My Agents"] })
     return
   }
 

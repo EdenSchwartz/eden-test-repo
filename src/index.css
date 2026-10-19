@@ -169,6 +169,32 @@
     --warning-wash: #33260a;
 }
 
+/* The sidebar (components/app-sidebar.tsx), from the Figma Navbar: the same in both looks */
+:root {
+  --nav-bg: #fbfbfb;
+  --nav-line: #ecebe9;
+  --nav-text: #6c6a68;
+  --nav-muted: #9a9893;
+  --nav-strong: #121212;
+  --nav-active: #0350d0;
+  --nav-pill: #ffffff;
+  --nav-hover: rgb(154 152 147 / 0.08);
+  --nav-rail: rgb(154 152 147 / 0.2);
+}
+.dark {
+  --nav-bg: #0e1528;
+  --nav-line: #25365a;
+  --nav-text: #a9b1c4;
+  --nav-muted: #7d8699;
+  --nav-strong: #f8f7f5;
+  --nav-active: #5ba3f7;
+  --nav-pill: #16233f;
+  --nav-hover: rgb(169 177 196 / 0.08);
+  --nav-rail: rgb(169 177 196 / 0.18);
+}
+/* The sidebar's line on its right is the nav line, not the app border */
+[data-slot="sidebar-container"] { border-color: var(--nav-line) !important; }
+
 @layer base {
   /* Big screens: scale the whole UI (everything is rem-based) so it isn't tiny on large monitors */
   html {

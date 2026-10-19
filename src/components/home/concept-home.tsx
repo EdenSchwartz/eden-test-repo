@@ -129,7 +129,7 @@ export function ConceptHome({ initial, created }: { initial?: SuperAgent; create
           )}
         </div>
 
-        {/* Templates have their own page now (Agent explorer); Home is just the chat, with a way there.
+        {/* Templates have their own page now (Agent Library); Home is just the chat, with a way there.
             Hex look: a ruled grid instead (Needs you · Recent · Start from) */}
         {hex && !picked ? <HexHomeGrid /> : <button
           onClick={() => navigate("explorer")}

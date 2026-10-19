@@ -18,7 +18,7 @@ export default function App() {
     <NavContext.Provider value={{ navigate, page: nav.page, params: nav.params }}>
     <ConversationsProvider>
     <TooltipProvider>
-      <SidebarProvider>
+      <SidebarProvider style={{ "--sidebar-width": "180px" } as React.CSSProperties}>
         <AppSidebar />
         <Shell page={nav.page} />
       </SidebarProvider>
