@@ -33,11 +33,15 @@ const groups: { id: string; label: string; icon: React.ComponentType<{ className
 ]
 
 const text = "text-[0.875rem] leading-4 text-[#6c6a68]"
+// The selected box: white, a 1px #ECEBE9 stroke, 6px corners, drop shadow 0 1 1 #778398 at 20%, 6px above and below
+// the text, drawn past its 24px row so nothing moves when you select
+const selectedBox = "absolute inset-x-0 -top-[0.1875rem] -bottom-[0.1875rem] rounded-[0.375rem] border border-[#ecebe9] bg-white shadow-[0px_1px_1px_0px_rgba(119,131,152,0.2)]"
 const top = cn("flex h-6 w-full cursor-pointer items-center gap-1.5 rounded-[0.25rem] py-1 pr-1 pl-1.5 text-left", text)
 
 export function AppSidebar() {
   const { navigate, page, params } = useNav()
   const { convs } = useConversations()
+  const onHome = page === "chat" && !params.conversationId
   // Sections you've collapsed (all open to start). Hovering a title swaps its icon for the toggle triangle
   const [closed, setClosed] = useState<Set<string>>(() => new Set())
   const toggle = (id: string) => setClosed((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n })
@@ -62,8 +66,10 @@ export function AppSidebar() {
         <nav aria-label="Main" className="flex min-h-px w-full flex-[1_0_0] flex-col items-start gap-4 overflow-y-auto px-3 py-1.5">
           <div className="flex w-full flex-col items-start">
             <div className="flex w-full flex-col items-start gap-1.5">
-              <button onClick={() => navigate("chat")} className={top}>
-                <HomeIcon className="size-4 shrink-0" /> <span className="min-w-px flex-[1_0_0] truncate">Home</span>
+              {/* Home: selected like the menu items (white box, Rival blue), the icon turns blue instead of a bar */}
+              <button onClick={() => navigate("chat")} aria-current={onHome ? "page" : undefined} className={cn(top, "relative", onHome && "z-10 text-[#2e4eca]")}>
+                {onHome && <span aria-hidden className={selectedBox} />}
+                <HomeIcon className="relative size-4 shrink-0" /> <span className="relative min-w-px flex-[1_0_0] truncate">Home</span>
               </button>
             </div>
 
@@ -95,7 +101,7 @@ export function AppSidebar() {
                     return active ? (
                       <button key={it.params?.conversationId ?? it.label} onClick={() => navigate(it.page, it.params)} aria-current="page" className="relative z-10 flex h-6 w-full cursor-pointer items-center gap-3.5 pr-1 pl-3 text-left">
                         {/* The white box: 6px above and below the text (30px tall), drawn past the row so nothing moves */}
-                        <span aria-hidden className="absolute inset-x-0 -top-[0.1875rem] -bottom-[0.1875rem] rounded-[0.375rem] border border-[#ecebe9] bg-white shadow-[0px_1px_1px_0px_rgba(119,131,152,0.2)]" />
+                        <span aria-hidden className={selectedBox} />
                         <span aria-hidden className="relative h-3.5 w-0 shrink-0"><SelectedBar /></span>
                         <span className="relative min-w-px flex-[1_0_0] truncate text-[0.875rem] leading-4 text-[#2e4eca]">{it.label}</span>
                       </button>
