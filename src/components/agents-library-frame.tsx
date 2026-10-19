@@ -29,7 +29,7 @@ function useAliveHover() {
     if (!raf.current) raf.current = requestAnimationFrame(tick)
   }
 
-  // The hint: coming near the box (within 10rem, from outside), the grid and glow peek in at the closest edge,
+  // The hint: coming near the box (within 18rem, from outside), the grid and glow peek in at the closest edge,
   // stronger the closer you get (--near 0 → 1), so it's clear something lives there before you're inside
   useEffect(() => {
     const box = el.current
@@ -40,8 +40,8 @@ function useAliveHover() {
       const cx = Math.min(Math.max(e.clientX, b.left), b.right), cy = Math.min(Math.max(e.clientY, b.top), b.bottom)
       const d = Math.hypot(e.clientX - cx, e.clientY - cy)
       if (d === 0) return // inside: the hover takes over
-      const range = parseFloat(getComputedStyle(document.documentElement).fontSize) * 10
-      const near = Math.max(0, 1 - d / range)
+      const range = parseFloat(getComputedStyle(document.documentElement).fontSize) * 18
+      const near = Math.pow(Math.max(0, 1 - d / range), 0.6) // eases off slowly, so it still shows from a distance
       box.style.setProperty("--near", near.toFixed(3))
       if (near > 0) { box.dataset.near = ""; follow(cx - b.left, cy - b.top, !wasNear) } else delete box.dataset.near
       wasNear = near > 0
