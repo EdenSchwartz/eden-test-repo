@@ -1,4 +1,4 @@
-import { Activity, Bot, Boxes, Brain, CalendarClock, Compass, Copy, Gauge, Hand, MessageSquare, Plug, Scale, Settings, ShieldAlert, Waypoints } from "lucide-react"
+import { Activity, AppWindow, Bot, Boxes, Brain, CalendarClock, Compass, Copy, Gauge, Hand, MessageSquare, Plug, Scale, Settings, ShieldAlert, Waypoints } from "lucide-react"
 import { ComingSoon } from "@/components/coming-soon"
 import AgentsPage from "@/pages/agents"
 import ChatPage from "@/pages/chat"
@@ -26,7 +26,8 @@ export const pages = [
   { id: "policies", title: "Policies", icon: Scale, component: soon("The rules your agents follow: what they do on their own, and what needs your approval first."), hideFab: true },
   { id: "usage", title: "Usage", icon: Gauge, component: soon("How much your agents run, how long they take, and what it costs."), hideFab: true },
   { id: "findings", title: "Findings", icon: ShieldAlert, component: FindingsPage },
-  { id: "entities", title: "Entities", icon: Waypoints, component: soon("The assets, identities, services and AI agents Rival knows about, and how they connect."), hideFab: true },
+  { id: "assets", title: "Assets", icon: Waypoints, component: soon("Every asset Rival knows about across your clouds: hosts, services, identities and AI agents, and how they connect."), hideFab: true },
+  { id: "applications", title: "Applications", icon: AppWindow, component: soon("Your applications and the code, services and cloud workloads behind each one."), hideFab: true },
   { id: "packages", title: "Packages", icon: Boxes, component: soon("The open-source packages across your code, and the risk each one carries."), hideFab: true },
   { id: "connectors", title: "Connectors", icon: Plug, component: soon("The tools Rival connects to: scanners, clouds, code, identity and ticketing."), hideFab: true },
   { id: "settings", title: "Settings", icon: Settings, component: soon("Your workspace, members and preferences."), hideFab: true },

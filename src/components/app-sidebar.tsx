@@ -1,6 +1,6 @@
 import { Sidebar } from "@/components/ui/sidebar"
 import {
-  AgentsIcon, AskRivalIcon, ChatsIcon, CollapseIcon, ConnectorsIcon, ExpandSimpleIcon, HomeIcon, PlatformIcon, PlusIcon,
+  AgentsIcon, ChatsIcon, CollapseIcon, ConnectorsIcon, ExpandSimpleIcon, HomeIcon, PlatformIcon, PlusIcon,
   RivalMark, RivalWordmark, SectionToggleIcon, SettingsIcon, WaitingIcon,
 } from "@/components/nav-icons"
 import { useState } from "react"
@@ -26,11 +26,10 @@ const groups: { id: string; label: string; icon: React.ComponentType<{ className
     id: "agents", label: "Agents", icon: AgentsIcon,
     items: [
       { label: "My Agents", page: "gallery" }, { label: "Agents Library", page: "explorer" }, { label: "Activity", page: "agents" },
-      { label: "Scheduled", page: "scheduled" }, { label: "Memory", page: "memory" }, { label: "Policies", page: "policies" },
-      { label: "Usage", page: "usage" },
+      { label: "Memory", page: "memory" }, { label: "Usage", page: "usage" },
     ],
   },
-  { id: "platform", label: "Platform", icon: PlatformIcon, items: [{ label: "Findings", page: "findings" }, { label: "Entities", page: "entities" }, { label: "Packages", page: "packages" }] },
+  { id: "platform", label: "Platform", icon: PlatformIcon, items: [{ label: "Findings", page: "findings" }, { label: "Assets", page: "assets" }, { label: "Applications", page: "applications" }, { label: "Packages", page: "packages" }] },
 ]
 
 const text = "text-[0.875rem] leading-4 text-[#6c6a68]"
@@ -63,9 +62,6 @@ export function AppSidebar() {
         <nav aria-label="Main" className="flex min-h-px w-full flex-[1_0_0] flex-col items-start gap-4 overflow-y-auto px-3 py-1.5">
           <div className="flex w-full flex-col items-start">
             <div className="flex w-full flex-col items-start gap-1.5">
-              <button onClick={() => navigate("chat")} className={cn(top, "drop-shadow-[0px_1px_0.5px_rgba(119,131,152,0.2)]")}>
-                <AskRivalIcon className="size-4 shrink-0" /> <span className="whitespace-nowrap">Ask Rival</span>
-              </button>
               <button onClick={() => navigate("chat")} className={top}>
                 <HomeIcon className="size-4 shrink-0" /> <span className="min-w-px flex-[1_0_0] truncate">Home</span>
               </button>
