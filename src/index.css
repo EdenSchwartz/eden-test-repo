@@ -575,3 +575,14 @@ html[data-vt="expand"]::view-transition-new(root) { animation: vt-fade-in 240ms 
   border-color: #ecebe9;
   background: repeating-linear-gradient(-45deg, rgb(154 152 147 / 0.1) 0 1px, transparent 1px 8px);
 }
+
+/* The header box's grid at rest (like Hex's hero): always there, very faint, fading out toward the box's
+   edges; the shimmering grid (.alive-grid) comes in on top of it around the pointer */
+.alive-base {
+  position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    linear-gradient(to right, rgb(18 18 18 / 0.04) 1px, transparent 1px) 0 0 / 1.25rem 1.25rem,
+    linear-gradient(to bottom, rgb(18 18 18 / 0.04) 1px, transparent 1px) 0 0 / 1.25rem 1.25rem;
+  -webkit-mask-image: radial-gradient(ellipse 70% 120% at 50% 30%, #000 0%, rgb(0 0 0 / 0.5) 50%, transparent 100%);
+  mask-image: radial-gradient(ellipse 70% 120% at 50% 30%, #000 0%, rgb(0 0 0 / 0.5) 50%, transparent 100%);
+}

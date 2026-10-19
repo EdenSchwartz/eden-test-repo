@@ -143,6 +143,7 @@ export function AgentsLibraryFrame() {
   return (
     <div className="flex flex-1 flex-col items-start bg-white whitespace-nowrap">
       <div {...alive} className="alive-box relative isolate flex w-full flex-col items-start justify-center gap-3 overflow-hidden border-b border-[#ecebe9] bg-white p-10">
+        <span aria-hidden className="alive-base" />
         <span aria-hidden className="alive-glow" />
         <ShimmerGrid />
         <p className="text-[1.25rem] leading-4 font-medium text-[#121212]">Agents Library</p>
@@ -153,7 +154,7 @@ export function AgentsLibraryFrame() {
       {/* The cards area: a drafting-sheet margin on both sides (fine diagonal hatching, a hairline rail), cards go between */}
       <div className="relative flex w-full flex-1">
         <span aria-hidden className="sheet-margin left-0 border-r" />
-        <div className="grid min-w-0 flex-1 grid-cols-[repeat(3,minmax(0,1fr))] content-start gap-4 mx-8 px-2 pt-8 pb-10">
+        <div className="mx-auto grid w-full max-w-[68rem] min-w-0 grid-cols-[repeat(3,minmax(0,1fr))] content-start gap-4 px-10 pt-8 pb-10">
           {library.map((a) => <AgentCard key={a.name} a={a} />)}
         </div>
         <span aria-hidden className="sheet-margin right-0 border-l" />
@@ -162,13 +163,15 @@ export function AgentsLibraryFrame() {
   )
 }
 
-// The squares on the header's line, at both ends (the frame's top pair sat on the top bar's line, gone on this page)
+// The four squares, on the top bar's line and the header's line, at both ends (as in the frame)
 export function FrameCorners() {
   const sq = "absolute size-3 border border-[#dddcda] bg-white"
   return (
     <>
-      <div aria-hidden className={sq} style={{ left: -1, top: "7.4375rem" }} />
-      <div aria-hidden className={sq} style={{ right: -1, top: "7.4375rem" }} />
+      <div aria-hidden className={sq} style={{ left: -1, top: "10.4375rem" }} />
+      <div aria-hidden className={sq} style={{ left: -1, top: "2.625rem" }} />
+      <div aria-hidden className={sq} style={{ right: 0, top: "2.625rem" }} />
+      <div aria-hidden className={sq} style={{ right: -1, top: "10.4375rem" }} />
     </>
   )
 }
