@@ -14,7 +14,8 @@ import { cn } from "@/lib/utils"
  * add forces, diffuse, advect, project so it stays incompressible) runs on a grid twice as fine as the drawn one.
  * Moving the pointer pushes the fluid and pours in dye; the dye swirls, curls and fades. Nothing is painted
  * as an area: only the grid lines take the dye's color, so the flow shows through the lines alone.
- * The color is silver like chrome: tight dark-steel to bright-silver bands that shift with the dye with a cool steel / faint champagne tint, and faster flow
+ * The color is silver like chrome: tight dark-steel to bright-silver bands that shift with the dye, with
+ * bluish silver-white highlights sweeping through with a cool steel / faint champagne tint, and faster flow
  * catches the light. Darker than the resting grid so it reads on white, at most 80% strength.
  * Coming near the box from outside (within 18rem) pours a little dye in at the closest edge, as a hint.
  * Runs only while there's dye to show; still (no fluid) if the user prefers reduced motion.
@@ -124,7 +125,12 @@ function FluidGrid() {
       const tint = Math.sin(2 * Math.PI * p * 0.5 + 1.3)
       const l = Math.min(1, band * 0.7 + sheen * 0.4)
       const base = [80 + l * 104, 90 + l * 106, 110 + l * 104]
-      return [base[0] + tint * 6, base[1] + tint * 2, base[2] - tint * 4].map((c) => Math.round(Math.min(222, Math.max(80, c))))
+      // now and then a bluish silver-white highlight sweeps through the bands
+      const hi = Math.pow(Math.max(0, Math.cos(2 * Math.PI * (p * 0.7 + 0.2))), 3) * 0.7
+      const blue = [170, 190, 232]
+      return [base[0] + tint * 6, base[1] + tint * 2, base[2] - tint * 4]
+        .map((c, i) => c + (blue[i] - c) * hi)
+        .map((c) => Math.round(Math.min(232, Math.max(80, c))))
     }
     const sample = (x: number, y: number) => {
       const i = Math.min(N, Math.max(1, Math.round(x / res + 0.5))), j = Math.min(M, Math.max(1, Math.round(y / res + 0.5)))
