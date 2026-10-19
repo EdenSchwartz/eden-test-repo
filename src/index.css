@@ -603,38 +603,31 @@ html[data-vt="expand"]::view-transition-new(root) { animation: vt-fade-in 240ms 
 /* Agent cards: a subtle 3D tilt toward the pointer (components/agents-library-frame.tsx sets the variables) */
 .tilt-card {
   --rx: 0deg; --ry: 0deg; --sx: 0px; --sy: 8px; --bx: 50%; --by: 50%;
-  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));
+  transform: perspective(700px) rotateX(var(--rx)) rotateY(var(--ry));
   box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.04);
   transition: transform 450ms cubic-bezier(.2,.8,.2,1), box-shadow 450ms ease, border-color 200ms ease;
   will-change: transform;
 }
 .tilt-card:hover {
-  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-2px) scale(1.012);
-  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.04), var(--sx) var(--sy) 24px -10px rgba(18, 18, 18, 0.16);
+  transform: perspective(700px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-3px) scale(1.02);
+  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.04), var(--sx) var(--sy) 30px -12px rgba(18, 18, 18, 0.2);
   transition: transform 120ms ease-out, box-shadow 200ms ease, border-color 200ms ease;
 }
 /* the sheen, in the agent's own colour (--tint, its colour square) */
 .tilt-light {
   position: absolute; inset: 0; pointer-events: none; opacity: 0;
-  /* Light from a fixed source (top left) lying across the card as a soft diagonal sheen: shiny more than coloured.
-     Oversized and moved by --bx / --by, so as the card tilts the sheen glides over the surface instead of
-     following the pointer. Long, eased edges: no spot, no visible boundary */
-  background:
-    /* the shine: a bright, clean streak with a whisper of cool shade either side (contrast, not colour) */
-    linear-gradient(118deg,
-      transparent 30%,
-      rgb(60 70 90 / 0.035) 40%,
-      rgb(255 255 255 / 0.9) 46.5%,
-      rgb(255 255 255 / 0.9) 48.5%,
-      rgb(60 70 90 / 0.03) 55%,
-      transparent 65%) var(--bx, 50%) var(--by, 50%) / 260% 260% no-repeat,
-    /* and only a trace of the agent's colour around it */
-    linear-gradient(118deg,
-      transparent 34%,
-      color-mix(in oklab, var(--tint, #2e4eca) 1.5%, transparent) 47%,
-      transparent 60%) var(--bx, 50%) var(--by, 50%) / 260% 260% no-repeat;
-  transition: opacity 600ms ease, background-position 700ms cubic-bezier(.2,.8,.2,1);
+  /* the paper: only the faintest shading on the side turning away from the light (top left) */
+  background: radial-gradient(140% 140% at var(--bx, 50%) var(--by, 50%), transparent 45%, rgb(30 30 40 / 0.035) 100%);
+  transition: opacity 500ms ease;
 }
+/* The agent's colour square is what catches the light: a soft highlight inside it that moves as the card turns,
+   like a glossy print. Flat (no highlight) when the card is at rest */
+.tilt-card .tile-gloss { position: relative; overflow: hidden; }
+.tilt-card .tile-gloss::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 500ms ease;
+  background: radial-gradient(circle at var(--bx, 50%) var(--by, 50%), rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.12) 45%, rgb(0 0 0 / 0.06) 100%);
+}
+.tilt-card:hover .tile-gloss::after { opacity: 1; }
 .tilt-card:hover .tilt-light { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .tilt-card, .tilt-card:hover { transform: none; transition: none; } }
 .tilt-card > :not(.tilt-light) { position: relative; } /* content above the light */

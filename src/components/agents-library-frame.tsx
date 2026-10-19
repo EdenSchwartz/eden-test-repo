@@ -403,7 +403,7 @@ const colorOf = (a: LibraryAgent) => colors.get(a) ?? flatColors[0]
 
 function FlatTile({ color }: { color: string }) {
   return (
-    <span aria-hidden className="grid size-5 shrink-0 place-items-center rounded-[0.25rem]" style={{ background: color }}>
+    <span aria-hidden className="tile-gloss grid size-5 shrink-0 place-items-center rounded-[0.25rem]" style={{ background: color }}>
       <span className="size-[0.4375rem] rounded-[0.09375rem] bg-white" />
     </span>
   )
@@ -497,18 +497,19 @@ function ToolMark({ tool }: { tool: Tool }) {
 }
 
 /*
- * The cards' hover: a subtle 3D tilt toward the pointer (4° at most), a hair of lift, a shadow that leans away
- * from the tilt, and a soft diagonal sheen of light (from a fixed source, top left) that slides across the
- * surface as it tilts, in the agent's colour. Eases back flat on leave. Styles: .tilt-card in index.css.
+ * The cards' hover, after the reference video: the card turns toward the pointer in real perspective (6° at most),
+ * lifts a little, and its shadow grows and leans away. Light comes from a fixed source (top left): the agent's
+ * colour square catches it as a soft highlight that moves as the card turns, and the paper only shades faintly on
+ * the side turning away. Eases back flat on leave. Styles: .tilt-card in index.css.
  */
 function useTilt() {
   const still = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
   const set = (el: HTMLElement, x: number, y: number) => {
-    el.style.setProperty("--rx", `${(-y * 4).toFixed(2)}deg`)
-    el.style.setProperty("--ry", `${(x * 4).toFixed(2)}deg`)
-    // where the sheen sits: it slides against the tilt, like fixed light catching a turning surface
-    el.style.setProperty("--bx", `${(50 - x * 22).toFixed(1)}%`)
-    el.style.setProperty("--by", `${(50 - y * 22).toFixed(1)}%`)
+    el.style.setProperty("--rx", `${(-y * 6).toFixed(2)}deg`)
+    el.style.setProperty("--ry", `${(x * 6).toFixed(2)}deg`)
+    // where the light falls (from the top left): it moves against the tilt, like a fixed source on a turning surface
+    el.style.setProperty("--bx", `${(35 - x * 30).toFixed(1)}%`)
+    el.style.setProperty("--by", `${(30 - y * 30).toFixed(1)}%`)
     el.style.setProperty("--sx", `${(-x * 6).toFixed(1)}px`)
     el.style.setProperty("--sy", `${(8 - y * 4).toFixed(1)}px`)
   }
