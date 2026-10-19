@@ -550,3 +550,21 @@ html[data-vt="expand"]::view-transition-new(root) { animation: vt-fade-in 240ms 
 
 /* Alternative looks (the Rival | Hex switch in the header) */
 @import "./looks/hex.css";
+
+/* The Agents Library header box coming alive on hover (components/agents-library-frame.tsx sets --ax / --ay).
+   A faint 20px grid revealed around the pointer, and a soft Rival-blue glow under it; both fade in and out. */
+.alive-grid, .alive-glow { position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity 600ms ease; }
+.alive-grid {
+  background:
+    linear-gradient(to right, rgb(18 18 18 / 0.045) 1px, transparent 1px) 0 0 / 1.25rem 1.25rem,
+    linear-gradient(to bottom, rgb(18 18 18 / 0.045) 1px, transparent 1px) 0 0 / 1.25rem 1.25rem;
+  -webkit-mask-image: radial-gradient(11rem circle at var(--ax, 50%) var(--ay, 50%), #000 0%, rgb(0 0 0 / 0.35) 45%, transparent 100%);
+  mask-image: radial-gradient(11rem circle at var(--ax, 50%) var(--ay, 50%), #000 0%, rgb(0 0 0 / 0.35) 45%, transparent 100%);
+}
+.alive-glow {
+  background:
+    radial-gradient(16rem circle at var(--ax, 50%) var(--ay, 50%), rgb(3 80 208 / 0.055), transparent 70%),
+    radial-gradient(28rem circle at calc(var(--ax, 50%) + 6rem) calc(var(--ay, 50%) - 2rem), rgb(1 112 253 / 0.025), transparent 70%);
+}
+.alive-box:hover .alive-grid, .alive-box:hover .alive-glow { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .alive-grid, .alive-glow { transition: none; } }
