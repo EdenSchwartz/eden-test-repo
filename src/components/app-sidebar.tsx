@@ -56,7 +56,7 @@ export function AppSidebar() {
           </button>
         </div>
 
-        <nav aria-label="Main" className="flex min-h-px w-full flex-[1_0_0] flex-col items-start gap-4 px-3 py-1.5">
+        <nav aria-label="Main" className="flex min-h-px w-full flex-[1_0_0] flex-col items-start gap-4 overflow-y-auto px-3 py-1.5">
           <div className="flex w-full flex-col items-start gap-6">
             <div className="flex w-full flex-col items-start gap-1.5">
               <button onClick={() => navigate("chat")} className={cn(top, "drop-shadow-[0px_1px_0.5px_rgba(119,131,152,0.2)]")}>
