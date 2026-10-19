@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils"
  * Moving the pointer pushes the fluid and pours in dye; the dye swirls, curls and fades. Nothing is painted
  * as an area: only the grid lines take the dye's color, so the flow shows through the lines alone.
  * The color is silver like chrome: tight dark-steel to bright-silver bands that shift with the dye, with
- * bluish silver-white highlights sweeping through with a cool steel / faint champagne tint, and faster flow
+ * bluish silver-white highlights sweeping through and, where the flow is fast, short white glints (the shine) with a cool steel / faint champagne tint, and faster flow
  * catches the light. Darker than the resting grid so it reads on white, at most 80% strength.
  * Coming near the box from outside (within 18rem) pours a little dye in at the closest edge, as a hint.
  * Runs only while there's dye to show; still (no fluid) if the user prefers reduced motion.
@@ -138,14 +138,17 @@ function FluidGrid() {
     }
     const seg = (x: number, y: number, horiz: boolean, t: number) => {
       const k = sample(horiz ? x + res / 2 : x, horiz ? y : y + res / 2)
-      const a = Math.min(1, d[k] * 1.6)
+      const a = Math.min(1, d[k] * 1.6) * 0.72 // the color, toned down (the movement is unchanged)
       if (a < 0.02) return 0
       const speed = Math.hypot(u[k], v[k])
-      const [r, g, b] = metal(x / w * 3.2 + y / h * 0.9 + d[k] * 0.6 + t * 0.00005, Math.min(1, speed * 0.25))
+      let [r, g, b] = metal(x / w * 3.2 + y / h * 0.9 + d[k] * 0.6 + t * 0.00005, Math.min(1, speed * 0.25))
+      // The shine: now and then a short glint, where the flow moves fast, the line flashes to near white
+      const glint = Math.pow(Math.max(0, Math.sin(t * 0.0035 + x * 0.071 + y * 0.113)), 14) * Math.min(1, speed * 0.5)
+      r += (248 - r) * glint; g += (250 - g) * glint; b += (255 - b) * glint
       // a soft 3px sheen around the line (the metal catching light), then the line itself
-      ctx.fillStyle = `rgba(${r},${g},${b},${a * 0.2})`
+      ctx.fillStyle = `rgba(${r | 0},${g | 0},${b | 0},${a * 0.16})`
       if (horiz) ctx.fillRect(x, y - 1, res, 3); else ctx.fillRect(x - 1, y, 3, res)
-      ctx.fillStyle = `rgba(${r},${g},${b},${a})`
+      ctx.fillStyle = `rgba(${r | 0},${g | 0},${b | 0},${a})`
       if (horiz) ctx.fillRect(x, y, res, 1); else ctx.fillRect(x, y, 1, res)
       return a
     }
