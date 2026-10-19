@@ -56,10 +56,13 @@ export function AppSidebar() {
   // The whole sidebar folded into a rail of icons (remembered)
   const [slim, setSlim] = useState(() => { try { return localStorage.getItem("rival.nav.slim") === "1" } catch { return false } })
   const setSlimSaved = (v: boolean) => { setSlim(v); try { localStorage.setItem("rival.nav.slim", v ? "1" : "0") } catch { /* ok */ } }
-  if (slim) return <SlimSidebar groups={all} onHome={onHome} onExpand={() => setSlimSaved(false)} />
 
+  // Opening and closing glide: the frame's width moves between 196px and 48px (and the page beside it with it);
+  // opening reveals the full menu as it widens, closing keeps the rail's icons still while the edge slides in
   return (
-    <Sidebar collapsible="none" className="sticky top-0 h-svh w-[12.25rem] shrink-0 border-r border-[#ecebe9] bg-[#fcfcfa] font-[Geist,ui-sans-serif,system-ui,sans-serif]">
+    <div className="sticky top-0 h-svh shrink-0 overflow-hidden border-r border-[#ecebe9] bg-[#fcfcfa] transition-[width] duration-300 ease-[cubic-bezier(.3,.7,.15,1)] motion-reduce:transition-none" style={{ width: slim ? "3rem" : "12.25rem" }}>
+    {slim ? <SlimSidebar groups={all} onHome={onHome} onExpand={() => setSlimSaved(false)} /> : (
+    <Sidebar collapsible="none" className="h-full w-[12.25rem] shrink-0 bg-[#fcfcfa] font-[Geist,ui-sans-serif,system-ui,sans-serif]">
       <div className="flex h-full flex-col overflow-clip">
         <div className="flex h-12 w-full shrink-0 items-center justify-between pr-4 pl-3.5">
           <button onClick={() => navigate("explorer")} aria-label="Rival" className="flex h-6 cursor-pointer items-center justify-center rounded-[0.25rem] p-1.5 text-[#0350d0]">
@@ -146,6 +149,8 @@ export function AppSidebar() {
         </div>
       </div>
     </Sidebar>
+    )}
+    </div>
   )
 }
 
@@ -212,7 +217,7 @@ function SlimSidebar({ groups, onHome, onExpand }: { groups: Group[]; onHome: bo
   const current = hover && (groups.find((g) => g.id === hover.id) ?? (singles[hover.id] && { id: hover.id, label: singles[hover.id].label, items: [] as Item[], plus: false }))
 
   return (
-    <Sidebar collapsible="none" className="sticky top-0 h-svh w-12 shrink-0 border-r border-[#ecebe9] bg-[#fcfcfa] font-[Geist,ui-sans-serif,system-ui,sans-serif]">
+    <Sidebar collapsible="none" className="h-full w-12 shrink-0 bg-[#fcfcfa] font-[Geist,ui-sans-serif,system-ui,sans-serif]">
       <div className="flex h-full flex-col items-center">
         <div className="flex h-12 w-full shrink-0 items-center justify-center">
           {/* The Rival R; hovering it swaps in the expand button */}
