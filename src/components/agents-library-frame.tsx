@@ -402,8 +402,8 @@ const colorOf = (a: LibraryAgent) => colors.get(a) ?? flatColors[0]
 
 function FlatTile({ color }: { color: string }) {
   return (
-    <span aria-hidden className="grid size-12 shrink-0 place-items-center rounded-[0.375rem]" style={{ background: color }}>
-      <span className="size-5 rounded-full bg-white" />
+    <span aria-hidden className="grid size-4 shrink-0 place-items-center rounded-[0.25rem]" style={{ background: color }}>
+      <span className="size-[0.4375rem] rounded-full bg-white" />
     </span>
   )
 }
@@ -463,13 +463,24 @@ function AgentCard({ a, selected, onSelect }: { a: LibraryAgent; selected: boole
       aria-pressed={selected}
       className="group flex cursor-pointer flex-col items-stretch rounded-[0.25rem] border border-[#f0f0f0] bg-white aria-pressed:border-[#2e4eca]/40 p-2 text-left drop-shadow-[0px_1px_1px_rgba(0,0,0,0.04)] transition-[border-color,translate] duration-200 hover:-translate-y-px hover:border-[#e2e1df]"
     >
-      <span className="mb-3 flex w-full items-start gap-2">
-        {TILE_STYLE === "flat" ? <FlatTile color={colorOf(a)} /> : <AgentTile seed={a.name} hue={hueOf(a)} />}
-        <span className="flex min-w-0 flex-1 flex-col items-start gap-2.5 pt-1">
-          <span className="w-full truncate text-[1rem] leading-4 font-medium text-[#121212]">{a.name}</span>
+      {TILE_STYLE === "flat" ? (
+        // The agent's colour as a small square beside its name (the title's height), the description below
+        <span className="mb-3 flex w-full flex-col items-start gap-2.5 px-1 pt-1.5">
+          <span className="flex w-full min-w-0 items-center gap-2">
+            <FlatTile color={colorOf(a)} />
+            <span className="min-w-0 flex-1 truncate text-[1rem] leading-4 font-medium text-[#121212]">{a.name}</span>
+          </span>
           <span className="line-clamp-2 w-full text-[0.875rem] leading-4 text-pretty text-[#6c6a68]">{a.tagline}</span>
         </span>
-      </span>
+      ) : (
+        <span className="mb-3 flex w-full items-start gap-2">
+          <AgentTile seed={a.name} hue={hueOf(a)} />
+          <span className="flex min-w-0 flex-1 flex-col items-start gap-2.5 pt-1">
+            <span className="w-full truncate text-[1rem] leading-4 font-medium text-[#121212]">{a.name}</span>
+            <span className="line-clamp-2 w-full text-[0.875rem] leading-4 text-pretty text-[#6c6a68]">{a.tagline}</span>
+          </span>
+        </span>
+      )}
 
       <span className="mt-auto flex flex-col gap-2.5 border-t border-[#f0f0f0] px-1 pt-2.5 pb-1 text-[0.75rem] leading-4 whitespace-nowrap text-[#6c6a68]">
         <span className="flex h-4 min-w-0 items-center gap-3 overflow-hidden">
