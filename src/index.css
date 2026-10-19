@@ -568,13 +568,13 @@ html[data-vt="expand"]::view-transition-new(root) { animation: vt-fade-in 240ms 
     linear-gradient(to right, rgb(18 18 18 / 0.045) 1px, transparent 1px) 0 0 / 1.25rem 1.25rem,
     linear-gradient(to bottom, rgb(18 18 18 / 0.045) 1px, transparent 1px) 0 0 / 1.25rem 1.25rem;
   /* One long, eased falloff (no stacked masks, so no band where it starts): strongest a little below the middle,
-     dissolving gradually toward the top line, the sides and the bottom */
-  -webkit-mask-image: radial-gradient(ellipse 62% 105% at 50% 62%,
-    #000 0%, rgb(0 0 0 / 0.86) 18%, rgb(0 0 0 / 0.66) 34%, rgb(0 0 0 / 0.45) 50%, rgb(0 0 0 / 0.27) 64%,
-    rgb(0 0 0 / 0.13) 77%, rgb(0 0 0 / 0.05) 88%, transparent 100%);
-  mask-image: radial-gradient(ellipse 62% 105% at 50% 62%,
-    #000 0%, rgb(0 0 0 / 0.86) 18%, rgb(0 0 0 / 0.66) 34%, rgb(0 0 0 / 0.45) 50%, rgb(0 0 0 / 0.27) 64%,
-    rgb(0 0 0 / 0.13) 77%, rgb(0 0 0 / 0.05) 88%, transparent 100%);
+     holding until near the edges, then dissolving gradually into the top line, the sides and the bottom */
+  -webkit-mask-image: radial-gradient(ellipse 78% 125% at 50% 60%,
+    #000 0%, rgb(0 0 0 / 0.92) 26%, rgb(0 0 0 / 0.76) 44%, rgb(0 0 0 / 0.55) 60%, rgb(0 0 0 / 0.34) 73%,
+    rgb(0 0 0 / 0.17) 84%, rgb(0 0 0 / 0.06) 93%, transparent 100%);
+  mask-image: radial-gradient(ellipse 78% 125% at 50% 60%,
+    #000 0%, rgb(0 0 0 / 0.92) 26%, rgb(0 0 0 / 0.76) 44%, rgb(0 0 0 / 0.55) 60%, rgb(0 0 0 / 0.34) 73%,
+    rgb(0 0 0 / 0.17) 84%, rgb(0 0 0 / 0.06) 93%, transparent 100%);
 }
 /* The section's background: a real, fine film grain across the whole surface, kept very low in contrast
    (it darkens the white by a few percent at most), a little denser toward the edges */
