@@ -10,131 +10,157 @@ import { withTransition } from "@/lib/view-transition"
 import { cn } from "@/lib/utils"
 
 /*
- * Hovering the header box: a faint, shimmering grid (ShimmerGrid) shows up around the pointer (like the Hex look's New chat, but lighter)
- * with a soft Rival-blue glow under it. Both trail the pointer with a little lag (eased each frame), and fade
- * in and out, so the box feels alive rather than mechanical. Styles: .alive-* in index.css.
+ * The header box's grid lit by a fluid. A small Navier-Stokes simulation (Jos Stam's "stable fluids":
+ * add forces, diffuse, advect, project so it stays incompressible) runs on a grid twice as fine as the drawn one.
+ * Moving the pointer pushes the fluid and pours in dye; the dye swirls, curls and fades. Nothing is painted
+ * as an area: only the grid lines take the dye's color, so the flow shows through the lines alone.
+ * The color is holographic: an iridescent cosine palette whose hue shifts with place, flow speed and time.
+ * Coming near the box from outside (within 18rem) pours a little dye in at the closest edge, as a hint.
+ * Runs only while there's dye to show; still (no fluid) if the user prefers reduced motion.
  */
-function useAliveHover() {
-  const el = useRef<HTMLDivElement>(null)
-  const target = useRef({ x: 0, y: 0 })
-  const pos = useRef({ x: 0, y: 0 })
-  const raf = useRef(0)
-
-  const set = (x: number, y: number) => {
-    el.current?.style.setProperty("--ax", `${x}px`)
-    el.current?.style.setProperty("--ay", `${y}px`)
-  }
-  const tick = () => {
-    const p = pos.current, t = target.current
-    p.x += (t.x - p.x) * 0.12
-    p.y += (t.y - p.y) * 0.12
-    set(p.x, p.y)
-    raf.current = Math.abs(t.x - p.x) + Math.abs(t.y - p.y) > 0.3 ? requestAnimationFrame(tick) : 0
-  }
-  const still = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  const follow = (x: number, y: number, jump = false) => {
-    target.current = { x, y }
-    if (jump || still()) { pos.current = { x, y }; set(x, y); return }
-    if (!raf.current) raf.current = requestAnimationFrame(tick)
-  }
-
-  // The hint: coming near the box (within 18rem, from outside), the grid and glow peek in at the closest edge,
-  // stronger the closer you get (--near 0 → 1), so it's clear something lives there before you're inside
-  useEffect(() => {
-    const box = el.current
-    if (!box) return
-    let wasNear = false
-    const move = (e: PointerEvent) => {
-      const b = box.getBoundingClientRect()
-      const cx = Math.min(Math.max(e.clientX, b.left), b.right), cy = Math.min(Math.max(e.clientY, b.top), b.bottom)
-      const d = Math.hypot(e.clientX - cx, e.clientY - cy)
-      if (d === 0) return // inside: the hover takes over
-      const range = parseFloat(getComputedStyle(document.documentElement).fontSize) * 18
-      const near = Math.pow(Math.max(0, 1 - d / range), 0.6) // eases off slowly, so it still shows from a distance
-      box.style.setProperty("--near", near.toFixed(3))
-      if (near > 0) { box.dataset.near = ""; follow(cx - b.left, cy - b.top, !wasNear) } else delete box.dataset.near
-      wasNear = near > 0
-    }
-    window.addEventListener("pointermove", move, { passive: true })
-    return () => { window.removeEventListener("pointermove", move); cancelAnimationFrame(raf.current) }
-  }, [])
-
-  const point = (e: React.PointerEvent<HTMLDivElement>) => {
-    const b = e.currentTarget.getBoundingClientRect()
-    return { x: e.clientX - b.left, y: e.clientY - b.top }
-  }
-  return {
-    ref: el,
-    onPointerEnter: (e: React.PointerEvent<HTMLDivElement>) => {
-      const p = point(e); follow(p.x, p.y, !e.currentTarget.hasAttribute("data-near"))
-    },
-    onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => { const p = point(e); follow(p.x, p.y) },
-  }
-}
-
-/*
- * The grid, drawn on a canvas so every short line (one cell edge, 1.25rem long) can breathe on its own:
- * each fades in and out on its own slow rhythm (2.5 to 6s) and phase, so the grid shimmers instead of
- * sitting still, like twinkling dots but with lines. The .alive-grid mask in index.css keeps it to the area
- * around the pointer. Only animates while the box is hovered (and through the fade-out); still if the user
- * prefers reduced motion.
- */
-function ShimmerGrid() {
+function FluidGrid() {
   const ref = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
     const canvas = ref.current, box = canvas?.parentElement
     if (!canvas || !box) return
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
     const ctx = canvas.getContext("2d")!
-    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    let raf = 0, stopAt = 0, w = 0, h = 0, cell = 20
+    let w = 0, h = 0, cell = 20, res = 10, N = 0, M = 0
+    let u: Float32Array, v: Float32Array, u0: Float32Array, v0: Float32Array, d: Float32Array, d0: Float32Array
+    const IX = (i: number, j: number) => i + (N + 2) * j
 
-    // A fixed pseudo-random value per line, so each keeps its own rhythm
-    const rand = (i: number, j: number, k: number) => {
-      const x = Math.sin(i * 127.1 + j * 311.7 + k * 74.7) * 43758.5453
-      return x - Math.floor(x)
-    }
     const size = () => {
       const dpr = window.devicePixelRatio || 1
       w = box.clientWidth; h = box.clientHeight
       cell = parseFloat(getComputedStyle(document.documentElement).fontSize) * 1.25
+      res = cell / 2
+      N = Math.ceil(w / res); M = Math.ceil(h / res)
+      const n = (N + 2) * (M + 2)
+      u = new Float32Array(n); v = new Float32Array(n); u0 = new Float32Array(n); v0 = new Float32Array(n)
+      d = new Float32Array(n); d0 = new Float32Array(n)
       canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr)
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     }
-    const alpha = (t: number, i: number, j: number, k: number) => {
-      if (still) return 0.07
-      const speed = (2 * Math.PI) / (2500 + rand(i, j, k) * 3500)
-      const wave = Math.sin(t * speed + rand(j, i, k + 3) * 2 * Math.PI) * 0.5 + 0.5
-      return 0.03 + 0.1 * wave * wave // mostly faint, now and then a line glows up
+
+    // ---- stable fluids ----
+    const bound = (b: number, x: Float32Array) => {
+      for (let i = 1; i <= N; i++) { x[IX(i, 0)] = b === 2 ? -x[IX(i, 1)] : x[IX(i, 1)]; x[IX(i, M + 1)] = b === 2 ? -x[IX(i, M)] : x[IX(i, M)] }
+      for (let j = 1; j <= M; j++) { x[IX(0, j)] = b === 1 ? -x[IX(1, j)] : x[IX(1, j)]; x[IX(N + 1, j)] = b === 1 ? -x[IX(N, j)] : x[IX(N, j)] }
+    }
+    const lin = (b: number, x: Float32Array, x0: Float32Array, a: number, c: number) => {
+      for (let k = 0; k < 6; k++) {
+        for (let j = 1; j <= M; j++) for (let i = 1; i <= N; i++)
+          x[IX(i, j)] = (x0[IX(i, j)] + a * (x[IX(i - 1, j)] + x[IX(i + 1, j)] + x[IX(i, j - 1)] + x[IX(i, j + 1)])) / c
+        bound(b, x)
+      }
+    }
+    const diffuse = (b: number, x: Float32Array, x0: Float32Array, k: number, dt: number) => { const a = dt * k * N * M; lin(b, x, x0, a, 1 + 4 * a) }
+    const advect = (b: number, dd: Float32Array, d0_: Float32Array, uu: Float32Array, vv: Float32Array, dt: number) => {
+      for (let j = 1; j <= M; j++) for (let i = 1; i <= N; i++) {
+        let x = i - dt * uu[IX(i, j)], y = j - dt * vv[IX(i, j)]
+        x = Math.min(Math.max(x, 0.5), N + 0.5); y = Math.min(Math.max(y, 0.5), M + 0.5)
+        const i0 = Math.floor(x), j0 = Math.floor(y), s1 = x - i0, t1 = y - j0
+        dd[IX(i, j)] = (1 - s1) * ((1 - t1) * d0_[IX(i0, j0)] + t1 * d0_[IX(i0, j0 + 1)]) + s1 * ((1 - t1) * d0_[IX(i0 + 1, j0)] + t1 * d0_[IX(i0 + 1, j0 + 1)])
+      }
+      bound(b, dd)
+    }
+    const project = (uu: Float32Array, vv: Float32Array, p: Float32Array, div: Float32Array) => {
+      for (let j = 1; j <= M; j++) for (let i = 1; i <= N; i++) {
+        div[IX(i, j)] = -0.5 * (uu[IX(i + 1, j)] - uu[IX(i - 1, j)] + vv[IX(i, j + 1)] - vv[IX(i, j - 1)])
+        p[IX(i, j)] = 0
+      }
+      bound(0, div); bound(0, p); lin(0, p, div, 1, 4)
+      for (let j = 1; j <= M; j++) for (let i = 1; i <= N; i++) {
+        uu[IX(i, j)] -= 0.5 * (p[IX(i + 1, j)] - p[IX(i - 1, j)])
+        vv[IX(i, j)] -= 0.5 * (p[IX(i, j + 1)] - p[IX(i, j - 1)])
+      }
+      bound(1, uu); bound(2, vv)
+    }
+    const step = (dt: number) => {
+      // velocity
+      u0.set(u); v0.set(v); diffuse(1, u, u0, 0.00002, dt); diffuse(2, v, v0, 0.00002, dt); project(u, v, u0, v0)
+      u0.set(u); v0.set(v); advect(1, u, u0, u0, v0, dt); advect(2, v, v0, u0, v0, dt); project(u, v, u0, v0)
+      // dye
+      d0.set(d); advect(0, d, d0, u, v, dt)
+      for (let k = 0; k < d.length; k++) { d[k] *= 0.975; u[k] *= 0.992; v[k] *= 0.992 }
+    }
+
+    // ---- pointer: push the fluid and pour dye in a soft disc ----
+    let last: { x: number; y: number } | null = null
+    const splat = (x: number, y: number, fx: number, fy: number, amount: number) => {
+      const ci = x / res + 1, cj = y / res + 1, r = 2.6
+      for (let j = Math.max(1, Math.floor(cj - r)); j <= Math.min(M, Math.ceil(cj + r)); j++)
+        for (let i = Math.max(1, Math.floor(ci - r)); i <= Math.min(N, Math.ceil(ci + r)); i++) {
+          const f = Math.exp(-((i - ci) ** 2 + (j - cj) ** 2) / (r * r * 0.5))
+          u[IX(i, j)] += fx * f; v[IX(i, j)] += fy * f; d[IX(i, j)] = Math.min(1.6, d[IX(i, j)] + amount * f)
+        }
+    }
+    const move = (e: PointerEvent) => {
+      const b = box.getBoundingClientRect()
+      const x = e.clientX - b.left, y = e.clientY - b.top
+      const inside = x >= 0 && y >= 0 && x <= b.width && y <= b.height
+      if (inside) {
+        const dx = last ? x - last.x : 0, dy = last ? y - last.y : 0
+        splat(x, y, dx * 0.6, dy * 0.6, 0.35 + Math.min(0.6, Math.hypot(dx, dy) * 0.02))
+        last = { x, y }
+      } else {
+        last = null
+        // The hint: a little dye at the closest edge, more the nearer you are, drifting inward
+        const cx = Math.min(Math.max(x, 0), b.width), cy = Math.min(Math.max(y, 0), b.height)
+        const range = parseFloat(getComputedStyle(document.documentElement).fontSize) * 18
+        const near = Math.max(0, 1 - Math.hypot(x - cx, y - cy) / range)
+        if (near <= 0) return
+        splat(cx, cy, (cx - x) * 0.01 * near, (cy - y) * 0.01 * near, 0.12 * near ** 1.5)
+      }
+      start()
+    }
+
+    // ---- draw: only the grid lines, colored by the dye under them ----
+    const holo = (p: number) => {
+      // iridescent cosine palette (pink, violet, cyan, mint, gold), kept bright so it reads on white
+      const t = 2 * Math.PI * p
+      return [0.62 + 0.38 * Math.cos(t), 0.6 + 0.38 * Math.cos(t + 2.1), 0.72 + 0.28 * Math.cos(t + 4.2)].map((c) => Math.round(Math.min(1, c) * 235))
+    }
+    const sample = (x: number, y: number) => {
+      const i = Math.min(N, Math.max(1, Math.round(x / res + 0.5))), j = Math.min(M, Math.max(1, Math.round(y / res + 0.5)))
+      return IX(i, j)
+    }
+    const seg = (x: number, y: number, horiz: boolean, t: number) => {
+      const k = sample(horiz ? x + res / 2 : x, horiz ? y : y + res / 2)
+      const a = Math.min(1, d[k] * 1.4)
+      if (a < 0.02) return 0
+      const speed = Math.hypot(u[k], v[k])
+      const [r, g, b] = holo(x / w * 0.9 + y / h * 0.35 + speed * 0.08 + t * 0.00006)
+      ctx.fillStyle = `rgba(${r},${g},${b},${a * 0.95})`
+      if (horiz) ctx.fillRect(x, y, res, 1); else ctx.fillRect(x, y, 1, res)
+      return a
     }
     const draw = (t: number) => {
       ctx.clearRect(0, 0, w, h)
-      for (let i = 0; i * cell <= w; i++) {
-        for (let j = 0; j * cell <= h; j++) {
-          ctx.fillStyle = `rgba(18,18,18,${alpha(t, i, j, 0)})`
-          ctx.fillRect(i * cell, j * cell, cell, 1) // the cell's top edge
-          ctx.fillStyle = `rgba(18,18,18,${alpha(t, i, j, 1)})`
-          ctx.fillRect(i * cell, j * cell, 1, cell) // its left edge
-        }
-      }
+      let lit = 0
+      for (let y = 0; y <= h; y += cell) for (let x = 0; x < w; x += res) lit += seg(x, y, true, t)
+      for (let x = 0; x <= w; x += cell) for (let y = 0; y < h; y += res) lit += seg(x, y, false, t)
+      return lit
     }
+
+    let raf = 0, prev = 0
     const loop = (t: number) => {
-      draw(t)
-      raf = !still && (box.matches(":hover") || box.hasAttribute("data-near") || t < stopAt) ? requestAnimationFrame(loop) : 0
+      const dt = Math.min(0.033, (t - (prev || t)) / 1000) * 6
+      prev = t
+      step(dt || 0.1)
+      const lit = draw(t)
+      raf = lit > 0.05 || box.matches(":hover") ? requestAnimationFrame(loop) : 0
+      if (!raf) { prev = 0; ctx.clearRect(0, 0, w, h) }
     }
     const start = () => { if (!raf) raf = requestAnimationFrame(loop) }
-    const leave = () => { stopAt = performance.now() + 700 } // keep moving through the 600ms fade-out
 
-    size(); draw(0)
-    const ro = new ResizeObserver(() => { size(); draw(performance.now()) })
+    size()
+    const ro = new ResizeObserver(size)
     ro.observe(box)
-    // Start when the pointer comes in or near (data-near, set by useAliveHover)
-    const mo = new MutationObserver(() => { if (box.hasAttribute("data-near")) start(); else leave() })
-    mo.observe(box, { attributes: true, attributeFilter: ["data-near"] })
-    box.addEventListener("pointerenter", start)
-    box.addEventListener("pointerleave", leave)
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); mo.disconnect(); box.removeEventListener("pointerenter", start); box.removeEventListener("pointerleave", leave) }
+    window.addEventListener("pointermove", move, { passive: true })
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); window.removeEventListener("pointermove", move) }
   }, [])
-  return <canvas ref={ref} aria-hidden className="alive-grid size-full" />
+  return <canvas ref={ref} aria-hidden className="pointer-events-none absolute inset-0 -z-1 size-full" />
 }
 
 /*
@@ -144,7 +170,6 @@ function ShimmerGrid() {
  * Positions are relative to the area right of the sidebar, top bar included (the squares sit on the two lines).
  */
 export function AgentsLibraryFrame() {
-  const alive = useAliveHover()
   const { navigate } = useNav()
   // The picked card's side panel (the Hex version's docked panel): an agent's, or a sub agent's. Esc or ✕ closes it
   const [picked, setPicked] = useState<{ agent?: string; kind?: AgentKind; name: string } | null>(null)
@@ -163,10 +188,9 @@ export function AgentsLibraryFrame() {
   return (
     // With a panel open, the page makes room for it (the panel takes the whole right side, under the top bar)
     <div className={cn("flex flex-1 flex-col items-start bg-white whitespace-nowrap", picked && "mr-[35rem]")}>
-      <div {...alive} className="alive-box relative isolate flex w-full flex-col items-start justify-center gap-3 overflow-hidden border-b border-[#ecebe9] bg-white p-10">
+      <div className="alive-box relative isolate flex w-full flex-col items-start justify-center gap-3 overflow-hidden border-b border-[#ecebe9] bg-white p-10">
         <span aria-hidden className="alive-base" />
-        <span aria-hidden className="alive-glow" />
-        <ShimmerGrid />
+        <FluidGrid />
         <p className="text-[1.25rem] leading-4 font-medium text-[#121212]">Agents Library</p>
         <p className="max-w-full truncate text-[0.875rem] leading-4 font-normal text-[#6c6a68]">
           Ready-made security agents by Rival. Pick one, make it yours in a short chat, and it joins My Agents.
