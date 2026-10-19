@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 
 /*
  * Home in the Hex look (components/home/concept-home.tsx shows it under the composer when <html data-look="hex">):
- * a tight, ruled grid in three columns, like Hex's home. Each column has a mono label and short rows:
+ * a tight, ruled grid in three columns, like Hex's home, closed as a box (4px corners), set a little below the composer. Each column has a mono label and short rows:
  *   Needs you   conversations waiting on an approval
  *   Recent      the latest conversations
  *   Start from  a few of Rival's templates (opens Agent explorer)
@@ -26,7 +26,7 @@ export function HexHomeGrid() {
   const open = (id: string) => navigate("chat", { conversationId: id })
 
   return (
-    <div className="rise-in grid w-full max-w-5xl grid-cols-1 border-y bg-background md:grid-cols-3 md:divide-x" style={{ "--delay": "160ms" } as React.CSSProperties}>
+    <div className="rise-in mt-6 grid w-full max-w-5xl grid-cols-1 overflow-hidden rounded-[4px] border bg-background md:grid-cols-3 md:divide-x" style={{ "--delay": "160ms" } as React.CSSProperties}>
       <Column label="Needs you" count={needs.length}>
         {needs.length === 0
           ? <p className="px-4 py-3 text-sm text-muted-foreground">Nothing waiting on you.</p>
