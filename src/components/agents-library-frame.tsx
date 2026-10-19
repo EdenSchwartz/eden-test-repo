@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils"
  * bluish silver-white highlights sweeping through and, where the flow is fast, short white glints (the shine) with a cool steel / faint champagne tint, and faster flow
  * catches the light. Darker than the resting grid so it reads on white, at most 80% strength.
  * Coming near the box from outside (within 18rem) pours a little dye in at the closest edge, as a hint.
+ * Left alone, it pulses on its own now and then (every 30 to 60s): one soft stroke drifts across and fades.
  * Runs only while there's dye to show; still (no fluid) if the user prefers reduced motion.
  */
 function FluidGrid() {
@@ -97,11 +98,13 @@ function FluidGrid() {
           u[IX(i, j)] += fx * f; v[IX(i, j)] += fy * f; d[IX(i, j)] = Math.min(1.6, d[IX(i, j)] + amount * f)
         }
     }
+    let touched = -Infinity // when the pointer last stirred the fluid (inside or near the box)
     const move = (e: PointerEvent) => {
       const b = box.getBoundingClientRect()
       const x = e.clientX - b.left, y = e.clientY - b.top
       const inside = x >= 0 && y >= 0 && x <= b.width && y <= b.height
       if (inside) {
+        touched = performance.now()
         const dx = last ? x - last.x : 0, dy = last ? y - last.y : 0
         splat(x, y, dx * 0.75, dy * 0.75, 0.35 + Math.min(0.6, Math.hypot(dx, dy) * 0.02))
         last = { x, y }
@@ -112,6 +115,7 @@ function FluidGrid() {
         const range = parseFloat(getComputedStyle(document.documentElement).fontSize) * 18
         const near = Math.max(0, 1 - Math.hypot(x - cx, y - cy) / range)
         if (near <= 0) return
+        touched = performance.now()
         splat(cx, cy, (cx - x) * 0.01 * near, (cy - y) * 0.01 * near, 0.12 * near ** 1.5)
       }
       start()
@@ -171,11 +175,33 @@ function FluidGrid() {
     }
     const start = () => { if (!raf) raf = requestAnimationFrame(loop) }
 
+    // The idle pulse: now and then (every 30 to 60s, never while you're on or near it, never in a hidden tab)
+    // a soft stroke drifts across part of the header by itself, as if someone breathed on it, then fades
+    let pulseTimer = 0, pulseRaf = 0
+    const schedule = (first = false) => { pulseTimer = window.setTimeout(pulse, first ? 9000 + Math.random() * 4000 : 30000 + Math.random() * 30000) }
+    const pulse = () => {
+      if (document.hidden || box.matches(":hover") || performance.now() - touched < 12000 || !w) return schedule()
+      const dir = Math.random() < 0.5 ? 1 : -1
+      const len = Math.min(w * 0.35, 26 * cell), x0 = w * (dir > 0 ? 0.1 + Math.random() * 0.35 : 0.55 + Math.random() * 0.35)
+      const y0 = h * (0.3 + Math.random() * 0.4), t0 = performance.now(), dur = 1600
+      let px = x0, py = y0
+      const stroke = (t: number) => {
+        const p = Math.min(1, (t - t0) / dur), e = p * p * (3 - 2 * p)
+        const x = x0 + dir * len * e, y = y0 + Math.sin(e * Math.PI * 1.4) * h * 0.14
+        splat(x, y, (x - px) * 0.45, (y - py) * 0.45, 0.16 * Math.sin(p * Math.PI))
+        px = x; py = y
+        start()
+        if (p < 1) pulseRaf = requestAnimationFrame(stroke); else schedule()
+      }
+      pulseRaf = requestAnimationFrame(stroke)
+    }
+    schedule(true)
+
     size()
     const ro = new ResizeObserver(size)
     ro.observe(box)
     window.addEventListener("pointermove", move, { passive: true })
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); window.removeEventListener("pointermove", move) }
+    return () => { cancelAnimationFrame(raf); cancelAnimationFrame(pulseRaf); clearTimeout(pulseTimer); ro.disconnect(); window.removeEventListener("pointermove", move) }
   }, [])
   return <canvas ref={ref} aria-hidden className="pointer-events-none absolute inset-0 -z-1 size-full" />
 }
@@ -224,9 +250,8 @@ export function AgentsLibraryFrame() {
         </div>
         <LibrarySearch value={query} onChange={setQuery} />
       </div>
-      {/* The cards area: a drafting-sheet margin on both sides (fine diagonal hatching, a hairline rail), cards go between */}
+      {/* The cards area: plain white space around the cards, nothing in the margins */}
       <div className="relative flex w-full flex-1">
-        <span aria-hidden className="sheet-margin left-0 border-r" />
         {/* Smaller screens (under 1800px): centered, 3 to a row (68rem at most). Big screens: in line with the title and
             the tabs, filling the width between the strips (4 or more to a row). Beside the panel: as many as fit */}
         <div className={cn("grid min-w-0 flex-1 content-start gap-4 pt-6 pb-10", picked
@@ -239,7 +264,6 @@ export function AgentsLibraryFrame() {
             </p>
           )}
         </div>
-        {!picked && <span aria-hidden className="sheet-margin right-0 border-l" />}
       </div>
       {picked && (
         // The whole right side, from the top bar down, and stays put while the cards scroll
