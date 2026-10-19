@@ -387,7 +387,7 @@ const hueOf = (a: LibraryAgent) => hues.get(a) ?? 255
  * An agent's tile: a soft gradient under heavy film grain in the agent's own colour, with a white circle in the middle.
  * Every agent gets a different hue (spread around the colour wheel by the golden angle, in the order of the
  * library: agents, then sub agents), so no two share a gradient; that hue is meant to become the agent's colour.
- * Each gradient mixes the hue with two neighbours and a pale tint of it, in soft, light tones (oklch).
+ * Each gradient mixes the hue with two neighbours and a lighter tint of it, in muted, deeper tones (oklch).
  */
 const grain = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.25' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='2.4' intercept='-0.7'/%3E%3CfeFuncG type='linear' slope='2.4' intercept='-0.7'/%3E%3CfeFuncB type='linear' slope='2.4' intercept='-0.7'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='96' height='96' filter='url(%23g)'/%3E%3C/svg%3E")`
 const hash = (t: string) => { let h = 2166136261; for (const c of t) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0 }
@@ -395,10 +395,11 @@ const hash = (t: string) => { let h = 2166136261; for (const c of t) h = Math.im
 function AgentTile({ seed, hue }: { seed: string; hue: number }) {
   const h = hash(seed)
   const r = (k: number) => ((h >>> (k * 4)) & 15) / 15 // 0..1, fixed per agent: where its colour pools sit
-  const tint = `oklch(0.95 0.035 ${hue})`
-  const main = `oklch(0.76 0.12 ${hue})`
-  const warm = `oklch(0.84 0.09 ${hue + 38})`
-  const deep = `oklch(0.64 0.14 ${hue - 34})`
+  // Muted and deep: low chroma, mid-to-dark tones, so the colour has depth without shouting
+  const tint = `oklch(0.8 0.03 ${hue})`
+  const main = `oklch(0.56 0.07 ${hue})`
+  const warm = `oklch(0.68 0.055 ${hue + 38})`
+  const deep = `oklch(0.38 0.065 ${hue - 34})`
   const pools = [
     `radial-gradient(circle at ${5 + r(1) * 35}% ${5 + r(2) * 35}%, ${warm} 0%, transparent 85%)`,
     `radial-gradient(circle at ${60 + r(3) * 40}% ${50 + r(4) * 50}%, ${deep} 0%, transparent 80%)`,
