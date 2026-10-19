@@ -191,7 +191,7 @@ function SlimSidebar({ groups, onHome, onExpand }: { groups: Group[]; onHome: bo
   const isActive = (it: Item) => it.params ? page === "chat" && params.conversationId === it.params.conversationId : page === it.page
   const go = (it: Item) => { setHover(null); navigate(it.page, it.params) }
 
-  const icon = (id: string, label: string, Icon: React.ComponentType<{ className?: string }>, active: boolean, onClick: () => void, fill?: boolean) => (
+  const icon = (id: string, label: string, Icon: React.ComponentType<{ className?: string }>, active: boolean, onClick: () => void) => (
     <button
       key={id}
       onClick={onClick}
@@ -199,10 +199,11 @@ function SlimSidebar({ groups, onHome, onExpand }: { groups: Group[]; onHome: bo
       onMouseLeave={leave}
       aria-label={label}
       aria-current={active ? "page" : undefined}
-      className={cn("relative flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-[0.375rem] text-[#6c6a68] transition-colors", active ? "z-10 text-[#2e4eca]" : "hover:bg-[#9a9893]/10", hover?.id === id && !active && "bg-[#9a9893]/10")}
+      className={cn("relative grid size-7 shrink-0 cursor-pointer place-items-center rounded-[0.375rem] text-[#6c6a68] transition-colors", active ? "z-10 text-[#2e4eca]" : "hover:bg-[#9a9893]/10", hover?.id === id && !active && "bg-[#9a9893]/10")}
     >
       {active && <span aria-hidden className="absolute inset-0 rounded-[0.375rem] border border-[#ecebe9] bg-white shadow-[0px_1px_1px_0px_rgba(119,131,152,0.2)]" />}
-      <Icon className={cn("relative size-4", active && fill && "[&_path]:fill-[#e6ebfa]")} />
+      {/* Selected: the icon in Rival blue, filled a very light blue (like Home in the open sidebar), dead centre */}
+      <Icon className={cn("relative col-start-1 row-start-1 size-4", active && "[&_path]:fill-[#e6ebfa]")} />
     </button>
   )
   const singles: Record<string, { label: string; page: string }> = {
@@ -214,16 +215,16 @@ function SlimSidebar({ groups, onHome, onExpand }: { groups: Group[]; onHome: bo
     <Sidebar collapsible="none" className="sticky top-0 h-svh w-12 shrink-0 border-r border-[#ecebe9] bg-[#fcfcfa] font-[Geist,ui-sans-serif,system-ui,sans-serif]">
       <div className="flex h-full flex-col items-center">
         <div className="flex h-12 w-full shrink-0 items-center justify-center">
-          <button onClick={onExpand} aria-label="Expand sidebar" title="Expand sidebar" className="flex size-8 cursor-pointer items-center justify-center rounded-[0.375rem] text-[#6c6a68] transition-colors hover:bg-[#9a9893]/10">
+          <button onClick={onExpand} aria-label="Expand sidebar" title="Expand sidebar" className="flex size-7 cursor-pointer items-center justify-center rounded-[0.375rem] text-[#6c6a68] transition-colors hover:bg-[#9a9893]/10">
             <CollapseIcon className="size-4 rotate-180" />
           </button>
         </div>
-        <nav aria-label="Main" className="flex min-h-px w-full flex-[1_0_0] flex-col items-center gap-1.5 py-1.5">
-          {icon("home", "Home", HomeIcon, onHome, () => navigate("chat"), true)}
-          <span aria-hidden className="my-1.5 h-px w-5 bg-[#ecebe9]" />
+        <nav aria-label="Main" className="flex min-h-px w-full flex-[1_0_0] flex-col items-center gap-0.5 py-1.5">
+          {icon("home", "Home", HomeIcon, onHome, () => navigate("chat"))}
+          <span aria-hidden className="my-1 h-px w-4 bg-[#ecebe9]" />
           {groups.map((g) => icon(g.id, g.label, g.icon, g.items.some(isActive), () => g.items[0] && go(g.items[0])))}
         </nav>
-        <div className="flex shrink-0 flex-col items-center gap-1.5 py-2">
+        <div className="flex shrink-0 flex-col items-center gap-0.5 py-2">
           {icon("connectors", "Connectors", ConnectorsIcon, page === "connectors", () => navigate("connectors"))}
           {icon("settings", "Settings", SettingsIcon, page === "settings", () => navigate("settings"))}
           <span className="relative mt-1 size-8 shrink-0 overflow-clip rounded-[0.375rem] border border-[#ecebe9] bg-white shadow-[0px_1px_1px_0px_rgba(119,131,152,0.2)]" title="Rival · eden@rival.io">
