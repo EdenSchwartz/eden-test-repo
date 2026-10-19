@@ -3,6 +3,7 @@ import {
   AgentsIcon, AskRivalIcon, ChatsIcon, CollapseIcon, ConnectorsIcon, ExpandSimpleIcon, HomeIcon, PlatformIcon, PlusIcon,
   RivalMark, RivalWordmark, SettingsIcon, WaitingIcon,
 } from "@/components/nav-icons"
+import { useConversations } from "@/lib/conversations"
 import { useNav } from "@/lib/nav"
 import { cn } from "@/lib/utils"
 
@@ -15,10 +16,10 @@ import { cn } from "@/lib/utils"
  *   the tree line at left 14 / top 28 (#9A9893 at 20%)
  *   Active: white, #ECEBE9 border, drop shadow 0 1 0.5 rgba(119,131,152,.2), pl 12 py 6 gap 14, bar and text #2E4ECA
  *   Bottom: px 14 · py 8, gap 6; the workspace px 2
- * The Chats group lists the frame's own items. The collapse button is drawn as in the frame and does nothing.
+ * The Chats group lists your conversations. The collapse button is drawn as in the frame and does nothing.
  */
 
-type Item = { label: string; page: string }
+type Item = { label: string; page: string; params?: Record<string, string> }
 const groups: { id: string; label: string; icon: React.ComponentType<{ className?: string }>; items: Item[]; plus?: boolean }[] = [
   {
     id: "agents", label: "Agents", icon: AgentsIcon,
@@ -29,20 +30,19 @@ const groups: { id: string; label: string; icon: React.ComponentType<{ className
     ],
   },
   { id: "platform", label: "Platform", icon: PlatformIcon, items: [{ label: "Findings", page: "findings" }, { label: "Entities", page: "entities" }, { label: "Packages", page: "packages" }] },
-  {
-    id: "chats", label: "Chats", icon: ChatsIcon, plus: true,
-    items: [
-      { label: "My Agents", page: "gallery" }, { label: "Agent Library", page: "explorer" }, { label: "Activity", page: "agents" },
-      { label: "Scheduled", page: "scheduled" }, { label: "Memory", page: "memory" },
-    ],
-  },
 ]
 
 const text = "text-[0.875rem] leading-4 text-[#6c6a68]"
 const top = cn("flex h-6 w-full cursor-pointer items-center gap-1.5 rounded-[0.25rem] py-1 pr-1 pl-1.5 text-left", text)
 
 export function AppSidebar() {
-  const { navigate, page } = useNav()
+  const { navigate, page, params } = useNav()
+  const { convs } = useConversations()
+  // Chats: your conversations, newest first (+ starts a new one)
+  const all = [...groups, {
+    id: "chats", label: "Chats", icon: ChatsIcon, plus: true,
+    items: convs.map((c) => ({ label: c.title, page: "chat", params: { conversationId: c.id } })),
+  }]
 
   return (
     <Sidebar collapsible="none" className="sticky top-0 h-svh w-[12.25rem] shrink-0 border-r border-[#ecebe9] bg-[#fcfcfa] font-[Geist,ui-sans-serif,system-ui,sans-serif]">
@@ -70,7 +70,7 @@ export function AppSidebar() {
               </button>
             </div>
 
-            {groups.map((g) => (
+            {all.map((g) => (
               <div key={g.id} className="relative flex w-full flex-col items-start gap-3 px-0.5">
                 <span aria-hidden className="absolute top-7 bottom-0 left-3.5 w-px bg-[#9a9893]/20" />
                 <div className="relative flex w-full items-center gap-1.5 px-1">
@@ -86,14 +86,14 @@ export function AppSidebar() {
                 </div>
                 <div className="flex w-full flex-col items-start gap-1.5">
                   {g.items.map((it) => {
-                    const active = g.id !== "chats" && page === it.page
+                    const active = it.params ? page === "chat" && params.conversationId === it.params.conversationId : page === it.page
                     return active ? (
-                      <button key={it.label} onClick={() => navigate(it.page)} aria-current="page" className="flex w-full cursor-pointer items-center gap-3.5 rounded-[0.25rem] border border-[#ecebe9] bg-white py-1.5 pr-1 pl-3 text-left drop-shadow-[0px_1px_0.5px_rgba(119,131,152,0.2)]">
+                      <button key={it.params?.conversationId ?? it.label} onClick={() => navigate(it.page, it.params)} aria-current="page" className="flex w-full cursor-pointer items-center gap-3.5 rounded-[0.25rem] border border-[#ecebe9] bg-white py-1.5 pr-1 pl-3 text-left drop-shadow-[0px_1px_0.5px_rgba(119,131,152,0.2)]">
                         <span aria-hidden className="relative h-3.5 w-0 shrink-0"><span className="absolute inset-y-0 -left-[0.75px] w-[1.5px] bg-[#2e4eca]" /></span>
                         <span className="min-w-px flex-[1_0_0] truncate text-[0.875rem] leading-4 text-[#2e4eca]">{it.label}</span>
                       </button>
                     ) : (
-                      <button key={it.label} onClick={() => navigate(it.page)} className={cn("flex h-6 w-full cursor-pointer items-center rounded-[0.25rem] pr-1 pl-[1.625rem] text-left", text)}>
+                      <button key={it.params?.conversationId ?? it.label} onClick={() => navigate(it.page, it.params)} title={it.params ? it.label : undefined} className={cn("flex h-6 w-full cursor-pointer items-center rounded-[0.25rem] pr-1 pl-[1.625rem] text-left", text)}>
                         <span className="min-w-px flex-[1_0_0] truncate">{it.label}</span>
                       </button>
                     )
