@@ -61,7 +61,7 @@ export function AppSidebar() {
         </div>
 
         <nav aria-label="Main" className="flex min-h-px w-full flex-[1_0_0] flex-col items-start gap-4 overflow-y-auto px-3 py-1.5">
-          <div className="flex w-full flex-col items-start gap-6">
+          <div className="flex w-full flex-col items-start">
             <div className="flex w-full flex-col items-start gap-1.5">
               <button onClick={() => navigate("chat")} className={cn(top, "drop-shadow-[0px_1px_0.5px_rgba(119,131,152,0.2)]")}>
                 <AskRivalIcon className="size-4 shrink-0" /> <span className="whitespace-nowrap">Ask Rival</span>
@@ -74,8 +74,9 @@ export function AppSidebar() {
               </button>
             </div>
 
-            {all.map((g) => (
-              <div key={g.id} className="relative flex w-full flex-col items-start px-0.5">
+            {/* 24px between sections; under a collapsed one, titles stack at the top rows' rhythm (30px apart) */}
+            {all.map((g, i) => (
+              <div key={g.id} className={cn("relative flex w-full flex-col items-start px-0.5 transition-[margin] duration-200 ease-out", i > 0 && closed.has(all[i - 1].id) ? "mt-3.5" : "mt-6")}>
                 <span aria-hidden className={cn("absolute top-7 bottom-0 left-3.5 w-px bg-[#9a9893]/20 transition-opacity duration-200", closed.has(g.id) && "opacity-0")} />
                 <div className="relative flex w-full items-center gap-1.5 px-1">
                   {/* The title: click to collapse or expand; on hover its icon becomes the triangle (down = open) */}
@@ -94,7 +95,8 @@ export function AppSidebar() {
                 </div>
                 {/* The items fold away (rows animate from their height to 0) */}
                 <div className={cn("grid w-full transition-[grid-template-rows] duration-200 ease-out", closed.has(g.id) ? "grid-rows-[0fr]" : "grid-rows-[1fr]")}>
-                <div className="flex min-h-0 w-full flex-col items-start gap-1.5 overflow-hidden pt-3">
+                <div className="min-h-0 w-full overflow-hidden">
+                <div className="flex w-full flex-col items-start gap-1.5 pt-3">
                   {g.items.map((it) => {
                     const active = it.params ? page === "chat" && params.conversationId === it.params.conversationId : page === it.page
                     return active ? (
@@ -108,6 +110,7 @@ export function AppSidebar() {
                       </button>
                     )
                   })}
+                </div>
                 </div>
                 </div>
               </div>
