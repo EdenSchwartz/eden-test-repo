@@ -206,8 +206,8 @@ export function AgentsLibraryFrame() {
   const agent = picked?.agent ? getSuperAgent(picked.agent) : undefined
   return (
     // With a panel open, the page makes room for it (the panel takes the whole right side, under the top bar)
-    <div className={cn("flex flex-1 flex-col items-start bg-white whitespace-nowrap", picked && "mr-[35rem]")}>
-      <div className="alive-box relative isolate flex w-full flex-col items-start justify-center gap-3 overflow-hidden border-b border-[#ecebe9] bg-white p-10">
+    <div className={cn("flex flex-1 flex-col items-start bg-[#fcfcfa] whitespace-nowrap", picked && "mr-[35rem]")}>
+      <div className="alive-box relative isolate flex w-full flex-col items-start justify-center gap-3 overflow-hidden border-b border-[#ecebe9] bg-[#fcfcfa] p-10">
         <span aria-hidden className="alive-base" />
         <FluidGrid />
         <p className="text-[1.25rem] leading-4 font-medium text-[#121212]">Agents Library</p>
@@ -225,8 +225,11 @@ export function AgentsLibraryFrame() {
         <LibrarySearch value={query} onChange={setQuery} />
       </div>
       {/* The cards area: a drafting-sheet margin on both sides (fine diagonal hatching, a hairline rail), cards go between */}
-      <div className="relative flex w-full flex-1">
-        <span aria-hidden className="sheet-margin left-0 border-r" />
+      {/* The white sheet the cards sit on; the strips either side are the frame's material showing through,
+          with a ruler along their inner edge and a small cross where each meets the tabs line */}
+      <div className="relative flex w-full flex-1 bg-white">
+        <span aria-hidden className="sheet-margin sheet-left left-0 border-r" />
+        <span aria-hidden className="reg-cross left-8" />
         {/* Smaller screens (under 1800px): centered, 3 to a row (68rem at most). Big screens: in line with the title and
             the tabs, filling the width between the strips (4 or more to a row). Beside the panel: as many as fit */}
         <div className={cn("grid min-w-0 flex-1 content-start gap-4 pt-6 pb-10", picked
@@ -239,7 +242,7 @@ export function AgentsLibraryFrame() {
             </p>
           )}
         </div>
-        {!picked && <span aria-hidden className="sheet-margin right-0 border-l" />}
+        {!picked && <><span aria-hidden className="sheet-margin sheet-right right-0 border-l" /><span aria-hidden className="reg-cross right-8" /></>}
       </div>
       {picked && (
         // The whole right side, from the top bar down, and stays put while the cards scroll
