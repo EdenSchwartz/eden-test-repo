@@ -1,8 +1,13 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { AppWindow, Bandage, Bot, Clock, Cloud, Crosshair, KeyRound, ShieldCheck, Swords, UsersRound, type LucideIcon } from "lucide-react"
 import { agentOutcomes, type Outcome } from "@/data/outcomes"
 import { blockers, getSuperAgent } from "@/data/super-agents"
 import { useNav } from "@/lib/nav"
+import type { AgentKind } from "@/components/chat/agents"
+import { SubAgentDetail } from "@/components/tasks/sub-agent-card"
+import { TemplateDetail } from "@/components/tasks/template-detail"
+import { withTransition } from "@/lib/view-transition"
+import { cn } from "@/lib/utils"
 
 /*
  * Hovering the header box: a faint, shimmering grid (ShimmerGrid) shows up around the pointer (like the Hex look's New chat, but lighter)
@@ -140,6 +145,18 @@ function ShimmerGrid() {
  */
 export function AgentsLibraryFrame() {
   const alive = useAliveHover()
+  const { navigate } = useNav()
+  // The picked card's side panel (the Hex version's docked panel): an agent's, or a sub agent's. Esc or ✕ closes it
+  const [picked, setPicked] = useState<{ agent?: string; kind?: AgentKind; name: string } | null>(null)
+  const pick = (a: LibraryAgent) => withTransition(() => setPicked(a.templateId ? { agent: a.templateId, name: a.name } : { kind: a.kind, name: a.name }))
+  const close = () => withTransition(() => setPicked(null))
+  useEffect(() => {
+    if (!picked) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close() }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [picked])
+  const agent = picked?.agent ? getSuperAgent(picked.agent) : undefined
   return (
     <div className="flex flex-1 flex-col items-start bg-white whitespace-nowrap">
       <div {...alive} className="alive-box relative isolate flex w-full flex-col items-start justify-center gap-3 overflow-hidden border-b border-[#ecebe9] bg-white p-10">
@@ -154,10 +171,17 @@ export function AgentsLibraryFrame() {
       {/* The cards area: a drafting-sheet margin on both sides (fine diagonal hatching, a hairline rail), cards go between */}
       <div className="relative flex w-full flex-1">
         <span aria-hidden className="sheet-margin left-0 border-r" />
-        <div className="mx-auto grid w-full max-w-[68rem] min-w-0 grid-cols-[repeat(3,minmax(0,1fr))] content-start gap-4 px-10 pt-8 pb-10">
-          {library.map((a) => <AgentCard key={a.name} a={a} />)}
+        <div className={cn("mx-auto grid w-full max-w-[68rem] min-w-0 content-start gap-4 px-10 pt-8 pb-10", picked ? "grid-cols-[repeat(2,minmax(0,1fr))]" : "grid-cols-[repeat(3,minmax(0,1fr))]")}>
+          {library.map((a) => <AgentCard key={a.name} a={a} selected={picked?.name === a.name} onSelect={() => pick(a)} />)}
         </div>
-        <span aria-hidden className="sheet-margin right-0 border-l" />
+        {picked ? (
+          // Docked on the right, under the header box, and stays in view while the cards scroll
+          <section aria-label={picked.name} className="sticky top-0 h-svh w-[35rem] shrink-0 self-start overflow-hidden border-l border-[#ecebe9] bg-background whitespace-normal" style={{ viewTransitionName: "template-detail" }}>
+            {agent
+              ? <TemplateDetail key={agent.id} sa={agent} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={close} />
+              : picked.kind && <SubAgentDetail key={picked.name} kind={picked.kind} template onClose={close} onOpenAgent={(sa) => withTransition(() => setPicked({ agent: sa.id, name: sa.name }))} />}
+          </section>
+        ) : <span aria-hidden className="sheet-margin right-0 border-l" />}
       </div>
     </div>
   )
@@ -180,21 +204,22 @@ export function FrameCorners() {
  * The library: Triage Hunter (the demo's own multi-step agent), then the product's built-in agents
  * (the real Agents page on dev): their outcomes and what they run on, as there. Taglines shortened to fit the card.
  */
-type LibraryAgent = { name: string; tagline: string; icon: LucideIcon; outcomes: Outcome[]; runsOn: string[]; templateId?: string }
+// kind: the sub agent whose panel it opens (closest match in the demo); templateId: an agent with its own panel
+type LibraryAgent = { name: string; tagline: string; icon: LucideIcon; outcomes: Outcome[]; runsOn: string[]; templateId?: string; kind?: AgentKind }
 const exploit: Outcome[] = [{ label: "Exploitable", tone: "risk" }, { label: "Not exploitable", tone: "clear" }, { label: "Unclear", tone: "unclear" }]
 const triage = getSuperAgent("triage")!
 const library: LibraryAgent[] = [
   { name: triage.name, tagline: triage.tagline, icon: triage.icon, outcomes: agentOutcomes.triage.filter((o) => o.label !== "Failed"), runsOn: ["CVE", "SAST"], templateId: "triage" },
-  { name: "Code CVE Exploitability", tagline: "Checks if a CVE in a code dependency is really exploitable.", icon: Crosshair, outcomes: exploit, runsOn: ["CVE"] },
-  { name: "Cloud Exploitability", tagline: "Checks if a cloud scanner finding is really exploitable.", icon: Crosshair, outcomes: exploit, runsOn: ["CVE"] },
-  { name: "Code SAST Exploitability", tagline: "Traces a SAST finding to see if it's really reachable.", icon: Crosshair, outcomes: exploit, runsOn: ["SAST"] },
-  { name: "Red Team Simulation", tagline: "Reproduces a finding with an isolated proof of concept.", icon: Swords, outcomes: [{ label: "Exploit demonstrated", tone: "risk" }, { label: "Not reproduced", tone: "unclear" }], runsOn: ["CVE", "SAST"] },
-  { name: "Finding Ownership", tagline: "Finds the person or team that should own the fix.", icon: UsersRound, outcomes: [], runsOn: ["CVE", "SAST", "Secret"] },
-  { name: "WAF Analysis", tagline: "Checks if WAF rules block a finding's ingress path.", icon: ShieldCheck, outcomes: [{ label: "Irrelevant", tone: "unclear" }, { label: "Mitigated", tone: "clear" }, { label: "Suggestion", tone: "warn" }], runsOn: ["CVE", "SAST"] },
-  { name: "Remediation", tagline: "Fixes a finding in a sandbox copy of the repository.", icon: Bandage, outcomes: [{ label: "Easy", tone: "clear" }, { label: "Medium", tone: "warn" }, { label: "Hard", tone: "risk" }], runsOn: ["CVE", "SAST"] },
-  { name: "Secret Validation", tagline: "Decides if a leaked secret is real or a false positive.", icon: KeyRound, outcomes: [{ label: "Yes", tone: "risk" }, { label: "No", tone: "good" }], runsOn: ["Secret"] },
-  { name: "App Inventory", tagline: "Discovers every deployable app and shared library.", icon: AppWindow, outcomes: [], runsOn: ["Branch"] },
-  { name: "Deployment Mapping", tagline: "Maps non-containerized apps to their cloud workloads.", icon: Cloud, outcomes: [], runsOn: [] },
+  { name: "Code CVE Exploitability", tagline: "Checks if a CVE in a code dependency is really exploitable.", icon: Crosshair, outcomes: exploit, runsOn: ["CVE"], kind: "exploitability" },
+  { name: "Cloud Exploitability", tagline: "Checks if a cloud scanner finding is really exploitable.", icon: Crosshair, outcomes: exploit, runsOn: ["CVE"], kind: "exploitability" },
+  { name: "Code SAST Exploitability", tagline: "Traces a SAST finding to see if it's really reachable.", icon: Crosshair, outcomes: exploit, runsOn: ["SAST"], kind: "exploitability" },
+  { name: "Red Team Simulation", tagline: "Reproduces a finding with an isolated proof of concept.", icon: Swords, outcomes: [{ label: "Exploit demonstrated", tone: "risk" }, { label: "Not reproduced", tone: "unclear" }], runsOn: ["CVE", "SAST"], kind: "red-team" },
+  { name: "Finding Ownership", tagline: "Finds the person or team that should own the fix.", icon: UsersRound, outcomes: [], runsOn: ["CVE", "SAST", "Secret"], kind: "ownership" },
+  { name: "WAF Analysis", tagline: "Checks if WAF rules block a finding's ingress path.", icon: ShieldCheck, outcomes: [{ label: "Irrelevant", tone: "unclear" }, { label: "Mitigated", tone: "clear" }, { label: "Suggestion", tone: "warn" }], runsOn: ["CVE", "SAST"], kind: "exploitability" },
+  { name: "Remediation", tagline: "Fixes a finding in a sandbox copy of the repository.", icon: Bandage, outcomes: [{ label: "Easy", tone: "clear" }, { label: "Medium", tone: "warn" }, { label: "Hard", tone: "risk" }], runsOn: ["CVE", "SAST"], kind: "remediation" },
+  { name: "Secret Validation", tagline: "Decides if a leaked secret is real or a false positive.", icon: KeyRound, outcomes: [{ label: "Yes", tone: "risk" }, { label: "No", tone: "good" }], runsOn: ["Secret"], kind: "data-leak" },
+  { name: "App Inventory", tagline: "Discovers every deployable app and shared library.", icon: AppWindow, outcomes: [], runsOn: ["Branch"], kind: "asset-discovery" },
+  { name: "Deployment Mapping", tagline: "Maps non-containerized apps to their cloud workloads.", icon: Cloud, outcomes: [], runsOn: [], kind: "asset-discovery" },
 ]
 
 /*
@@ -204,21 +229,21 @@ const library: LibraryAgent[] = [
  * The tagline may take two lines here (three cards to a row). Under a hairline (kept at the bottom, so cards
  * in a row line up): what a run ends in (its outcomes, as colored dots), then what it runs on,
  * with sub agents and time per run on the right for multi-step agents. Rows never wrap.
- * Click: make it yours in a short chat (the Customize page; Triage Hunter only for now).
+ * Click: opens its side panel (the page's docked panel).
  */
 const tone: Record<Outcome["tone"], string> = {
   risk: "bg-[#d8453a]", clear: "bg-[#2e4eca]", good: "bg-[#2f9e5b]", warn: "bg-[#d9921a]", unclear: "bg-[#9a9893]", failed: "bg-[#9a9893]",
 }
 
-function AgentCard({ a }: { a: LibraryAgent }) {
-  const { navigate } = useNav()
+function AgentCard({ a, selected, onSelect }: { a: LibraryAgent; selected: boolean; onSelect: () => void }) {
   const Icon = a.icon
   const sa = a.templateId ? getSuperAgent(a.templateId) : undefined
   const setup = sa ? blockers(sa).length > 0 : false
   return (
     <button
-      onClick={() => sa && navigate("clone", { templateId: sa.id })}
-      className="group flex cursor-pointer flex-col items-stretch rounded-[0.25rem] border border-[#f0f0f0] bg-white p-2 text-left drop-shadow-[0px_1px_1px_rgba(0,0,0,0.04)] transition-[border-color,translate] duration-200 hover:-translate-y-px hover:border-[#e2e1df]"
+      onClick={onSelect}
+      aria-pressed={selected}
+      className="group flex cursor-pointer flex-col items-stretch rounded-[0.25rem] border border-[#f0f0f0] bg-white aria-pressed:border-[#2e4eca]/40 p-2 text-left drop-shadow-[0px_1px_1px_rgba(0,0,0,0.04)] transition-[border-color,translate] duration-200 hover:-translate-y-px hover:border-[#e2e1df]"
     >
       <span className="mb-3 flex w-full items-start gap-2">
         <span className="flex size-12 shrink-0 items-center justify-center rounded-[0.375rem] bg-[#5e64bf] text-white">
