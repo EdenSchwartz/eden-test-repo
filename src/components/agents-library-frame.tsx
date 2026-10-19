@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react"
 
 /*
- * Hovering the header box: a faint grid shows up around the pointer (like the Hex look's New chat, but lighter)
+ * Hovering the header box: a faint, shimmering grid (ShimmerGrid) shows up around the pointer (like the Hex look's New chat, but lighter)
  * with a soft Rival-blue glow under it. Both trail the pointer with a little lag (eased each frame), and fade
  * in and out, so the box feels alive rather than mechanical. Styles: .alive-* in index.css.
  */
@@ -10,7 +10,6 @@ function useAliveHover() {
   const target = useRef({ x: 0, y: 0 })
   const pos = useRef({ x: 0, y: 0 })
   const raf = useRef(0)
-  useEffect(() => () => cancelAnimationFrame(raf.current), [])
 
   const set = (x: number, y: number) => {
     el.current?.style.setProperty("--ax", `${x}px`)
@@ -23,24 +22,110 @@ function useAliveHover() {
     set(p.x, p.y)
     raf.current = Math.abs(t.x - p.x) + Math.abs(t.y - p.y) > 0.3 ? requestAnimationFrame(tick) : 0
   }
+  const still = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  const follow = (x: number, y: number, jump = false) => {
+    target.current = { x, y }
+    if (jump || still()) { pos.current = { x, y }; set(x, y); return }
+    if (!raf.current) raf.current = requestAnimationFrame(tick)
+  }
+
+  // The hint: coming near the box (within 10rem, from outside), the grid and glow peek in at the closest edge,
+  // stronger the closer you get (--near 0 → 1), so it's clear something lives there before you're inside
+  useEffect(() => {
+    const box = el.current
+    if (!box) return
+    let wasNear = false
+    const move = (e: PointerEvent) => {
+      const b = box.getBoundingClientRect()
+      const cx = Math.min(Math.max(e.clientX, b.left), b.right), cy = Math.min(Math.max(e.clientY, b.top), b.bottom)
+      const d = Math.hypot(e.clientX - cx, e.clientY - cy)
+      if (d === 0) return // inside: the hover takes over
+      const range = parseFloat(getComputedStyle(document.documentElement).fontSize) * 10
+      const near = Math.max(0, 1 - d / range)
+      box.style.setProperty("--near", near.toFixed(3))
+      if (near > 0) { box.dataset.near = ""; follow(cx - b.left, cy - b.top, !wasNear) } else delete box.dataset.near
+      wasNear = near > 0
+    }
+    window.addEventListener("pointermove", move, { passive: true })
+    return () => { window.removeEventListener("pointermove", move); cancelAnimationFrame(raf.current) }
+  }, [])
+
   const point = (e: React.PointerEvent<HTMLDivElement>) => {
     const b = e.currentTarget.getBoundingClientRect()
     return { x: e.clientX - b.left, y: e.clientY - b.top }
   }
-  const still = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches
-
   return {
     ref: el,
     onPointerEnter: (e: React.PointerEvent<HTMLDivElement>) => {
-      // Start right under the pointer, no slide in from a corner
-      target.current = point(e); pos.current = { ...target.current }; set(pos.current.x, pos.current.y)
+      const p = point(e); follow(p.x, p.y, !e.currentTarget.hasAttribute("data-near"))
     },
-    onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => {
-      target.current = point(e)
-      if (still()) { pos.current = { ...target.current }; set(pos.current.x, pos.current.y); return }
-      if (!raf.current) raf.current = requestAnimationFrame(tick)
-    },
+    onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => { const p = point(e); follow(p.x, p.y) },
   }
+}
+
+/*
+ * The grid, drawn on a canvas so every short line (one cell edge, 1.25rem long) can breathe on its own:
+ * each fades in and out on its own slow rhythm (2.5 to 6s) and phase, so the grid shimmers instead of
+ * sitting still, like twinkling dots but with lines. The .alive-grid mask in index.css keeps it to the area
+ * around the pointer. Only animates while the box is hovered (and through the fade-out); still if the user
+ * prefers reduced motion.
+ */
+function ShimmerGrid() {
+  const ref = useRef<HTMLCanvasElement>(null)
+  useEffect(() => {
+    const canvas = ref.current, box = canvas?.parentElement
+    if (!canvas || !box) return
+    const ctx = canvas.getContext("2d")!
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    let raf = 0, stopAt = 0, w = 0, h = 0, cell = 20
+
+    // A fixed pseudo-random value per line, so each keeps its own rhythm
+    const rand = (i: number, j: number, k: number) => {
+      const x = Math.sin(i * 127.1 + j * 311.7 + k * 74.7) * 43758.5453
+      return x - Math.floor(x)
+    }
+    const size = () => {
+      const dpr = window.devicePixelRatio || 1
+      w = box.clientWidth; h = box.clientHeight
+      cell = parseFloat(getComputedStyle(document.documentElement).fontSize) * 1.25
+      canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr)
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    }
+    const alpha = (t: number, i: number, j: number, k: number) => {
+      if (still) return 0.07
+      const speed = (2 * Math.PI) / (2500 + rand(i, j, k) * 3500)
+      const wave = Math.sin(t * speed + rand(j, i, k + 3) * 2 * Math.PI) * 0.5 + 0.5
+      return 0.03 + 0.1 * wave * wave // mostly faint, now and then a line glows up
+    }
+    const draw = (t: number) => {
+      ctx.clearRect(0, 0, w, h)
+      for (let i = 0; i * cell <= w; i++) {
+        for (let j = 0; j * cell <= h; j++) {
+          ctx.fillStyle = `rgba(18,18,18,${alpha(t, i, j, 0)})`
+          ctx.fillRect(i * cell, j * cell, cell, 1) // the cell's top edge
+          ctx.fillStyle = `rgba(18,18,18,${alpha(t, i, j, 1)})`
+          ctx.fillRect(i * cell, j * cell, 1, cell) // its left edge
+        }
+      }
+    }
+    const loop = (t: number) => {
+      draw(t)
+      raf = !still && (box.matches(":hover") || box.hasAttribute("data-near") || t < stopAt) ? requestAnimationFrame(loop) : 0
+    }
+    const start = () => { if (!raf) raf = requestAnimationFrame(loop) }
+    const leave = () => { stopAt = performance.now() + 700 } // keep moving through the 600ms fade-out
+
+    size(); draw(0)
+    const ro = new ResizeObserver(() => { size(); draw(performance.now()) })
+    ro.observe(box)
+    // Start when the pointer comes in or near (data-near, set by useAliveHover)
+    const mo = new MutationObserver(() => { if (box.hasAttribute("data-near")) start(); else leave() })
+    mo.observe(box, { attributes: true, attributeFilter: ["data-near"] })
+    box.addEventListener("pointerenter", start)
+    box.addEventListener("pointerleave", leave)
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); mo.disconnect(); box.removeEventListener("pointerenter", start); box.removeEventListener("pointerleave", leave) }
+  }, [])
+  return <canvas ref={ref} aria-hidden className="alive-grid size-full" />
 }
 
 /*
@@ -55,7 +140,7 @@ export function AgentsLibraryFrame() {
     <div className="flex flex-col items-start bg-white whitespace-nowrap">
       <div {...alive} className="alive-box relative isolate flex w-full flex-col items-start justify-center gap-3 overflow-hidden border-b border-[#ecebe9] bg-white p-10">
         <span aria-hidden className="alive-glow" />
-        <span aria-hidden className="alive-grid" />
+        <ShimmerGrid />
         <p className="text-[1.25rem] leading-4 font-medium text-[#121212]">Agents Library</p>
         <p className="text-[0.875rem] leading-4 font-normal text-[#6c6a68]">
           Ready-made security agents by Rival. Pick one, make it yours in a short chat, and it joins My Agents.
