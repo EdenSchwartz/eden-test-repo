@@ -4,7 +4,8 @@ import AgentsPage from "@/pages/agents"
 import ChatPage from "@/pages/chat"
 import ClonePage from "@/pages/clone"
 import FindingsPage from "@/pages/findings"
-import MyAgentsPage, { ExplorerPage } from "@/pages/gallery"
+import MyAgentsPage from "@/pages/gallery"
+import { AgentsLibraryFrame } from "@/components/agents-library-frame"
 import MemoryPage from "@/pages/memory"
 import ScheduledPage from "@/pages/scheduled"
 
@@ -18,7 +19,7 @@ export const pages = [
   { id: "chat", title: "New chat", icon: MessageSquare, component: ChatPage, hideFab: true },
   { id: "waiting", title: "Waiting", icon: Hand, component: soon("Everything waiting on you in one place: approvals, questions from your agents, and runs that need a hand."), hideFab: true },
   { id: "gallery", title: "My Agents", icon: Bot, component: MyAgentsPage, hideFab: true }, // your agents (pages/gallery.tsx)
-  { id: "explorer", title: "Agent Library", icon: Compass, component: ExplorerPage, hideFab: true }, // Rival's templates to start from; Home's "Browse agent templates"
+  { id: "explorer", title: "Agents Library", icon: Compass, component: AgentsLibraryFrame, hideFab: true }, // Rival's templates to start from; Home's "Browse agent templates"
   { id: "agents", title: "Activity", icon: Activity, component: AgentsPage },
   { id: "scheduled", title: "Scheduled", icon: CalendarClock, component: ScheduledPage },
   { id: "memory", title: "Memory", icon: Brain, component: MemoryPage },

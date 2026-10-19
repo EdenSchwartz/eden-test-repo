@@ -1,140 +1,123 @@
-import { Sidebar, useSidebar } from "@/components/ui/sidebar"
+import { Sidebar } from "@/components/ui/sidebar"
 import {
   AgentsIcon, AskRivalIcon, ChatsIcon, CollapseIcon, ConnectorsIcon, ExpandSimpleIcon, HomeIcon, PlatformIcon, PlusIcon,
   RivalMark, RivalWordmark, SettingsIcon, WaitingIcon,
 } from "@/components/nav-icons"
-import { useConversations } from "@/lib/conversations"
 import { useNav } from "@/lib/nav"
 import { cn } from "@/lib/utils"
 
 /*
- * The sidebar, built from the Figma "Navbar" (file "🏎️ Rival 2.0 Demo", node 15:8489), the same in both looks.
- * 180px wide, Geist 14/16, colors from the --nav-* tokens in index.css (background #FBFBFB, a #ECEBE9 line on its right).
- *   Header (48px): the Rival wordmark, and a button that hides the sidebar (the top bar's toggle brings it back)
- *   Top:      Ask Rival (a new chat) · Home · Waiting
- *   Groups:   a muted title with its icon, then indented items joined by a thin tree line on the left
- *             Agents   My Agents · Agent Library · Activity · Scheduled · Memory · Policies · Usage
- *             Platform Findings · Entities · Packages
- *             Chats    your conversations, newest first (+ starts a new one)
- *   Active:   a white raised pill with a hairline edge, a short blue bar on the left, text in Rival blue
- *   Bottom:   Connectors · Settings · the workspace (Rival, eden@rival.io)
- * Pages that aren't built yet (Waiting, Policies, Usage, Entities, Packages, Connectors) show a short placeholder (pages.tsx).
+ * The sidebar, exactly as in the Figma "Frame 2147206359" (file "🏎️ Rival 2.0 Demo").
+ * 196px wide, background #FCFCFA, a #ECEBE9 line on its right, no line under its header, Geist 14/16.
+ *   Navigation px 12 · py 6, gap 16; main nav gap 24; groups px 2 gap 12, title rows px 4, items pl 26,
+ *   the tree line at left 14 / top 28 (#9A9893 at 20%)
+ *   Active: white, #ECEBE9 border, drop shadow 0 1 0.5 rgba(119,131,152,.2), pl 12 py 6 gap 14, bar and text #0170FD
+ *   Bottom: px 14 · py 8, gap 6; the workspace px 2
+ * The Chats group lists the frame's own items. The collapse button is drawn as in the frame and does nothing.
  */
 
-type Item = { label: string; page: string; params?: Record<string, string> }
-const groups: { id: string; label: string; icon: React.ComponentType<{ className?: string }>; tint?: boolean; items: Item[] }[] = [
+type Item = { label: string; page: string }
+const groups: { id: string; label: string; icon: React.ComponentType<{ className?: string }>; items: Item[]; plus?: boolean }[] = [
   {
-    id: "agents", label: "Agents", icon: AgentsIcon, tint: true,
+    id: "agents", label: "Agents", icon: AgentsIcon,
     items: [
-      { label: "My Agents", page: "gallery" }, { label: "Agent Library", page: "explorer" }, { label: "Activity", page: "agents" },
+      { label: "My Agents", page: "gallery" }, { label: "Agents Library", page: "explorer" }, { label: "Activity", page: "agents" },
       { label: "Scheduled", page: "scheduled" }, { label: "Memory", page: "memory" }, { label: "Policies", page: "policies" },
       { label: "Usage", page: "usage" },
     ],
   },
   { id: "platform", label: "Platform", icon: PlatformIcon, items: [{ label: "Findings", page: "findings" }, { label: "Entities", page: "entities" }, { label: "Packages", page: "packages" }] },
+  {
+    id: "chats", label: "Chats", icon: ChatsIcon, plus: true,
+    items: [
+      { label: "My Agents", page: "gallery" }, { label: "Agent Library", page: "explorer" }, { label: "Activity", page: "agents" },
+      { label: "Scheduled", page: "scheduled" }, { label: "Memory", page: "memory" },
+    ],
+  },
 ]
 
-// 24px rows, 14px Geist; the active one becomes the white pill
-const row = "flex h-6 w-full cursor-pointer items-center gap-1.5 rounded-[4px] pr-1 pl-1.5 text-left text-[14px] leading-4 text-[var(--nav-text)] transition-colors hover:bg-[var(--nav-hover)]"
-const pill = "h-auto gap-3.5 border border-[var(--nav-line)] bg-[var(--nav-pill)] py-1.5 pl-2 text-[var(--nav-active)] drop-shadow-[0px_1px_0.5px_rgba(119,131,152,0.2)] hover:bg-[var(--nav-pill)]"
-
-function SubItem({ label, active, onClick, title }: { label: string; active: boolean; onClick: () => void; title?: string }) {
-  return (
-    <button onClick={onClick} aria-current={active ? "page" : undefined} title={title} className={cn(row, "pl-[22px]", active && cn(pill, "pl-2"))}>
-      {active && <span aria-hidden className="h-3.5 w-[1.5px] shrink-0 rounded-full bg-[var(--nav-active)]" />}
-      <span className="min-w-0 flex-1 truncate">{label}</span>
-    </button>
-  )
-}
-
-function Group({ label, icon: Icon, tint, action, children }: { label: string; icon: React.ComponentType<{ className?: string }>; tint?: boolean; action?: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <div className="relative flex w-full flex-col gap-3">
-      {/* The tree line, from under the title's icon down the items */}
-      <span aria-hidden className="absolute top-7 bottom-0 left-2 w-px bg-[var(--nav-rail)]" />
-      <div className="relative flex w-full items-center gap-1.5 text-[14px] leading-4 text-[var(--nav-muted)]">
-        {tint && <span aria-hidden className="absolute top-[3px] left-[2px] h-2.5 w-3 rounded-[2px] bg-[var(--nav-muted)]/10" />}
-        <Icon className="relative size-4 shrink-0" />
-        <span className="flex-1 truncate">{label}</span>
-        {action}
-      </div>
-      <div className="flex w-full flex-col gap-1.5">{children}</div>
-    </div>
-  )
-}
+const text = "text-[14px] leading-4 text-[#6c6a68]"
+const top = cn("flex h-6 w-full cursor-pointer items-center gap-1.5 rounded-[4px] py-1 pr-1 pl-1.5 text-left", text)
 
 export function AppSidebar() {
-  const { navigate, page, params } = useNav()
-  const { convs } = useConversations()
-  const { toggleSidebar } = useSidebar()
-  const onHome = page === "chat" && !params.conversationId
+  const { navigate, page } = useNav()
 
   return (
-    <Sidebar collapsible="offcanvas" className="font-[Geist,ui-sans-serif,system-ui,sans-serif] [&_[data-sidebar=sidebar]]:bg-[var(--nav-bg)]">
-      <div className="flex h-full flex-col">
-        {/* Header: the wordmark, and hide-the-sidebar */}
-        <div className="flex h-12 shrink-0 items-center justify-between border-b border-[var(--nav-line)] pr-4 pl-3.5">
-          <button onClick={() => navigate("chat")} aria-label="Rival home" className="flex h-6 cursor-pointer items-center justify-center rounded-[4px] p-1.5 text-[var(--nav-active)]">
+    <Sidebar collapsible="none" className="sticky top-0 h-svh w-[196px] shrink-0 border-r border-[#ecebe9] bg-[#fcfcfa] font-[Geist,ui-sans-serif,system-ui,sans-serif]">
+      <div className="flex h-full flex-col overflow-clip">
+        <div className="flex h-12 w-full shrink-0 items-center justify-between pr-4 pl-3.5">
+          <button onClick={() => navigate("explorer")} aria-label="Rival" className="flex h-6 cursor-pointer items-center justify-center rounded-[4px] p-1.5 text-[#0350d0]">
             <RivalWordmark className="h-[16.25px] w-[45px]" />
           </button>
-          <button onClick={toggleSidebar} aria-label="Hide sidebar" title="Hide sidebar" className="flex size-6 cursor-pointer items-center justify-center rounded-[4px] p-1 text-[var(--nav-text)] transition-colors hover:bg-[var(--nav-hover)]">
-            <CollapseIcon className="size-4" />
+          <button aria-label="Collapse" className="flex size-6 cursor-pointer items-center justify-center rounded-[4px] p-1.5 text-[#6c6a68]">
+            <CollapseIcon className="size-4 shrink-0" />
           </button>
         </div>
 
-        <nav aria-label="Main" className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-3.5 py-1.5">
-          <div className="flex w-full flex-col gap-6">
-            <div className="flex w-full flex-col gap-1.5">
-              <button onClick={() => navigate("chat")} className={cn(row, "drop-shadow-[0px_1px_0.5px_rgba(119,131,152,0.2)]")}>
-                <AskRivalIcon className="size-4 shrink-0" /> Ask Rival
+        <nav aria-label="Main" className="flex min-h-px w-full flex-[1_0_0] flex-col items-start gap-4 px-3 py-1.5">
+          <div className="flex w-full flex-col items-start gap-6">
+            <div className="flex w-full flex-col items-start gap-1.5">
+              <button onClick={() => navigate("chat")} className={cn(top, "drop-shadow-[0px_1px_0.5px_rgba(119,131,152,0.2)]")}>
+                <AskRivalIcon className="size-4 shrink-0" /> <span className="whitespace-nowrap">Ask Rival</span>
               </button>
-              <button onClick={() => navigate("chat")} aria-current={onHome ? "page" : undefined} className={cn(row, onHome && cn(pill, "gap-1.5 pl-1.5"))}>
-                <HomeIcon className="size-4 shrink-0" /> <span className="flex-1 truncate">Home</span>
+              <button onClick={() => navigate("chat")} className={top}>
+                <HomeIcon className="size-4 shrink-0" /> <span className="min-w-px flex-[1_0_0] truncate">Home</span>
               </button>
-              <button onClick={() => navigate("waiting")} aria-current={page === "waiting" ? "page" : undefined} className={cn(row, page === "waiting" && cn(pill, "gap-1.5 pl-1.5"))}>
-                <WaitingIcon className="size-4 shrink-0" /> <span className="flex-1 truncate">Waiting</span>
+              <button onClick={() => navigate("waiting")} className={top}>
+                <WaitingIcon className="size-4 shrink-0" /> <span className="min-w-px flex-[1_0_0] truncate">Waiting</span>
               </button>
             </div>
 
             {groups.map((g) => (
-              <Group key={g.id} label={g.label} icon={g.icon} tint={g.tint}>
-                {g.items.map((it) => <SubItem key={it.label} label={it.label} active={page === it.page} onClick={() => navigate(it.page)} />)}
-              </Group>
+              <div key={g.id} className="relative flex w-full flex-col items-start gap-3 px-0.5">
+                <span aria-hidden className="absolute top-7 bottom-0 left-3.5 w-px bg-[#9a9893]/20" />
+                <div className="relative flex w-full items-center gap-1.5 px-1">
+                  <div className="flex min-w-px flex-[1_0_0] items-center gap-1.5">
+                    <g.icon className="size-4 shrink-0 text-[#9a9893]" />
+                    <span className="truncate text-[14px] leading-4 text-[#9a9893]">{g.label}</span>
+                  </div>
+                  {g.plus && (
+                    <button onClick={() => navigate("chat")} aria-label="New chat" className="flex size-4 shrink-0 cursor-pointer items-center justify-center text-[#6c6a68]">
+                      <PlusIcon className="size-4" />
+                    </button>
+                  )}
+                </div>
+                <div className="flex w-full flex-col items-start gap-1.5">
+                  {g.items.map((it) => {
+                    const active = g.id !== "chats" && page === it.page
+                    return active ? (
+                      <button key={it.label} onClick={() => navigate(it.page)} aria-current="page" className="flex w-full cursor-pointer items-center gap-3.5 rounded-[4px] border border-[#ecebe9] bg-white py-1.5 pr-1 pl-3 text-left drop-shadow-[0px_1px_0.5px_rgba(119,131,152,0.2)]">
+                        <span aria-hidden className="relative h-3.5 w-0 shrink-0"><span className="absolute inset-y-0 -left-[0.75px] w-[1.5px] bg-[#0170fd]" /></span>
+                        <span className="min-w-px flex-[1_0_0] truncate text-[14px] leading-4 text-[#0170fd]">{it.label}</span>
+                      </button>
+                    ) : (
+                      <button key={it.label} onClick={() => navigate(it.page)} className={cn("flex h-6 w-full cursor-pointer items-center rounded-[4px] pr-1 pl-[26px] text-left", text)}>
+                        <span className="min-w-px flex-[1_0_0] truncate">{it.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
             ))}
-
-            <Group
-              label="Chats"
-              icon={ChatsIcon}
-              action={
-                <button onClick={() => navigate("chat")} aria-label="New chat" title="New chat" className="flex size-4 cursor-pointer items-center justify-center rounded-[4px] text-[var(--nav-text)] transition-colors hover:text-[var(--nav-active)]">
-                  <PlusIcon className="size-4" />
-                </button>
-              }
-            >
-              {convs.map((c) => (
-                <SubItem key={c.id} label={c.title} title={c.title} active={page === "chat" && params.conversationId === c.id} onClick={() => navigate("chat", { conversationId: c.id })} />
-              ))}
-            </Group>
           </div>
         </nav>
 
-        <div className="flex shrink-0 flex-col gap-1.5 p-1.5">
-          <button onClick={() => navigate("connectors")} aria-current={page === "connectors" ? "page" : undefined} className={cn(row, page === "connectors" && cn(pill, "gap-1.5 pl-1.5"))}>
-            <ConnectorsIcon className="size-4 shrink-0" /> <span className="flex-1 truncate">Connectors</span>
+        <div className="flex shrink-0 flex-col items-start gap-1.5 px-3.5 py-2">
+          <button onClick={() => navigate("connectors")} className={cn(top, "w-[168px]")}>
+            <ConnectorsIcon className="size-4 shrink-0" /> <span className="min-w-px flex-[1_0_0] truncate">Connectors</span>
           </button>
-          <button onClick={() => navigate("settings")} aria-current={page === "settings" ? "page" : undefined} className={cn(row, page === "settings" && cn(pill, "gap-1.5 pl-1.5"))}>
-            <SettingsIcon className="size-4 shrink-0" /> <span className="flex-1 truncate">Settings</span>
+          <button onClick={() => navigate("settings")} className={cn(top, "w-[168px]")}>
+            <SettingsIcon className="size-4 shrink-0" /> <span className="min-w-px flex-[1_0_0] truncate">Settings</span>
           </button>
-          {/* The workspace switcher (static in the demo) */}
-          <button className="flex h-10 w-full cursor-pointer items-center gap-1.5 rounded-[6px] px-1.5 py-1 text-left text-[14px] leading-4 transition-colors hover:bg-[var(--nav-hover)]">
-            <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[6px] border border-[var(--nav-line)] bg-[var(--nav-pill)] text-[var(--nav-active)] shadow-[0px_1px_1px_0px_rgba(119,131,152,0.2)]">
-              <RivalMark className="size-6" />
+          <button className="flex h-10 w-[168px] cursor-pointer items-center gap-1.5 rounded-[6px] px-0.5 py-1 text-left text-[14px] leading-4">
+            <span className="relative size-8 shrink-0 overflow-clip rounded-[6px] border border-[#ecebe9] bg-white shadow-[0px_1px_1px_0px_rgba(119,131,152,0.2)]">
+              <RivalMark className="absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2 text-[#0350d0]" />
             </span>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-[var(--nav-strong)]">Rival</span>
-              <span className="block truncate text-[var(--nav-muted)]">eden@rival.io</span>
+            <span className="flex min-w-px flex-[1_0_0] flex-col items-start justify-center">
+              <span className="text-[#121212]">Rival</span>
+              <span className="whitespace-nowrap text-[#9a9893]">eden@rival.io</span>
             </span>
-            <ExpandSimpleIcon className="size-3 shrink-0 text-[var(--nav-muted)]" />
+            <ExpandSimpleIcon className="size-3 shrink-0 text-[#9a9893]" />
           </button>
         </div>
       </div>

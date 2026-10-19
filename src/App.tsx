@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
-import { HeaderToolbar } from "@/components/header-toolbar"
+import { FrameCorners } from "@/components/agents-library-frame"
+import { BreadcrumbRobotIcon } from "@/components/nav-icons"
 import { NewChatFab } from "@/components/new-chat-fab"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -11,14 +12,14 @@ import { pages } from "@/pages"
 
 // ponytail: state-based nav, no router. Add react-router if you need shareable URLs per page.
 export default function App() {
-  const [nav, setNav] = useState<{ page: string; params: NavParams }>({ page: pages[0].id, params: {} })
+  const [nav, setNav] = useState<{ page: string; params: NavParams }>({ page: "explorer", params: {} })
   const navigate = (page: string, params: NavParams = {}) => setNav({ page, params })
 
   return (
     <NavContext.Provider value={{ navigate, page: nav.page, params: nav.params }}>
     <ConversationsProvider>
     <TooltipProvider>
-      <SidebarProvider style={{ "--sidebar-width": "180px" } as React.CSSProperties}>
+      <SidebarProvider className="overflow-x-clip" style={{ "--sidebar-width": "196px" } as React.CSSProperties}>
         <AppSidebar />
         <Shell page={nav.page} />
       </SidebarProvider>
@@ -36,13 +37,21 @@ function Shell({ page: pageId }: { page: string }) {
   const title = page.id === "chat" ? convs.find((c) => c.id === params.conversationId)?.title ?? "New chat"
     : page.id === "clone" ? `Customize ${getSuperAgent(params.templateId)?.name ?? "agent"}`
     : page.title
+  const full = page.id === "explorer"
   return (
     <>
-      <SidebarInset>
-        <HeaderToolbar title={title} />
-        <main className="flex flex-1 flex-col overflow-auto p-6">
+      <SidebarInset className="relative bg-white font-[Geist,ui-sans-serif,system-ui,sans-serif]">
+        {/* The top bar from the frame: h 48, px 16 · py 12, a #ECEBE9 line under it, the breadcrumb (robot 16 · gap 6 · Geist 12/16 #121212) */}
+        <header className="flex h-12 w-full shrink-0 items-center border-b border-[#ecebe9] px-4 py-3">
+          <div className="flex items-center gap-1.5">
+            <BreadcrumbRobotIcon className="size-4 shrink-0" />
+            <p className="max-w-[120px] overflow-hidden text-[12px] leading-4 text-ellipsis whitespace-nowrap text-[#121212]">{title}</p>
+          </div>
+        </header>
+        <main className={full ? "flex flex-1 flex-col" : "flex flex-1 flex-col overflow-auto p-6"}>
           <page.component />
         </main>
+        {full && <FrameCorners />}
       </SidebarInset>
       {!page.hideFab && <NewChatFab onClick={() => navigate("chat")} />}
     </>
