@@ -565,21 +565,26 @@ html[data-vt="expand"]::view-transition-new(root) { animation: vt-fade-in 240ms 
 .alive-base {
   position: absolute; inset: 0; z-index: -2; pointer-events: none;
   background:
-    linear-gradient(to right, rgb(18 18 18 / 0.04) 1px, transparent 1px) 0 0 / 1.25rem 1.25rem,
-    linear-gradient(to bottom, rgb(18 18 18 / 0.04) 1px, transparent 1px) 0 0 / 1.25rem 1.25rem;
-  /* fades out toward the sides and bottom (the ellipse) and toward the top line too */
-  -webkit-mask-image: radial-gradient(ellipse 70% 120% at 50% 30%, #000 0%, rgb(0 0 0 / 0.5) 50%, transparent 100%), linear-gradient(to bottom, transparent, #000 40%);
-  -webkit-mask-composite: source-in;
-  mask-image: radial-gradient(ellipse 70% 120% at 50% 30%, #000 0%, rgb(0 0 0 / 0.5) 50%, transparent 100%), linear-gradient(to bottom, transparent, #000 40%);
-  mask-composite: intersect;
+    linear-gradient(to right, rgb(18 18 18 / 0.045) 1px, transparent 1px) 0 0 / 1.25rem 1.25rem,
+    linear-gradient(to bottom, rgb(18 18 18 / 0.045) 1px, transparent 1px) 0 0 / 1.25rem 1.25rem;
+  /* One long, eased falloff (no stacked masks, so no band where it starts): strongest a little below the middle,
+     dissolving gradually toward the top line, the sides and the bottom */
+  -webkit-mask-image: radial-gradient(ellipse 62% 105% at 50% 62%,
+    #000 0%, rgb(0 0 0 / 0.86) 18%, rgb(0 0 0 / 0.66) 34%, rgb(0 0 0 / 0.45) 50%, rgb(0 0 0 / 0.27) 64%,
+    rgb(0 0 0 / 0.13) 77%, rgb(0 0 0 / 0.05) 88%, transparent 100%);
+  mask-image: radial-gradient(ellipse 62% 105% at 50% 62%,
+    #000 0%, rgb(0 0 0 / 0.86) 18%, rgb(0 0 0 / 0.66) 34%, rgb(0 0 0 / 0.45) 50%, rgb(0 0 0 / 0.27) 64%,
+    rgb(0 0 0 / 0.13) 77%, rgb(0 0 0 / 0.05) 88%, transparent 100%);
 }
-/* The section's background: a very fine grain, only toward its edges (clear in the middle, where the grid is) */
+/* The section's background: a real, fine film grain across the whole surface, kept very low in contrast
+   (it darkens the white by a few percent at most), a little denser toward the edges */
 .alive-noise {
   position: absolute; inset: 0; z-index: -3; pointer-events: none;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.32 0 0 0 0 0.35 0 0 0 0 0.42 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E") 0 0 / 180px 180px;
-  opacity: 0.48;
-  -webkit-mask-image: radial-gradient(ellipse 75% 140% at 50% 45%, transparent 45%, #000 100%);
-  mask-image: radial-gradient(ellipse 75% 140% at 50% 45%, transparent 45%, #000 100%);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='2.2' intercept='-0.15'/%3E%3CfeFuncG type='linear' slope='2.2' intercept='-0.15'/%3E%3CfeFuncB type='linear' slope='2.2' intercept='-0.1'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)'/%3E%3C/svg%3E") 0 0 / 220px 220px;
+  mix-blend-mode: multiply;
+  opacity: 0.09;
+  -webkit-mask-image: radial-gradient(ellipse 80% 120% at 50% 55%, rgb(0 0 0 / 0.6) 30%, #000 100%);
+  mask-image: radial-gradient(ellipse 80% 120% at 50% 55%, rgb(0 0 0 / 0.6) 30%, #000 100%);
 }
 
 /* Agents | Sub Agents tabs on the Agents Library (as drawn): resting is plain grey text; hover gets a white
