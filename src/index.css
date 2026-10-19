@@ -616,7 +616,14 @@ html[data-vt="expand"]::view-transition-new(root) { animation: vt-fade-in 240ms 
 /* the faint light under the pointer, in the agent's own colour (--tint, its colour square) */
 .tilt-light {
   position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 300ms ease;
-  background: radial-gradient(circle at var(--lx) var(--ly), color-mix(in oklab, var(--tint, #2e4eca) 9%, transparent), transparent 58%);
+  /* like sun on a surface: a wide, soft wash with a long eased falloff and no visible edge */
+  background: radial-gradient(ellipse 130% 110% at var(--lx) var(--ly),
+    color-mix(in oklab, var(--tint, #2e4eca) 6%, transparent) 0%,
+    color-mix(in oklab, var(--tint, #2e4eca) 4%, transparent) 22%,
+    color-mix(in oklab, var(--tint, #2e4eca) 2%, transparent) 45%,
+    color-mix(in oklab, var(--tint, #2e4eca) 0.7%, transparent) 65%,
+    transparent 85%);
+  transition: opacity 500ms ease;
 }
 .tilt-card:hover .tilt-light { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .tilt-card, .tilt-card:hover { transform: none; transition: none; } }
