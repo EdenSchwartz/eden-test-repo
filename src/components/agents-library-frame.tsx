@@ -528,6 +528,7 @@ function AgentCard({ a, selected, onSelect }: { a: LibraryAgent; selected: boole
       onClick={onSelect}
       aria-pressed={selected}
       {...tilt}
+      style={{ "--tint": colorOf(a) } as React.CSSProperties}
       className="tilt-card group relative flex cursor-pointer flex-col items-stretch overflow-hidden rounded-[0.375rem] border border-[#ecebe9] bg-white text-left hover:border-[#dddcda] aria-pressed:border-[#2e4eca]/40"
     >
       <span aria-hidden className="tilt-light" />

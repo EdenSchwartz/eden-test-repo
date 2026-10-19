@@ -613,10 +613,10 @@ html[data-vt="expand"]::view-transition-new(root) { animation: vt-fade-in 240ms 
   box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.04), var(--sx) var(--sy) 24px -10px rgba(18, 18, 18, 0.16);
   transition: transform 120ms ease-out, box-shadow 200ms ease, border-color 200ms ease;
 }
-/* the faint light under the pointer */
+/* the faint light under the pointer, in the agent's own colour (--tint, its colour square) */
 .tilt-light {
   position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 300ms ease;
-  background: radial-gradient(circle at var(--lx) var(--ly), rgb(46 78 202 / 0.045), transparent 55%);
+  background: radial-gradient(circle at var(--lx) var(--ly), color-mix(in oklab, var(--tint, #2e4eca) 9%, transparent), transparent 58%);
 }
 .tilt-card:hover .tilt-light { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .tilt-card, .tilt-card:hover { transform: none; transition: none; } }
