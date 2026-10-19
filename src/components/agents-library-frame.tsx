@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react"
-import { AppWindow, Bandage, Bot, Clock, Cloud, Crosshair, KeyRound, Search, ShieldCheck, Swords, UsersRound, X, type LucideIcon } from "lucide-react"
+import { Activity, AppWindow, Bandage, Box, Brain, Cloud, Combine, Crosshair, FileSearch, FileText, Fingerprint, FolderSearch, GitBranch, GitPullRequest, KeyRound, Network, Radar, Search, ShieldCheck, Swords, UsersRound, X, type LucideIcon } from "lucide-react"
 import { agentOutcomes, subOutcomes, type Outcome } from "@/data/outcomes"
-import { blockers, getSuperAgent } from "@/data/super-agents"
+import { getSuperAgent } from "@/data/super-agents"
+import { RivalMark } from "@/components/nav-icons"
 import { useNav } from "@/lib/nav"
 import { agents, type AgentKind } from "@/components/chat/agents"
 import { SubAgentDetail, subName, usedBy } from "@/components/tasks/sub-agent-card"
@@ -402,8 +403,8 @@ const colorOf = (a: LibraryAgent) => colors.get(a) ?? flatColors[0]
 
 function FlatTile({ color }: { color: string }) {
   return (
-    <span aria-hidden className="grid size-4 shrink-0 place-items-center rounded-[0.25rem]" style={{ background: color }}>
-      <span className="size-[0.4375rem] rounded-full bg-white" />
+    <span aria-hidden className="grid size-10 shrink-0 place-items-center rounded-[0.375rem]" style={{ background: color }}>
+      <span className="size-3.5 rounded-[0.1875rem] bg-white" />
     </span>
   )
 }
@@ -442,72 +443,90 @@ function AgentTile({ seed, hue }: { seed: string; hue: number }) {
 }
 
 /*
- * An agent card. The top is the Figma card "Frame 2147206362" as drawn: white, a #F0F0F0 edge, drop shadow
- * 0 1 1 rgba(0,0,0,.04), p 8, 4px corners; a 48px tile (6px corners, see AgentTile) with the agent's icon; the name
- * (Geist Medium 16/16, #121212) and the tagline (14/16, #6C6A68), 10 apart.
- * The tagline may take two lines here (three cards to a row). Under a hairline (kept at the bottom, so cards
- * in a row line up): what a run ends in (its outcomes, as colored dots), then what it runs on,
- * with sub agents and time per run on the right for multi-step agents. Rows never wrap.
- * Click: opens its side panel (the page's docked panel).
+ * An agent card (the design: Figma "Triage Hunter" card). White, a #ECEBE9 hairline, 6px corners, 24px padding.
+ *   Top:    the agent's colour tile (40px, a white rounded square in the middle) and its name (Geist 16, #121212),
+ *           its category as a small mono chip (#F2F2F1), then the description (14/20, #6C6A68, up to two lines)
+ *   Footer: under a hairline, three columns: Created by (the Rival mark) · Capabilities (icon + name) ·
+ *           Context (the tools it reads from, as small marks; their names on hover). One line, never wraps.
+ * Click: opens its side panel.
  */
-const tone: Record<Outcome["tone"], string> = {
-  risk: "bg-[#d8453a]", clear: "bg-[#2e4eca]", good: "bg-[#2f9e5b]", warn: "bg-[#d9921a]", unclear: "bg-[#9a9893]", failed: "bg-[#9a9893]",
+type Tool = "defender" | "sunburst" | "paloalto" | "wiz" | "github" | "aws"
+type Meta = { category: string; cap: [string, LucideIcon]; ctx: Tool[] }
+const VM = "Vuln Management", APP = "AppSec", CLOUD = "CloudSec", THREATS = "Threats", GRC = "GRC"
+const meta: Record<string, Meta> = {
+  "Triage Hunter": { category: VM, cap: ["Memory Usage", Brain], ctx: ["defender", "sunburst", "paloalto"] },
+  "Code CVE Exploitability": { category: VM, cap: ["Code Search", FileSearch], ctx: ["github", "sunburst"] },
+  "Cloud Exploitability": { category: CLOUD, cap: ["Cloud Graph", Network], ctx: ["wiz", "aws", "paloalto"] },
+  "Code SAST Exploitability": { category: APP, cap: ["Code Search", FileSearch], ctx: ["github", "sunburst"] },
+  "Red Team Simulation": { category: THREATS, cap: ["Sandbox", Box], ctx: ["aws", "github", "defender"] },
+  "Finding Ownership": { category: VM, cap: ["Git History", GitBranch], ctx: ["github", "wiz"] },
+  "WAF Analysis": { category: CLOUD, cap: ["Traffic Replay", Activity], ctx: ["paloalto", "aws"] },
+  "Remediation": { category: VM, cap: ["Code Changes", GitPullRequest], ctx: ["github", "wiz", "sunburst"] },
+  "Secret Validation": { category: APP, cap: ["Live Check", KeyRound], ctx: ["github", "aws"] },
+  "App Inventory": { category: APP, cap: ["Repo Scan", FolderSearch], ctx: ["github", "wiz"] },
+  "Deployment Mapping": { category: CLOUD, cap: ["Cloud Graph", Network], ctx: ["aws", "wiz", "github"] },
+}
+const subMeta: Partial<Record<AgentKind, Meta>> = {
+  exploitability: { category: VM, cap: ["Sandbox", Box], ctx: ["github", "wiz"] },
+  remediation: { category: VM, cap: ["Code Changes", GitPullRequest], ctx: ["github", "paloalto"] },
+  "threat-intel": { category: THREATS, cap: ["Threat Feeds", Radar], ctx: ["defender", "sunburst"] },
+  "red-team": { category: THREATS, cap: ["Sandbox", Box], ctx: ["aws", "defender"] },
+  "asset-discovery": { category: CLOUD, cap: ["Cloud Graph", Network], ctx: ["aws", "wiz", "github"] },
+  ownership: { category: VM, cap: ["Git History", GitBranch], ctx: ["github"] },
+  "data-leak": { category: APP, cap: ["Traffic Scan", Fingerprint], ctx: ["defender", "paloalto"] },
+  reporting: { category: GRC, cap: ["Reports", FileText], ctx: ["github", "sunburst"] },
+  correlation: { category: VM, cap: ["Dedup", Combine], ctx: ["wiz", "sunburst", "defender"] },
+  prioritization: { category: VM, cap: ["Memory Usage", Brain], ctx: ["wiz", "defender"] },
+}
+const metaOf = (a: LibraryAgent): Meta =>
+  meta[a.name] ?? ((a.partOf !== undefined && a.kind && subMeta[a.kind]) || { category: VM, cap: ["Memory Usage", Brain], ctx: ["github"] })
+
+// Small marks for the tools an agent reads from, in each tool's colours (simplified, not the official logos)
+const toolNames: Record<Tool, string> = { defender: "Microsoft Defender", sunburst: "Sumo Logic", paloalto: "Palo Alto Networks", wiz: "Wiz", github: "GitHub", aws: "AWS" }
+function ToolMark({ tool }: { tool: Tool }) {
+  const art: Record<Tool, React.ReactNode> = {
+    defender: <path d="M8 1.2 2.6 3.1v4.3c0 3.4 2.3 6.1 5.4 7.4 3.1-1.3 5.4-4 5.4-7.4V3.1L8 1.2Zm-.6 2.1v4.4H3.8V4.1l3.6-.8Zm1.2 0 3.6.8v3.6H8.6V3.3ZM3.9 8.9h3.5v4.2C5.5 12.1 4.2 10.6 3.9 8.9Zm4.7 0h3.5c-.3 1.7-1.6 3.2-3.5 4.2V8.9Z" fill="#0078d4" />,
+    sunburst: <g stroke="#121212" strokeWidth="1.3" strokeLinecap="round">{Array.from({ length: 12 }, (_, i) => { const t = (i / 12) * Math.PI * 2; return <line key={i} x1={8 + Math.cos(t) * 3.4} y1={8 + Math.sin(t) * 3.4} x2={8 + Math.cos(t) * 6.6} y2={8 + Math.sin(t) * 6.6} /> })}</g>,
+    paloalto: <g fill="#fa582d"><path d="m6.2 2.4 3 3-5.3 5.3-3-3z" /><path d="m11.1 5.3 3 3-5.3 5.3-3-3z" /></g>,
+    wiz: <text x="8" y="12" textAnchor="middle" fontSize="11" fontWeight="800" fontFamily="Geist, sans-serif" fill="#1b4dff">W</text>,
+    github: <><circle cx="8" cy="8" r="6.6" fill="#24292f" /><path d="M6.2 11.6v-1.4c-1.6.3-2-.7-2-.7-.3-.7-.7-.9-.7-.9-.6-.4 0-.4 0-.4.6 0 1 .7 1 .7.5.9 1.4.7 1.7.5 0-.4.2-.7.4-.8-1.3-.1-2.6-.6-2.6-2.8 0-.6.2-1.1.6-1.5-.1-.2-.3-.8 0-1.5 0 0 .5-.2 1.6.6a5.4 5.4 0 0 1 2.9 0c1.1-.8 1.6-.6 1.6-.6.3.7.1 1.3 0 1.5.4.4.6.9.6 1.5 0 2.2-1.3 2.7-2.6 2.8.2.2.4.5.4 1v1.9" fill="#fff" /></>,
+    aws: <><path d="M2.5 10.2c3.4 2 7.6 2 11 0" stroke="#ff9900" strokeWidth="1.4" fill="none" strokeLinecap="round" /><path d="m12 9.2 1.8.9-.6 1.9" stroke="#ff9900" strokeWidth="1.3" fill="none" strokeLinecap="round" strokeLinejoin="round" /><text x="8" y="8" textAnchor="middle" fontSize="6.4" fontWeight="700" fontFamily="Geist, sans-serif" fill="#232f3e">aws</text></>,
+  }
+  return <svg viewBox="0 0 16 16" className="size-[1.125rem] shrink-0" role="img" aria-label={toolNames[tool]}><title>{toolNames[tool]}</title>{art[tool]}</svg>
 }
 
 function AgentCard({ a, selected, onSelect }: { a: LibraryAgent; selected: boolean; onSelect: () => void }) {
-  const sa = a.templateId ? getSuperAgent(a.templateId) : undefined
-  const setup = sa ? blockers(sa).length > 0 : false
+  const m = metaOf(a)
+  const Cap = m.cap[1]
   return (
     <button
       onClick={onSelect}
       aria-pressed={selected}
-      className="group flex cursor-pointer flex-col items-stretch rounded-[0.25rem] border border-[#f0f0f0] bg-white aria-pressed:border-[#2e4eca]/40 p-2 text-left drop-shadow-[0px_1px_1px_rgba(0,0,0,0.04)] transition-[border-color,translate] duration-200 hover:-translate-y-px hover:border-[#e2e1df]"
+      className="group flex cursor-pointer flex-col items-stretch rounded-[0.375rem] border border-[#ecebe9] bg-white text-left shadow-[0px_1px_1px_rgba(0,0,0,0.04)] transition-[border-color,translate] duration-200 hover:-translate-y-px hover:border-[#dddcda] aria-pressed:border-[#2e4eca]/40"
     >
-      {TILE_STYLE === "flat" ? (
-        // The agent's colour as a small square beside its name (the title's height), the description below
-        <span className="mb-3 flex w-full flex-col items-start gap-2.5 px-1 pt-1.5">
-          <span className="flex w-full min-w-0 items-center gap-2">
-            <FlatTile color={colorOf(a)} />
-            <span className="min-w-0 flex-1 truncate text-[1rem] leading-4 font-medium text-[#121212]">{a.name}</span>
+      <span className="flex flex-col items-start gap-3.5 p-5">
+        <span className="flex w-full min-w-0 items-center gap-2.5">
+          {TILE_STYLE === "flat" ? <FlatTile color={colorOf(a)} /> : <AgentTile seed={a.name} hue={hueOf(a)} />}
+          <span className="min-w-0 flex-1 truncate text-[1rem] leading-5 font-medium text-[#121212]">{a.name}</span>
+        </span>
+        <span className="rounded-[0.25rem] bg-[#f2f2f1] px-2 py-0.5 font-[IBM_Plex_Mono,ui-monospace,monospace] text-[0.75rem] leading-5 whitespace-nowrap text-[#6c6a68]">{m.category}</span>
+        <span className="line-clamp-2 text-[0.875rem] leading-5 text-pretty text-[#6c6a68]">{a.tagline}</span>
+      </span>
+      <span className="mt-auto grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-4 border-t border-[#ecebe9] px-5 pt-5 pb-5 whitespace-nowrap">
+        <span className="flex flex-col gap-3">
+          <span className="text-[0.875rem] leading-4 text-[#6c6a68]">Created by</span>
+          <span className="flex h-5 items-center"><RivalMark className="size-4 text-[#0350d0]" /></span>
+        </span>
+        <span className="flex min-w-0 flex-col gap-3">
+          <span className="truncate text-[0.875rem] leading-4 text-[#6c6a68]">Capabilities</span>
+          <span className="flex h-5 min-w-0 items-center gap-1.5 text-[0.875rem] leading-5 text-[#121212]">
+            <Cap className="size-4 shrink-0 text-[#6c6a68]" strokeWidth={1.5} />
+            <span className="truncate">{m.cap[0]}</span>
           </span>
-          <span className="line-clamp-2 w-full text-[0.875rem] leading-4 text-pretty text-[#6c6a68]">{a.tagline}</span>
         </span>
-      ) : (
-        <span className="mb-3 flex w-full items-start gap-2">
-          <AgentTile seed={a.name} hue={hueOf(a)} />
-          <span className="flex min-w-0 flex-1 flex-col items-start gap-2.5 pt-1">
-            <span className="w-full truncate text-[1rem] leading-4 font-medium text-[#121212]">{a.name}</span>
-            <span className="line-clamp-2 w-full text-[0.875rem] leading-4 text-pretty text-[#6c6a68]">{a.tagline}</span>
-          </span>
-        </span>
-      )}
-
-      <span className="mt-auto flex flex-col gap-2.5 border-t border-[#f0f0f0] px-1 pt-2.5 pb-1 text-[0.75rem] leading-4 whitespace-nowrap text-[#6c6a68]">
-        <span className="flex h-4 min-w-0 items-center gap-3 overflow-hidden">
-          {a.outcomes.length > 0 ? a.outcomes.map((o) => (
-            <span key={o.label} className="inline-flex items-center gap-1.5">
-              <span aria-hidden className={`size-1.5 rounded-full ${tone[o.tone]}`} />
-              {o.label}
-            </span>
-          )) : <span className="text-[#c9c7c3]">—</span>}
-        </span>
-        <span className="flex h-5 min-w-0 items-center gap-3 overflow-hidden">
-          <span className="w-12 shrink-0 text-[#9a9893]">{a.partOf !== undefined ? "Part of" : "Runs on"}</span>
-          {a.partOf !== undefined ? <span>{a.partOf} {a.partOf === 1 ? "agent" : "agents"}</span> : <span className="flex items-center gap-1">
-            {a.runsOn.length > 0 ? a.runsOn.map((r) => (
-              <span key={r} className="rounded-[0.1875rem] border border-[#ecebe9] px-1.5 text-[0.6875rem] leading-[1.125rem] text-[#6c6a68]">{r}</span>
-            )) : <span className="text-[#c9c7c3]">—</span>}
-          </span>}
-          {sa && (
-            <span className="ml-auto flex items-center gap-3 text-[#9a9893]">
-              {setup ? (
-                <span className="inline-flex items-center gap-1.5 font-medium text-[#b7791f]"><span aria-hidden className="size-1.5 rounded-full bg-[#d9921a]" />Needs setup</span>
-              ) : <>
-                <span className="inline-flex items-center gap-1.5"><Bot className="size-3.5" />{sa.pattern.flat().length}</span>
-                <span className="inline-flex items-center gap-1.5"><Clock className="size-3.5" />~{sa.runtime}</span>
-              </>}
-            </span>
-          )}
+        <span className="flex flex-col gap-3">
+          <span className="text-[0.875rem] leading-4 text-[#6c6a68]">Context</span>
+          <span className="flex h-5 items-center gap-1">{m.ctx.map((t) => <ToolMark key={t} tool={t} />)}</span>
         </span>
       </span>
     </button>
