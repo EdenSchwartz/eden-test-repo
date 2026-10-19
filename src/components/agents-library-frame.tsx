@@ -1,4 +1,8 @@
 import { useEffect, useRef } from "react"
+import { Bot, Clock, Play } from "lucide-react"
+import { agentOutcomes, type Outcome } from "@/data/outcomes"
+import { blockers, superAgents, type SuperAgent } from "@/data/super-agents"
+import { useNav } from "@/lib/nav"
 
 /*
  * Hovering the header box: a faint, shimmering grid (ShimmerGrid) shows up around the pointer (like the Hex look's New chat, but lighter)
@@ -149,7 +153,9 @@ export function AgentsLibraryFrame() {
       {/* The cards area: a drafting-sheet margin on both sides (fine diagonal hatching, a hairline rail), cards go between */}
       <div className="relative flex w-full flex-1">
         <span aria-hidden className="sheet-margin left-0 border-r" />
-        <div className="min-w-0 flex-1" />
+        <div className="grid min-w-0 flex-1 auto-rows-min grid-cols-[repeat(auto-fill,minmax(23.8125rem,1fr))] gap-4 px-2 pt-8 pb-10">
+          {superAgents.filter((sa) => !sa.custom).map((sa) => <AgentCard key={sa.id} sa={sa} />)}
+        </div>
         <span aria-hidden className="sheet-margin right-0 border-l" />
       </div>
     </div>
@@ -166,5 +172,65 @@ export function FrameCorners() {
       <div aria-hidden className={sq} style={{ right: 0, top: "2.625rem" }} />
       <div aria-hidden className={sq} style={{ right: -1, top: "10.4375rem" }} />
     </>
+  )
+}
+
+/*
+ * An agent card. The top is the Figma card "Frame 2147206362" as drawn: white, a #F0F0F0 edge, drop shadow
+ * 0 1 1 rgba(0,0,0,.04), p 8, 4px corners; a 48px #5E64BF tile (6px corners) with the white icon; the name
+ * (Geist Medium 16/16, #121212) and the tagline (14/16, #6C6A68), 10 apart.
+ * Under a hairline, what the earlier cards told you: what a run ends in (its outcomes), and one quiet line,
+ * never wrapping: made by Rival · sub agents · time per run · runs this month · Needs setup when a tool is missing.
+ * Click: make it yours in a short chat (the Customize page).
+ */
+const tone: Record<Outcome["tone"], string> = {
+  risk: "bg-[#d8453a]", clear: "bg-[#2e4eca]", good: "bg-[#2f9e5b]", warn: "bg-[#d9921a]", unclear: "bg-[#9a9893]", failed: "bg-[#9a9893]",
+}
+
+function AgentCard({ sa }: { sa: SuperAgent }) {
+  const { navigate } = useNav()
+  const Icon = sa.icon
+  const outcomes = (agentOutcomes[sa.id] ?? []).filter((o) => o.label !== "Failed").slice(0, 3)
+  const setup = blockers(sa).length > 0
+  return (
+    <button
+      onClick={() => navigate("clone", { templateId: sa.id })}
+      className="group flex cursor-pointer flex-col items-stretch rounded-[0.25rem] border border-[#f0f0f0] bg-white p-2 text-left drop-shadow-[0px_1px_1px_rgba(0,0,0,0.04)] transition-[border-color,translate] duration-200 hover:-translate-y-px hover:border-[#e2e1df]"
+    >
+      <span className="flex w-full items-center gap-2">
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-[0.375rem] bg-[#5e64bf] text-white">
+          <Icon className="size-6" strokeWidth={1.5} />
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col items-start gap-2.5">
+          <span className="w-full truncate text-[1rem] leading-4 font-medium text-[#121212]">{sa.name}</span>
+          <span className="w-full truncate text-[0.875rem] leading-4 text-[#6c6a68]">{sa.tagline}</span>
+        </span>
+      </span>
+
+      <span className="mt-2 flex flex-col gap-2.5 border-t border-[#f0f0f0] px-1 pt-2.5 pb-1 text-[0.75rem] leading-4 whitespace-nowrap text-[#6c6a68]">
+        {outcomes.length > 0 && (
+          <span className="flex min-w-0 items-center gap-3 overflow-hidden">
+            <span className="text-[#9a9893]">Ends in</span>
+            {outcomes.map((o) => (
+              <span key={o.label} className="inline-flex items-center gap-1.5">
+                <span aria-hidden className={`size-1.5 rounded-full ${tone[o.tone]}`} />
+                {o.label}
+              </span>
+            ))}
+          </span>
+        )}
+        <span className="flex min-w-0 items-center gap-3 overflow-hidden text-[#9a9893]">
+          <span className="inline-flex items-center gap-1.5"><img src="/rival-logo.png" alt="" className="size-3.5" />Rival</span>
+          <span className="inline-flex items-center gap-1.5"><Bot className="size-3.5" />{sa.pattern.flat().length} agents</span>
+          <span className="inline-flex items-center gap-1.5"><Clock className="size-3.5" />~{sa.runtime}</span>
+          <span className="inline-flex items-center gap-1.5"><Play className="size-3.5" />{sa.runsThisMonth} runs / mo</span>
+          {setup && (
+            <span className="ml-auto inline-flex items-center gap-1.5 font-medium text-[#b7791f]">
+              <span aria-hidden className="size-1.5 rounded-full bg-[#d9921a]" />Needs setup
+            </span>
+          )}
+        </span>
+      </span>
+    </button>
   )
 }
