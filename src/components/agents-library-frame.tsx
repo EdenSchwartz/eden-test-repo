@@ -153,7 +153,7 @@ export function AgentsLibraryFrame() {
       {/* The cards area: a drafting-sheet margin on both sides (fine diagonal hatching, a hairline rail), cards go between */}
       <div className="relative flex w-full flex-1">
         <span aria-hidden className="sheet-margin left-0 border-r" />
-        <div className="grid min-w-0 flex-1 grid-cols-3 content-start gap-4 px-2 pt-8 pb-10">
+        <div className="grid min-w-0 flex-1 grid-cols-[repeat(3,minmax(0,1fr))] content-start gap-4 mx-8 px-2 pt-8 pb-10">
           {library.map((a) => <AgentCard key={a.name} a={a} />)}
         </div>
         <span aria-hidden className="sheet-margin right-0 border-l" />
