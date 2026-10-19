@@ -556,15 +556,15 @@ html[data-vt="expand"]::view-transition-new(root) { animation: vt-fade-in 240ms 
 .alive-grid, .alive-glow { position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity 600ms ease; }
 .alive-grid {
   background:
-    linear-gradient(to right, rgb(18 18 18 / 0.045) 1px, transparent 1px) 0 0 / 1.25rem 1.25rem,
-    linear-gradient(to bottom, rgb(18 18 18 / 0.045) 1px, transparent 1px) 0 0 / 1.25rem 1.25rem;
+    linear-gradient(to right, rgb(18 18 18 / 0.07) 1px, transparent 1px) 0 0 / 1.25rem 1.25rem,
+    linear-gradient(to bottom, rgb(18 18 18 / 0.07) 1px, transparent 1px) 0 0 / 1.25rem 1.25rem;
   -webkit-mask-image: radial-gradient(11rem circle at var(--ax, 50%) var(--ay, 50%), #000 0%, rgb(0 0 0 / 0.35) 45%, transparent 100%);
   mask-image: radial-gradient(11rem circle at var(--ax, 50%) var(--ay, 50%), #000 0%, rgb(0 0 0 / 0.35) 45%, transparent 100%);
 }
 .alive-glow {
   background:
-    radial-gradient(16rem circle at var(--ax, 50%) var(--ay, 50%), rgb(3 80 208 / 0.055), transparent 70%),
-    radial-gradient(28rem circle at calc(var(--ax, 50%) + 6rem) calc(var(--ay, 50%) - 2rem), rgb(1 112 253 / 0.025), transparent 70%);
+    radial-gradient(11rem circle at var(--ax, 50%) var(--ay, 50%), rgb(3 80 208 / 0.085), transparent 70%),
+    radial-gradient(19rem circle at calc(var(--ax, 50%) + 4rem) calc(var(--ay, 50%) - 1.5rem), rgb(1 112 253 / 0.04), transparent 70%);
 }
 .alive-box:hover .alive-grid, .alive-box:hover .alive-glow { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .alive-grid, .alive-glow { transition: none; } }
