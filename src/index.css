@@ -567,3 +567,11 @@ html[data-vt="expand"]::view-transition-new(root) { animation: vt-fade-in 240ms 
 }
 .alive-box:hover .alive-grid, .alive-box:hover .alive-glow { opacity: 1; transition-duration: 600ms; }
 @media (prefers-reduced-motion: reduce) { .alive-grid, .alive-glow { transition: none; } }
+
+/* The side margins of the Agents Library cards area (components/agents-library-frame.tsx): 2rem strips of
+   fine 45° hatching in the frame's line color, each with a hairline rail on its content side */
+.sheet-margin {
+  position: absolute; top: 0; bottom: 0; width: 2rem; pointer-events: none;
+  border-color: #ecebe9;
+  background: repeating-linear-gradient(-45deg, rgb(154 152 147 / 0.16) 0 1px, transparent 1px 6px);
+}

@@ -137,7 +137,7 @@ function ShimmerGrid() {
 export function AgentsLibraryFrame() {
   const alive = useAliveHover()
   return (
-    <div className="flex flex-col items-start bg-white whitespace-nowrap">
+    <div className="flex flex-1 flex-col items-start bg-white whitespace-nowrap">
       <div {...alive} className="alive-box relative isolate flex w-full flex-col items-start justify-center gap-3 overflow-hidden border-b border-[#ecebe9] bg-white p-10">
         <span aria-hidden className="alive-glow" />
         <ShimmerGrid />
@@ -145,6 +145,12 @@ export function AgentsLibraryFrame() {
         <p className="text-[0.875rem] leading-4 font-normal text-[#6c6a68]">
           Ready-made security agents by Rival. Pick one, make it yours in a short chat, and it joins My Agents.
         </p>
+      </div>
+      {/* The cards area: a drafting-sheet margin on both sides (fine diagonal hatching, a hairline rail), cards go between */}
+      <div className="relative flex w-full flex-1">
+        <span aria-hidden className="sheet-margin left-0 border-r" />
+        <div className="min-w-0 flex-1" />
+        <span aria-hidden className="sheet-margin right-0 border-l" />
       </div>
     </div>
   )
