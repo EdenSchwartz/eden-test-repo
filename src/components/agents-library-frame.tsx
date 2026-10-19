@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react"
-import { Bot, Clock, Play } from "lucide-react"
+import { AppWindow, Bandage, Bot, Clock, Cloud, Crosshair, KeyRound, ShieldCheck, Swords, UsersRound, type LucideIcon } from "lucide-react"
 import { agentOutcomes, type Outcome } from "@/data/outcomes"
-import { blockers, superAgents, type SuperAgent } from "@/data/super-agents"
+import { blockers, getSuperAgent } from "@/data/super-agents"
 import { useNav } from "@/lib/nav"
 
 /*
@@ -153,8 +153,8 @@ export function AgentsLibraryFrame() {
       {/* The cards area: a drafting-sheet margin on both sides (fine diagonal hatching, a hairline rail), cards go between */}
       <div className="relative flex w-full flex-1">
         <span aria-hidden className="sheet-margin left-0 border-r" />
-        <div className="grid min-w-0 flex-1 auto-rows-min grid-cols-[repeat(auto-fill,minmax(23.8125rem,1fr))] gap-4 px-2 pt-8 pb-10">
-          {superAgents.filter((sa) => !sa.custom).map((sa) => <AgentCard key={sa.id} sa={sa} />)}
+        <div className="grid min-w-0 flex-1 grid-cols-3 content-start gap-4 px-2 pt-8 pb-10">
+          {library.map((a) => <AgentCard key={a.name} a={a} />)}
         </div>
         <span aria-hidden className="sheet-margin right-0 border-l" />
       </div>
@@ -162,71 +162,95 @@ export function AgentsLibraryFrame() {
   )
 }
 
-// The four squares, placed against the area right of the sidebar (left -1 / 1712 / 1713 at a 1724px wide area)
+// The squares on the header's line, at both ends (the frame's top pair sat on the top bar's line, gone on this page)
 export function FrameCorners() {
   const sq = "absolute size-3 border border-[#dddcda] bg-white"
   return (
     <>
-      <div aria-hidden className={sq} style={{ left: -1, top: "10.4375rem" }} />
-      <div aria-hidden className={sq} style={{ left: -1, top: "2.625rem" }} />
-      <div aria-hidden className={sq} style={{ right: 0, top: "2.625rem" }} />
-      <div aria-hidden className={sq} style={{ right: -1, top: "10.4375rem" }} />
+      <div aria-hidden className={sq} style={{ left: -1, top: "7.4375rem" }} />
+      <div aria-hidden className={sq} style={{ right: -1, top: "7.4375rem" }} />
     </>
   )
 }
 
 /*
+ * The library: Triage Hunter (the demo's own multi-step agent), then the product's built-in agents
+ * (the real Agents page on dev): their outcomes and what they run on, as there. Taglines shortened to fit the card.
+ */
+type LibraryAgent = { name: string; tagline: string; icon: LucideIcon; outcomes: Outcome[]; runsOn: string[]; templateId?: string }
+const exploit: Outcome[] = [{ label: "Exploitable", tone: "risk" }, { label: "Not exploitable", tone: "clear" }, { label: "Unclear", tone: "unclear" }]
+const triage = getSuperAgent("triage")!
+const library: LibraryAgent[] = [
+  { name: triage.name, tagline: triage.tagline, icon: triage.icon, outcomes: agentOutcomes.triage.filter((o) => o.label !== "Failed"), runsOn: ["CVE", "SAST"], templateId: "triage" },
+  { name: "Code CVE Exploitability", tagline: "Checks if a CVE in a code dependency is really exploitable.", icon: Crosshair, outcomes: exploit, runsOn: ["CVE"] },
+  { name: "Cloud Exploitability", tagline: "Checks if a cloud scanner finding is really exploitable.", icon: Crosshair, outcomes: exploit, runsOn: ["CVE"] },
+  { name: "Code SAST Exploitability", tagline: "Traces a SAST finding to see if it's really reachable.", icon: Crosshair, outcomes: exploit, runsOn: ["SAST"] },
+  { name: "Red Team Simulation", tagline: "Reproduces a finding with an isolated proof of concept.", icon: Swords, outcomes: [{ label: "Exploit demonstrated", tone: "risk" }, { label: "Not reproduced", tone: "unclear" }], runsOn: ["CVE", "SAST"] },
+  { name: "Finding Ownership", tagline: "Finds the person or team that should own the fix.", icon: UsersRound, outcomes: [], runsOn: ["CVE", "SAST", "Secret"] },
+  { name: "WAF Analysis", tagline: "Checks if WAF rules block a finding's ingress path.", icon: ShieldCheck, outcomes: [{ label: "Irrelevant", tone: "unclear" }, { label: "Mitigated", tone: "clear" }, { label: "Suggestion", tone: "warn" }], runsOn: ["CVE", "SAST"] },
+  { name: "Remediation", tagline: "Fixes a finding in a sandbox copy of the repository.", icon: Bandage, outcomes: [{ label: "Easy", tone: "clear" }, { label: "Medium", tone: "warn" }, { label: "Hard", tone: "risk" }], runsOn: ["CVE", "SAST"] },
+  { name: "Secret Validation", tagline: "Decides if a leaked secret is real or a false positive.", icon: KeyRound, outcomes: [{ label: "Yes", tone: "risk" }, { label: "No", tone: "good" }], runsOn: ["Secret"] },
+  { name: "App Inventory", tagline: "Discovers every deployable app and shared library.", icon: AppWindow, outcomes: [], runsOn: ["Branch"] },
+  { name: "Deployment Mapping", tagline: "Maps non-containerized apps to their cloud workloads.", icon: Cloud, outcomes: [], runsOn: [] },
+]
+
+/*
  * An agent card. The top is the Figma card "Frame 2147206362" as drawn: white, a #F0F0F0 edge, drop shadow
  * 0 1 1 rgba(0,0,0,.04), p 8, 4px corners; a 48px #5E64BF tile (6px corners) with the white icon; the name
  * (Geist Medium 16/16, #121212) and the tagline (14/16, #6C6A68), 10 apart.
- * Under a hairline, what the earlier cards told you: what a run ends in (its outcomes), and one quiet line,
- * never wrapping: made by Rival · sub agents · time per run · runs this month · Needs setup when a tool is missing.
- * Click: make it yours in a short chat (the Customize page).
+ * The tagline may take two lines here (three cards to a row). Under a hairline (kept at the bottom, so cards
+ * in a row line up): what a run ends in (its outcomes, as colored dots), then what it runs on,
+ * with sub agents and time per run on the right for multi-step agents. Rows never wrap.
+ * Click: make it yours in a short chat (the Customize page; Triage Hunter only for now).
  */
 const tone: Record<Outcome["tone"], string> = {
   risk: "bg-[#d8453a]", clear: "bg-[#2e4eca]", good: "bg-[#2f9e5b]", warn: "bg-[#d9921a]", unclear: "bg-[#9a9893]", failed: "bg-[#9a9893]",
 }
 
-function AgentCard({ sa }: { sa: SuperAgent }) {
+function AgentCard({ a }: { a: LibraryAgent }) {
   const { navigate } = useNav()
-  const Icon = sa.icon
-  const outcomes = (agentOutcomes[sa.id] ?? []).filter((o) => o.label !== "Failed").slice(0, 3)
-  const setup = blockers(sa).length > 0
+  const Icon = a.icon
+  const sa = a.templateId ? getSuperAgent(a.templateId) : undefined
+  const setup = sa ? blockers(sa).length > 0 : false
   return (
     <button
-      onClick={() => navigate("clone", { templateId: sa.id })}
+      onClick={() => sa && navigate("clone", { templateId: sa.id })}
       className="group flex cursor-pointer flex-col items-stretch rounded-[0.25rem] border border-[#f0f0f0] bg-white p-2 text-left drop-shadow-[0px_1px_1px_rgba(0,0,0,0.04)] transition-[border-color,translate] duration-200 hover:-translate-y-px hover:border-[#e2e1df]"
     >
-      <span className="flex w-full items-center gap-2">
+      <span className="mb-3 flex w-full items-start gap-2">
         <span className="flex size-12 shrink-0 items-center justify-center rounded-[0.375rem] bg-[#5e64bf] text-white">
           <Icon className="size-6" strokeWidth={1.5} />
         </span>
-        <span className="flex min-w-0 flex-1 flex-col items-start gap-2.5">
-          <span className="w-full truncate text-[1rem] leading-4 font-medium text-[#121212]">{sa.name}</span>
-          <span className="w-full truncate text-[0.875rem] leading-4 text-[#6c6a68]">{sa.tagline}</span>
+        <span className="flex min-w-0 flex-1 flex-col items-start gap-2.5 pt-1">
+          <span className="w-full truncate text-[1rem] leading-4 font-medium text-[#121212]">{a.name}</span>
+          <span className="line-clamp-2 w-full text-[0.875rem] leading-4 text-pretty text-[#6c6a68]">{a.tagline}</span>
         </span>
       </span>
 
-      <span className="mt-2 flex flex-col gap-2.5 border-t border-[#f0f0f0] px-1 pt-2.5 pb-1 text-[0.75rem] leading-4 whitespace-nowrap text-[#6c6a68]">
-        {outcomes.length > 0 && (
-          <span className="flex min-w-0 items-center gap-3 overflow-hidden">
-            <span className="text-[#9a9893]">Ends in</span>
-            {outcomes.map((o) => (
-              <span key={o.label} className="inline-flex items-center gap-1.5">
-                <span aria-hidden className={`size-1.5 rounded-full ${tone[o.tone]}`} />
-                {o.label}
-              </span>
-            ))}
+      <span className="mt-auto flex flex-col gap-2.5 border-t border-[#f0f0f0] px-1 pt-2.5 pb-1 text-[0.75rem] leading-4 whitespace-nowrap text-[#6c6a68]">
+        <span className="flex h-4 min-w-0 items-center gap-3 overflow-hidden">
+          {a.outcomes.length > 0 ? a.outcomes.map((o) => (
+            <span key={o.label} className="inline-flex items-center gap-1.5">
+              <span aria-hidden className={`size-1.5 rounded-full ${tone[o.tone]}`} />
+              {o.label}
+            </span>
+          )) : <span className="text-[#c9c7c3]">—</span>}
+        </span>
+        <span className="flex h-5 min-w-0 items-center gap-3 overflow-hidden">
+          <span className="w-12 shrink-0 text-[#9a9893]">Runs on</span>
+          <span className="flex items-center gap-1">
+            {a.runsOn.length > 0 ? a.runsOn.map((r) => (
+              <span key={r} className="rounded-[0.1875rem] border border-[#ecebe9] px-1.5 text-[0.6875rem] leading-[1.125rem] text-[#6c6a68]">{r}</span>
+            )) : <span className="text-[#c9c7c3]">—</span>}
           </span>
-        )}
-        <span className="flex min-w-0 items-center gap-3 overflow-hidden text-[#9a9893]">
-          <span className="inline-flex items-center gap-1.5"><img src="/rival-logo.png" alt="" className="size-3.5" />Rival</span>
-          <span className="inline-flex items-center gap-1.5"><Bot className="size-3.5" />{sa.pattern.flat().length} agents</span>
-          <span className="inline-flex items-center gap-1.5"><Clock className="size-3.5" />~{sa.runtime}</span>
-          <span className="inline-flex items-center gap-1.5"><Play className="size-3.5" />{sa.runsThisMonth} runs / mo</span>
-          {setup && (
-            <span className="ml-auto inline-flex items-center gap-1.5 font-medium text-[#b7791f]">
-              <span aria-hidden className="size-1.5 rounded-full bg-[#d9921a]" />Needs setup
+          {sa && (
+            <span className="ml-auto flex items-center gap-3 text-[#9a9893]">
+              {setup ? (
+                <span className="inline-flex items-center gap-1.5 font-medium text-[#b7791f]"><span aria-hidden className="size-1.5 rounded-full bg-[#d9921a]" />Needs setup</span>
+              ) : <>
+                <span className="inline-flex items-center gap-1.5"><Bot className="size-3.5" />{sa.pattern.flat().length}</span>
+                <span className="inline-flex items-center gap-1.5"><Clock className="size-3.5" />~{sa.runtime}</span>
+              </>}
             </span>
           )}
         </span>
