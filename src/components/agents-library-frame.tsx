@@ -445,52 +445,53 @@ function AgentTile({ seed, hue }: { seed: string; hue: number }) {
 /*
  * An agent card (the design: Figma "Triage Hunter" card). White, a #ECEBE9 hairline, 6px corners, 24px padding.
  *   Top:    the agent's colour tile (40px, a white rounded square in the middle) and its name (Geist 16, #121212),
- *           its category as a small mono chip (#F2F2F1), then the description (14/20, #6C6A68, up to two lines)
+ *           its one or two categories as small mono chips (#F2F2F1), then the description (14/20, #6C6A68, up to two lines)
  *   Footer: under a hairline, three columns: Created by (the Rival mark) · Capabilities (icon + name) ·
- *           Context (the tools it reads from, as small marks; their names on hover). One line, never wraps.
+ *           Context (only the integrations it pulls data from, as small marks; their names on hover). One line, never wraps.
  * Click: opens its side panel.
  */
-type Tool = "defender" | "sunburst" | "paloalto" | "wiz" | "github" | "aws"
-type Meta = { category: string; cap: [string, LucideIcon]; ctx: Tool[] }
+type Tool = "wiz" | "snyk" | "github" | "defender" | "paloalto" | "semgrep"
+// category: one or two; ctx: the integrations it pulls its data from (sources only)
+type Meta = { categories: string[]; cap: [string, LucideIcon]; ctx: Tool[] }
 const VM = "Vuln Management", APP = "AppSec", CLOUD = "CloudSec", THREATS = "Threats", GRC = "GRC"
 const meta: Record<string, Meta> = {
-  "Triage Hunter": { category: VM, cap: ["Memory Usage", Brain], ctx: ["defender", "sunburst", "paloalto"] },
-  "Code CVE Exploitability": { category: VM, cap: ["Code Search", FileSearch], ctx: ["github", "sunburst"] },
-  "Cloud Exploitability": { category: CLOUD, cap: ["Cloud Graph", Network], ctx: ["wiz", "aws", "paloalto"] },
-  "Code SAST Exploitability": { category: APP, cap: ["Code Search", FileSearch], ctx: ["github", "sunburst"] },
-  "Red Team Simulation": { category: THREATS, cap: ["Sandbox", Box], ctx: ["aws", "github", "defender"] },
-  "Finding Ownership": { category: VM, cap: ["Git History", GitBranch], ctx: ["github", "wiz"] },
-  "WAF Analysis": { category: CLOUD, cap: ["Traffic Replay", Activity], ctx: ["paloalto", "aws"] },
-  "Remediation": { category: VM, cap: ["Code Changes", GitPullRequest], ctx: ["github", "wiz", "sunburst"] },
-  "Secret Validation": { category: APP, cap: ["Live Check", KeyRound], ctx: ["github", "aws"] },
-  "App Inventory": { category: APP, cap: ["Repo Scan", FolderSearch], ctx: ["github", "wiz"] },
-  "Deployment Mapping": { category: CLOUD, cap: ["Cloud Graph", Network], ctx: ["aws", "wiz", "github"] },
+  "Triage Hunter": { categories: [VM, APP], cap: ["Memory Usage", Brain], ctx: ["wiz", "snyk", "github"] },
+  "Code CVE Exploitability": { categories: [VM, APP], cap: ["Code Search", FileSearch], ctx: ["snyk", "github"] },
+  "Cloud Exploitability": { categories: [CLOUD, VM], cap: ["Cloud Graph", Network], ctx: ["wiz", "defender", "paloalto"] },
+  "Code SAST Exploitability": { categories: [APP], cap: ["Code Search", FileSearch], ctx: ["semgrep", "github"] },
+  "Red Team Simulation": { categories: [THREATS, APP], cap: ["Sandbox", Box], ctx: ["snyk", "semgrep", "wiz"] },
+  "Finding Ownership": { categories: [VM], cap: ["Git History", GitBranch], ctx: ["github", "wiz"] },
+  "WAF Analysis": { categories: [CLOUD, THREATS], cap: ["Traffic Replay", Activity], ctx: ["paloalto", "wiz"] },
+  "Remediation": { categories: [VM, APP], cap: ["Code Changes", GitPullRequest], ctx: ["github", "snyk", "semgrep"] },
+  "Secret Validation": { categories: [APP, THREATS], cap: ["Live Check", KeyRound], ctx: ["github", "semgrep"] },
+  "App Inventory": { categories: [APP, GRC], cap: ["Repo Scan", FolderSearch], ctx: ["github", "wiz"] },
+  "Deployment Mapping": { categories: [CLOUD, APP], cap: ["Cloud Graph", Network], ctx: ["wiz", "github"] },
 }
 const subMeta: Partial<Record<AgentKind, Meta>> = {
-  exploitability: { category: VM, cap: ["Sandbox", Box], ctx: ["github", "wiz"] },
-  remediation: { category: VM, cap: ["Code Changes", GitPullRequest], ctx: ["github", "paloalto"] },
-  "threat-intel": { category: THREATS, cap: ["Threat Feeds", Radar], ctx: ["defender", "sunburst"] },
-  "red-team": { category: THREATS, cap: ["Sandbox", Box], ctx: ["aws", "defender"] },
-  "asset-discovery": { category: CLOUD, cap: ["Cloud Graph", Network], ctx: ["aws", "wiz", "github"] },
-  ownership: { category: VM, cap: ["Git History", GitBranch], ctx: ["github"] },
-  "data-leak": { category: APP, cap: ["Traffic Scan", Fingerprint], ctx: ["defender", "paloalto"] },
-  reporting: { category: GRC, cap: ["Reports", FileText], ctx: ["github", "sunburst"] },
-  correlation: { category: VM, cap: ["Dedup", Combine], ctx: ["wiz", "sunburst", "defender"] },
-  prioritization: { category: VM, cap: ["Memory Usage", Brain], ctx: ["wiz", "defender"] },
+  exploitability: { categories: [VM, APP], cap: ["Sandbox", Box], ctx: ["snyk", "wiz"] },
+  remediation: { categories: [VM], cap: ["Code Changes", GitPullRequest], ctx: ["github", "snyk"] },
+  "threat-intel": { categories: [THREATS], cap: ["Threat Feeds", Radar], ctx: ["defender", "paloalto"] },
+  "red-team": { categories: [THREATS, APP], cap: ["Sandbox", Box], ctx: ["semgrep", "wiz"] },
+  "asset-discovery": { categories: [CLOUD], cap: ["Cloud Graph", Network], ctx: ["wiz", "github"] },
+  ownership: { categories: [VM], cap: ["Git History", GitBranch], ctx: ["github"] },
+  "data-leak": { categories: [APP, THREATS], cap: ["Traffic Scan", Fingerprint], ctx: ["defender", "paloalto"] },
+  reporting: { categories: [GRC], cap: ["Reports", FileText], ctx: ["wiz", "snyk"] },
+  correlation: { categories: [VM], cap: ["Dedup", Combine], ctx: ["wiz", "snyk", "semgrep"] },
+  prioritization: { categories: [VM], cap: ["Memory Usage", Brain], ctx: ["wiz", "defender"] },
 }
 const metaOf = (a: LibraryAgent): Meta =>
-  meta[a.name] ?? ((a.partOf !== undefined && a.kind && subMeta[a.kind]) || { category: VM, cap: ["Memory Usage", Brain], ctx: ["github"] })
+  meta[a.name] ?? ((a.partOf !== undefined && a.kind && subMeta[a.kind]) || { categories: [VM], cap: ["Memory Usage", Brain], ctx: ["github"] })
 
 // Small marks for the tools an agent reads from, in each tool's colours (simplified, not the official logos)
-const toolNames: Record<Tool, string> = { defender: "Microsoft Defender", sunburst: "Sumo Logic", paloalto: "Palo Alto Networks", wiz: "Wiz", github: "GitHub", aws: "AWS" }
+const toolNames: Record<Tool, string> = { wiz: "Wiz", snyk: "Snyk", github: "GitHub", defender: "Microsoft Defender", paloalto: "Palo Alto Prisma", semgrep: "Semgrep" }
 function ToolMark({ tool }: { tool: Tool }) {
   const art: Record<Tool, React.ReactNode> = {
     defender: <path d="M8 1.2 2.6 3.1v4.3c0 3.4 2.3 6.1 5.4 7.4 3.1-1.3 5.4-4 5.4-7.4V3.1L8 1.2Zm-.6 2.1v4.4H3.8V4.1l3.6-.8Zm1.2 0 3.6.8v3.6H8.6V3.3ZM3.9 8.9h3.5v4.2C5.5 12.1 4.2 10.6 3.9 8.9Zm4.7 0h3.5c-.3 1.7-1.6 3.2-3.5 4.2V8.9Z" fill="#0078d4" />,
-    sunburst: <g stroke="#121212" strokeWidth="1.3" strokeLinecap="round">{Array.from({ length: 12 }, (_, i) => { const t = (i / 12) * Math.PI * 2; return <line key={i} x1={8 + Math.cos(t) * 3.4} y1={8 + Math.sin(t) * 3.4} x2={8 + Math.cos(t) * 6.6} y2={8 + Math.sin(t) * 6.6} /> })}</g>,
     paloalto: <g fill="#fa582d"><path d="m6.2 2.4 3 3-5.3 5.3-3-3z" /><path d="m11.1 5.3 3 3-5.3 5.3-3-3z" /></g>,
-    wiz: <text x="8" y="12" textAnchor="middle" fontSize="11" fontWeight="800" fontFamily="Geist, sans-serif" fill="#1b4dff">W</text>,
+    wiz: <><rect x="1" y="1" width="14" height="14" rx="3.5" fill="#1b4dff" /><text x="8" y="11.6" textAnchor="middle" fontSize="9.5" fontWeight="800" fontFamily="Geist, sans-serif" fill="#fff">W</text></>,
+    snyk: <><rect x="1" y="1" width="14" height="14" rx="3.5" fill="#4c4a73" /><text x="8" y="11.6" textAnchor="middle" fontSize="9.5" fontWeight="800" fontFamily="Geist, sans-serif" fill="#fff">S</text></>,
+    semgrep: <><circle cx="8" cy="8" r="7" fill="#2bc28a" /><circle cx="8" cy="8" r="2.6" fill="#fff" /></>,
     github: <><circle cx="8" cy="8" r="6.6" fill="#24292f" /><path d="M6.2 11.6v-1.4c-1.6.3-2-.7-2-.7-.3-.7-.7-.9-.7-.9-.6-.4 0-.4 0-.4.6 0 1 .7 1 .7.5.9 1.4.7 1.7.5 0-.4.2-.7.4-.8-1.3-.1-2.6-.6-2.6-2.8 0-.6.2-1.1.6-1.5-.1-.2-.3-.8 0-1.5 0 0 .5-.2 1.6.6a5.4 5.4 0 0 1 2.9 0c1.1-.8 1.6-.6 1.6-.6.3.7.1 1.3 0 1.5.4.4.6.9.6 1.5 0 2.2-1.3 2.7-2.6 2.8.2.2.4.5.4 1v1.9" fill="#fff" /></>,
-    aws: <><path d="M2.5 10.2c3.4 2 7.6 2 11 0" stroke="#ff9900" strokeWidth="1.4" fill="none" strokeLinecap="round" /><path d="m12 9.2 1.8.9-.6 1.9" stroke="#ff9900" strokeWidth="1.3" fill="none" strokeLinecap="round" strokeLinejoin="round" /><text x="8" y="8" textAnchor="middle" fontSize="6.4" fontWeight="700" fontFamily="Geist, sans-serif" fill="#232f3e">aws</text></>,
   }
   return <svg viewBox="0 0 16 16" className="size-[1.125rem] shrink-0" role="img" aria-label={toolNames[tool]}><title>{toolNames[tool]}</title>{art[tool]}</svg>
 }
@@ -509,7 +510,11 @@ function AgentCard({ a, selected, onSelect }: { a: LibraryAgent; selected: boole
           {TILE_STYLE === "flat" ? <FlatTile color={colorOf(a)} /> : <AgentTile seed={a.name} hue={hueOf(a)} />}
           <span className="min-w-0 flex-1 truncate text-[1rem] leading-5 font-medium text-[#121212]">{a.name}</span>
         </span>
-        <span className="rounded-[0.25rem] bg-[#f2f2f1] px-2 py-0.5 font-[IBM_Plex_Mono,ui-monospace,monospace] text-[0.75rem] leading-5 whitespace-nowrap text-[#6c6a68]">{m.category}</span>
+        <span className="flex items-center gap-1">
+          {m.categories.map((c) => (
+            <span key={c} className="rounded-[0.1875rem] bg-[#f2f2f1] px-1.5 font-[IBM_Plex_Mono,ui-monospace,monospace] text-[0.6875rem] leading-[1.125rem] whitespace-nowrap text-[#6c6a68]">{c}</span>
+          ))}
+        </span>
         <span className="line-clamp-2 text-[0.875rem] leading-5 text-pretty text-[#6c6a68]">{a.tagline}</span>
       </span>
       <span className="mt-auto grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-4 border-t border-[#ecebe9] px-5 pt-5 pb-5 whitespace-nowrap">
