@@ -384,12 +384,12 @@ const hues = new Map([...library, ...subLibrary].map((a, i) => [a, (255 + i * 13
 const hueOf = (a: LibraryAgent) => hues.get(a) ?? 255
 
 /*
- * An agent's tile: a soft, grainy gradient in the agent's own colour, with a white circle in the middle.
+ * An agent's tile: a soft gradient under heavy film grain in the agent's own colour, with a white circle in the middle.
  * Every agent gets a different hue (spread around the colour wheel by the golden angle, in the order of the
  * library: agents, then sub agents), so no two share a gradient; that hue is meant to become the agent's colour.
  * Each gradient mixes the hue with two neighbours and a pale tint of it, in soft, light tones (oklch).
  */
-const grain = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='96' height='96' filter='url(%23g)'/%3E%3C/svg%3E")`
+const grain = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.25' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='2.4' intercept='-0.7'/%3E%3CfeFuncG type='linear' slope='2.4' intercept='-0.7'/%3E%3CfeFuncB type='linear' slope='2.4' intercept='-0.7'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='96' height='96' filter='url(%23g)'/%3E%3C/svg%3E")`
 const hash = (t: string) => { let h = 2166136261; for (const c of t) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0 }
 
 function AgentTile({ seed, hue }: { seed: string; hue: number }) {
@@ -407,7 +407,9 @@ function AgentTile({ seed, hue }: { seed: string; hue: number }) {
   ].join(", ")
   return (
     <span aria-hidden className="relative isolate grid size-12 shrink-0 place-items-center overflow-hidden rounded-[0.375rem]" style={{ background: `${pools}, linear-gradient(135deg, ${warm}, ${main} 55%, ${deep})` }}>
-      <span className="absolute inset-0 opacity-50 mix-blend-overlay" style={{ background: `${grain} 0 0 / 48px 48px` }} />
+      {/* Heavy film grain: high-contrast noise, overlaid twice (overlay for texture, soft-light for depth) */}
+      <span className="absolute inset-0 opacity-90 mix-blend-overlay" style={{ background: `${grain} 0 0 / 48px 48px` }} />
+      <span className="absolute inset-0 opacity-60 mix-blend-soft-light" style={{ background: `${grain} 13px 7px / 40px 40px` }} />
       <span className="relative size-5 rounded-full bg-white shadow-[0_1px_2px_rgba(18,18,18,0.08)]" />
     </span>
   )
