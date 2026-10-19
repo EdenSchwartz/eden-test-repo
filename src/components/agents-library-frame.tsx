@@ -384,6 +384,31 @@ const hues = new Map([...library, ...subLibrary].map((a, i) => [a, (255 + i * 13
 const hueOf = (a: LibraryAgent) => hues.get(a) ?? 255
 
 /*
+ * Trying a second look: one flat colour per agent (no gradient, no grain), with the white circle. The colours
+ * grow from a warm, muted four (sage, slate blue, ochre, brick) into a family of 21, one per agent, in order.
+ * Switch TILE_STYLE back to "gradient" for the grainy gradients.
+ */
+const TILE_STYLE: "flat" | "gradient" = "flat"
+const flatColors = [
+  "#4f8a5f", "#3e6f8e", "#cf9f45", "#b85a55", // sage, slate blue, ochre, brick (the reference)
+  "#6a7f4a", "#2f7a78", "#c47a4a", "#8a6aa0", // olive, teal, terracotta, dusty violet
+  "#5a6f9e", "#a3835a", "#9a4f6a", "#6e9a8a", // denim, camel, mulberry, eucalyptus
+  "#d08a5e", "#4a5d7a", "#8f9a4f", "#b86a7a", // apricot, navy slate, moss, rose
+  "#5f8fae", "#a35d3e", "#7a8f6a", "#c2a35e", // steel, rust, lichen, soft mustard
+  "#6a5a8a", // plum
+]
+const colors = new Map([...library, ...subLibrary].map((a, i) => [a, flatColors[i % flatColors.length]]))
+const colorOf = (a: LibraryAgent) => colors.get(a) ?? flatColors[0]
+
+function FlatTile({ color }: { color: string }) {
+  return (
+    <span aria-hidden className="grid size-12 shrink-0 place-items-center rounded-[0.375rem]" style={{ background: color }}>
+      <span className="size-5 rounded-full bg-white" />
+    </span>
+  )
+}
+
+/*
  * An agent's tile: a soft gradient under heavy film grain in the agent's own colour, with a white circle in the middle.
  * Every agent gets a different hue (spread around the colour wheel by the golden angle, in the order of the
  * library: agents, then sub agents), so no two share a gradient; that hue is meant to become the agent's colour.
@@ -439,7 +464,7 @@ function AgentCard({ a, selected, onSelect }: { a: LibraryAgent; selected: boole
       className="group flex cursor-pointer flex-col items-stretch rounded-[0.25rem] border border-[#f0f0f0] bg-white aria-pressed:border-[#2e4eca]/40 p-2 text-left drop-shadow-[0px_1px_1px_rgba(0,0,0,0.04)] transition-[border-color,translate] duration-200 hover:-translate-y-px hover:border-[#e2e1df]"
     >
       <span className="mb-3 flex w-full items-start gap-2">
-        <AgentTile seed={a.name} hue={hueOf(a)} />
+        {TILE_STYLE === "flat" ? <FlatTile color={colorOf(a)} /> : <AgentTile seed={a.name} hue={hueOf(a)} />}
         <span className="flex min-w-0 flex-1 flex-col items-start gap-2.5 pt-1">
           <span className="w-full truncate text-[1rem] leading-4 font-medium text-[#121212]">{a.name}</span>
           <span className="line-clamp-2 w-full text-[0.875rem] leading-4 text-pretty text-[#6c6a68]">{a.tagline}</span>
