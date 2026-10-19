@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
  * add forces, diffuse, advect, project so it stays incompressible) runs on a grid twice as fine as the drawn one.
  * Moving the pointer pushes the fluid and pours in dye; the dye swirls, curls and fades. Nothing is painted
  * as an area: only the grid lines take the dye's color, so the flow shows through the lines alone.
- * The color is metallic: graphite-to-silver bands with a cool steel / faint champagne tint, and faster flow
+ * The color is silver like chrome: tight dark-steel to bright-silver bands that shift with the dye with a cool steel / faint champagne tint, and faster flow
  * catches the light. Darker than the resting grid so it reads on white, at most 80% strength.
  * Coming near the box from outside (within 18rem) pours a little dye in at the closest edge, as a hint.
  * Runs only while there's dye to show; still (no fluid) if the user prefers reduced motion.
@@ -83,7 +83,7 @@ function FluidGrid() {
       u0.set(u); v0.set(v); advect(1, u, u0, u0, v0, dt); advect(2, v, v0, u0, v0, dt); project(u, v, u0, v0)
       // dye
       d0.set(d); advect(0, d, d0, u, v, dt)
-      for (let k = 0; k < d.length; k++) { d[k] *= 0.975; u[k] *= 0.992; v[k] *= 0.992 }
+      for (let k = 0; k < d.length; k++) { d[k] *= 0.98; u[k] *= 0.996; v[k] *= 0.996 } // slow fade, long swirl
     }
 
     // ---- pointer: push the fluid and pour dye in a soft disc ----
@@ -102,7 +102,7 @@ function FluidGrid() {
       const inside = x >= 0 && y >= 0 && x <= b.width && y <= b.height
       if (inside) {
         const dx = last ? x - last.x : 0, dy = last ? y - last.y : 0
-        splat(x, y, dx * 0.5, dy * 0.5, 0.3 + Math.min(0.45, Math.hypot(dx, dy) * 0.015))
+        splat(x, y, dx * 0.75, dy * 0.75, 0.35 + Math.min(0.6, Math.hypot(dx, dy) * 0.02))
         last = { x, y }
       } else {
         last = null
@@ -123,8 +123,8 @@ function FluidGrid() {
       const band = 0.5 + 0.5 * Math.cos(2 * Math.PI * p)
       const tint = Math.sin(2 * Math.PI * p * 0.5 + 1.3)
       const l = Math.min(1, band * 0.7 + sheen * 0.4)
-      const base = [58 + l * 92, 64 + l * 96, 76 + l * 100]
-      return [base[0] + tint * 14, base[1] + tint * 4, base[2] - tint * 16].map((c) => Math.round(Math.min(200, Math.max(40, c))))
+      const base = [72 + l * 140, 80 + l * 142, 94 + l * 140]
+      return [base[0] + tint * 8, base[1] + tint * 3, base[2] - tint * 6].map((c) => Math.round(Math.min(228, Math.max(64, c))))
     }
     const sample = (x: number, y: number) => {
       const i = Math.min(N, Math.max(1, Math.round(x / res + 0.5))), j = Math.min(M, Math.max(1, Math.round(y / res + 0.5)))
@@ -135,8 +135,8 @@ function FluidGrid() {
       const a = Math.min(1, d[k] * 1.1)
       if (a < 0.02) return 0
       const speed = Math.hypot(u[k], v[k])
-      const [r, g, b] = metal(x / w * 1.6 + y / h * 0.5 + t * 0.00004, Math.min(1, speed * 0.25))
-      ctx.fillStyle = `rgba(${r},${g},${b},${a * 0.8})`
+      const [r, g, b] = metal(x / w * 3.2 + y / h * 0.9 + d[k] * 0.6 + t * 0.00005, Math.min(1, speed * 0.25))
+      ctx.fillStyle = `rgba(${r},${g},${b},${a * 0.95})`
       if (horiz) ctx.fillRect(x, y, res, 1); else ctx.fillRect(x, y, 1, res)
       return a
     }
