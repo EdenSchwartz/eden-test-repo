@@ -136,7 +136,7 @@ export function AppSidebar() {
   )
 }
 
-// The selected item's 1.5px bar, nudged onto a whole screen pixel: the UI scales with the screen (rem), which
+// The selected item's 2px bar, nudged onto a whole screen pixel: the UI scales with the screen (rem), which
 // can leave it at e.g. 26.56px, where it smudges wider. Re-snaps when the window or the scaling changes.
 function SelectedBar() {
   const ref = useRef<HTMLSpanElement>(null)
@@ -153,5 +153,5 @@ function SelectedBar() {
     window.addEventListener("resize", snap)
     return () => window.removeEventListener("resize", snap)
   }, [])
-  return <span ref={ref} className="absolute inset-y-0 left-0 w-[1.5px] bg-[#2e4eca]" />
+  return <span ref={ref} className="absolute inset-y-0 left-0 w-[2px] bg-[#2e4eca]" />
 }
