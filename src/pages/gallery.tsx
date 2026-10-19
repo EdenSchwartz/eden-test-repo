@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ArrowLeft, ArrowRight, Bot, ChevronDown, ChevronRight, LayoutGrid, Rows3, Search, Shapes } from "lucide-react"
 import { agents, type AgentKind } from "@/components/chat/agents"
 import { StepsLine } from "@/components/tasks/empty-state"
@@ -24,6 +24,8 @@ import { cn } from "@/lib/utils"
  *              Use template → the setup chat (pages/chat.tsx) → it joins My agents.
  *   My agents (default export, mode "mine"): your agents: search, a Status filter, and Cards | List. List groups them
  *              Linear-style under the template they were made from (components/tasks/task-table.tsx).
+ *              Clicking an agent card expands it into a full page (the card's box grows into the page's, a shared
+ *              view-transition name; data-vt="expand" in index.css); ✕ or Esc shrinks it back into its card.
  *              None yet: an empty state pointing at Agent explorer.
  *   Agents | Sub agents: a switch under the intro. Agents = the multi-step ones above (templates or yours);
  *              Sub agents = the single-mission helpers they're built from (components/tasks/sub-agent-card.tsx),
@@ -79,6 +81,19 @@ function Gallery({ mode }: { mode: "explore" | "mine" }) {
   const [subId, setSubId] = useState<AgentKind | null>(null)
   // An agent opened from the sub agent's "Part of" list: shown in the same panel, under a breadcrumb back to the sub agent
   const [nestedId, setNestedId] = useState<string | null>(null)
+  // My agents: the agent expanded into a full page (its card grows into it), or none. Esc shrinks it back
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const expanded = expandedId ? getSuperAgent(expandedId) ?? null : null
+  // After an expand, the grid comes back without its entrance animation: the shrink-back needs the card visible
+  const [settled, setSettled] = useState(false)
+  const expand = (sa: SuperAgent) => withTransition(() => { setExpandedId(sa.id); setSettled(true) }, {}, "expand")
+  const collapse = () => withTransition(() => setExpandedId(null), {}, "expand")
+  useEffect(() => {
+    if (!expandedId) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") collapse() }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [expandedId])
   const nested = nestedId ? getSuperAgent(nestedId) ?? null : null
   const [view, setViewState] = useState<"cards" | "list">(() => {
     try { return localStorage.getItem("tasks-view") === "list" ? "list" : "cards" } catch { return "cards" }
@@ -167,9 +182,23 @@ function Gallery({ mode }: { mode: "explore" | "mine" }) {
     </p>
   )
 
+  // My agents, one expanded: a full page in place of the grid. It carries the card's view-transition name
+  // (tpl-<id>), so the browser grows the card's box into this one, and shrinks it back on close
+  if (!explore && expanded) {
+    return (
+      <div className="relative -m-6 h-[calc(100svh-3.5rem)] [contain:inline-size]">
+        <section aria-label={expanded.name} className="h-full overflow-hidden bg-background" style={{ viewTransitionName: `tpl-${expanded.id}` }}>
+          <div className="mx-auto h-full max-w-5xl border-x border-hairline">
+            <TemplateDetail key={expanded.id} sa={expanded} onUse={use} onClose={collapse} wide />
+          </div>
+        </section>
+      </div>
+    )
+  }
+
   return (
     // -m-6 cancels main's padding: the page fills the area, both sides scroll on their own
-    <div className="relative -m-6 h-[calc(100svh-3.5rem)] [contain:inline-size]">
+    <div className="relative -m-6 h-[calc(100svh-3.5rem)] [contain:inline-size]" data-settled={settled || undefined}>
       <Split
         layout={layout}
         panelName="template-detail"
@@ -262,7 +291,7 @@ function Gallery({ mode }: { mode: "explore" | "mine" }) {
               ? empty(() => { setTaskQuery(""); setStatus("all") }, taskQuery.trim())
               : view === "cards" ? (
                 <div className={grid}>
-                  {mine.map((sa, i) => <TemplateCard key={sa.id} sa={sa} delay={i * 30} selected={selected?.id === sa.id} onSelect={select} status={taskStatus(sa, convs)} />)}
+                  {mine.map((sa, i) => <TemplateCard key={sa.id} sa={sa} delay={i * 30} selected={selected?.id === sa.id} onSelect={expand} status={taskStatus(sa, convs)} />)}
                 </div>
               ) : (
                 <TaskTable tasks={mine} convs={convs} selectedId={selected?.id} onSelect={select} />
