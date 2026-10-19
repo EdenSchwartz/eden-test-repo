@@ -408,9 +408,9 @@ function AgentTile({ seed, hue }: { seed: string; hue: number }) {
   ].join(", ")
   return (
     <span aria-hidden className="relative isolate grid size-12 shrink-0 place-items-center overflow-hidden rounded-[0.375rem]" style={{ background: `${pools}, linear-gradient(135deg, ${warm}, ${main} 55%, ${deep})` }}>
-      {/* Heavy film grain: high-contrast noise, overlaid twice (overlay for texture, soft-light for depth) */}
-      <span className="absolute inset-0 opacity-90 mix-blend-overlay" style={{ background: `${grain} 0 0 / 48px 48px` }} />
-      <span className="absolute inset-0 opacity-60 mix-blend-soft-light" style={{ background: `${grain} 13px 7px / 40px 40px` }} />
+      {/* Film grain: high-contrast noise, overlaid twice (overlay for texture, soft-light for depth) */}
+      <span className="absolute inset-0 opacity-65 mix-blend-overlay" style={{ background: `${grain} 0 0 / 48px 48px` }} />
+      <span className="absolute inset-0 opacity-40 mix-blend-soft-light" style={{ background: `${grain} 13px 7px / 40px 40px` }} />
       <span className="relative size-5 rounded-full bg-white shadow-[0_1px_2px_rgba(18,18,18,0.08)]" />
     </span>
   )
