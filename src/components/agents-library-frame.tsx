@@ -380,8 +380,45 @@ const subLibrary: LibraryAgent[] = (Object.keys(agents) as AgentKind[]).map((k) 
 }))
 
 /*
+ * An agent's tile: a soft, grainy mesh gradient (its own palette, picked from the name, so it stays the same
+ * everywhere), a fine grid over it, and a white rounded square in the middle holding the icon.
+ * Layers: colour pools (radial gradients on a light base) · film grain (overlay) · grid · the white square.
+ */
+const palettes: [string, string, string, string][] = [
+  ["#f8dccb", "#f2b38e", "#f4d27a", "#e9786a"], // peach, gold, coral
+  ["#efe9de", "#9cbcbd", "#ec9a6c", "#e66a3f"], // cream, teal, orange
+  ["#d8e6f2", "#a9c3df", "#c9b8dd", "#5d7fae"], // blue haze, lavender
+  ["#eef0f8", "#e7b7c4", "#b9a6e3", "#4c5fbf"], // pink into indigo
+  ["#f3efe6", "#cfe8dc", "#9fc9c0", "#c7b9e6"], // mint, sage, lilac
+  ["#fbeee6", "#f3c7b8", "#f1d9a8", "#e6a7a0"], // rose gold
+]
+const grain = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='96' height='96' filter='url(%23g)'/%3E%3C/svg%3E")`
+const hash = (t: string) => { let h = 2166136261; for (const c of t) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0 }
+
+function AgentTile({ seed, icon: Icon }: { seed: string; icon: LucideIcon }) {
+  const h = hash(seed)
+  const [base, a, b, c] = palettes[h % palettes.length]
+  const r = (k: number) => ((h >>> (k * 4)) & 15) / 15 // 0..1, fixed per agent
+  const pools = [
+    `radial-gradient(circle at ${5 + r(1) * 35}% ${5 + r(2) * 35}%, ${a} 0%, transparent 85%)`,
+    `radial-gradient(circle at ${60 + r(3) * 40}% ${50 + r(4) * 50}%, ${c} 0%, transparent 80%)`,
+    `radial-gradient(circle at ${r(5) * 100}% ${70 + r(6) * 30}%, ${b} 0%, transparent 75%)`,
+    `radial-gradient(circle at ${70 + r(7) * 30}% ${r(0) * 30}%, ${base} 0%, transparent 55%)`,
+  ].join(", ")
+  return (
+    <span aria-hidden className="relative isolate grid size-12 shrink-0 place-items-center overflow-hidden rounded-[0.375rem]" style={{ background: `${pools}, linear-gradient(135deg, ${a}, ${b} 55%, ${c})` }}>
+      <span className="absolute inset-0 opacity-50 mix-blend-overlay" style={{ background: `${grain} 0 0 / 48px 48px` }} />
+      <span className="absolute inset-0 bg-[linear-gradient(to_right,rgb(18_18_18/0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgb(18_18_18/0.045)_1px,transparent_1px)] bg-[size:4px_4px]" />
+      <span className="relative grid size-5 place-items-center rounded-[0.25rem] bg-white shadow-[0_1px_2px_rgba(18,18,18,0.08)]">
+        <Icon className="size-3 text-[#3d3c3a]" strokeWidth={2} />
+      </span>
+    </span>
+  )
+}
+
+/*
  * An agent card. The top is the Figma card "Frame 2147206362" as drawn: white, a #F0F0F0 edge, drop shadow
- * 0 1 1 rgba(0,0,0,.04), p 8, 4px corners; a 48px #5E64BF tile (6px corners) with the white icon; the name
+ * 0 1 1 rgba(0,0,0,.04), p 8, 4px corners; a 48px tile (6px corners, see AgentTile) with the agent's icon; the name
  * (Geist Medium 16/16, #121212) and the tagline (14/16, #6C6A68), 10 apart.
  * The tagline may take two lines here (three cards to a row). Under a hairline (kept at the bottom, so cards
  * in a row line up): what a run ends in (its outcomes, as colored dots), then what it runs on,
@@ -403,9 +440,7 @@ function AgentCard({ a, selected, onSelect }: { a: LibraryAgent; selected: boole
       className="group flex cursor-pointer flex-col items-stretch rounded-[0.25rem] border border-[#f0f0f0] bg-white aria-pressed:border-[#2e4eca]/40 p-2 text-left drop-shadow-[0px_1px_1px_rgba(0,0,0,0.04)] transition-[border-color,translate] duration-200 hover:-translate-y-px hover:border-[#e2e1df]"
     >
       <span className="mb-3 flex w-full items-start gap-2">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-[0.375rem] bg-[#5e64bf] text-white">
-          <Icon className="size-6" strokeWidth={1.5} />
-        </span>
+        <AgentTile seed={a.name} icon={Icon} />
         <span className="flex min-w-0 flex-1 flex-col items-start gap-2.5 pt-1">
           <span className="w-full truncate text-[1rem] leading-4 font-medium text-[#121212]">{a.name}</span>
           <span className="line-clamp-2 w-full text-[0.875rem] leading-4 text-pretty text-[#6c6a68]">{a.tagline}</span>
