@@ -66,10 +66,10 @@ export function AppSidebar() {
         <nav aria-label="Main" className="flex min-h-px w-full flex-[1_0_0] flex-col items-start gap-4 overflow-y-auto px-3 py-1.5">
           <div className="flex w-full flex-col items-start">
             <div className="flex w-full flex-col items-start gap-1.5">
-              {/* Home: selected like the menu items (white box, Rival blue), the icon turns blue instead of a bar */}
+              {/* Home: selected like the menu items (white box, Rival blue), the icon turns blue (filled a very light blue) instead of a bar */}
               <button onClick={() => navigate("chat")} aria-current={onHome ? "page" : undefined} className={cn(top, "relative", onHome && "z-10 text-[#2e4eca]")}>
                 {onHome && <span aria-hidden className={selectedBox} />}
-                <HomeIcon className="relative size-4 shrink-0" /> <span className="relative min-w-px flex-[1_0_0] truncate">Home</span>
+                <HomeIcon className={cn("relative size-4 shrink-0", onHome && "[&_path]:fill-[#e6ebfa]")} /> <span className="relative min-w-px flex-[1_0_0] truncate">Home</span>
               </button>
             </div>
 
