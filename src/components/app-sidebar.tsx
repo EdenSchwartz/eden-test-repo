@@ -1,7 +1,7 @@
 import { Sidebar } from "@/components/ui/sidebar"
 import {
   AgentsIcon, ChatsIcon, CollapseIcon, ConnectorsIcon, ExpandSimpleIcon, HomeIcon, PlatformIcon, PlusIcon,
-  RivalMark, RivalWordmark, SectionToggleIcon, SettingsIcon, WaitingIcon,
+  RivalMark, RivalWordmark, SectionToggleIcon, SettingsIcon,
 } from "@/components/nav-icons"
 import { useState } from "react"
 import { useConversations } from "@/lib/conversations"
@@ -25,8 +25,8 @@ const groups: { id: string; label: string; icon: React.ComponentType<{ className
   {
     id: "agents", label: "Agents", icon: AgentsIcon,
     items: [
-      { label: "My Agents", page: "gallery" }, { label: "Agents Library", page: "explorer" }, { label: "Activity", page: "agents" },
-      { label: "Memory", page: "memory" }, { label: "Usage", page: "usage" },
+      { label: "Waiting", page: "waiting" }, { label: "My Agents", page: "gallery" }, { label: "Agents Library", page: "explorer" },
+      { label: "Activity", page: "agents" }, { label: "Memory", page: "memory" }, { label: "Usage", page: "usage" },
     ],
   },
   { id: "platform", label: "Platform", icon: PlatformIcon, items: [{ label: "Findings", page: "findings" }, { label: "Assets", page: "assets" }, { label: "Applications", page: "applications" }, { label: "Packages", page: "packages" }] },
@@ -64,9 +64,6 @@ export function AppSidebar() {
             <div className="flex w-full flex-col items-start gap-1.5">
               <button onClick={() => navigate("chat")} className={top}>
                 <HomeIcon className="size-4 shrink-0" /> <span className="min-w-px flex-[1_0_0] truncate">Home</span>
-              </button>
-              <button onClick={() => navigate("waiting")} className={top}>
-                <WaitingIcon className="size-4 shrink-0" /> <span className="min-w-px flex-[1_0_0] truncate">Waiting</span>
               </button>
             </div>
 
