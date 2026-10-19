@@ -602,7 +602,7 @@ html[data-vt="expand"]::view-transition-new(root) { animation: vt-fade-in 240ms 
 
 /* Agent cards: a subtle 3D tilt toward the pointer (components/agents-library-frame.tsx sets the variables) */
 .tilt-card {
-  --rx: 0deg; --ry: 0deg; --sx: 0px; --sy: 8px; --lx: 50%; --ly: 50%;
+  --rx: 0deg; --ry: 0deg; --sx: 0px; --sy: 8px; --bx: 50%; --by: 50%;
   transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));
   box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.04);
   transition: transform 450ms cubic-bezier(.2,.8,.2,1), box-shadow 450ms ease, border-color 200ms ease;
@@ -613,17 +613,20 @@ html[data-vt="expand"]::view-transition-new(root) { animation: vt-fade-in 240ms 
   box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.04), var(--sx) var(--sy) 24px -10px rgba(18, 18, 18, 0.16);
   transition: transform 120ms ease-out, box-shadow 200ms ease, border-color 200ms ease;
 }
-/* the faint light under the pointer, in the agent's own colour (--tint, its colour square) */
+/* the sheen, in the agent's own colour (--tint, its colour square) */
 .tilt-light {
-  position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 300ms ease;
-  /* like sun on a surface: a wide, soft wash with a long eased falloff and no visible edge */
-  background: radial-gradient(ellipse 130% 110% at var(--lx) var(--ly),
-    color-mix(in oklab, var(--tint, #2e4eca) 6%, transparent) 0%,
-    color-mix(in oklab, var(--tint, #2e4eca) 4%, transparent) 22%,
-    color-mix(in oklab, var(--tint, #2e4eca) 2%, transparent) 45%,
-    color-mix(in oklab, var(--tint, #2e4eca) 0.7%, transparent) 65%,
-    transparent 85%);
-  transition: opacity 500ms ease;
+  position: absolute; inset: 0; pointer-events: none; opacity: 0;
+  /* Light from a fixed source (top left) lying across the card as a soft diagonal sheen, in the agent's colour.
+     Oversized and moved by --bx / --by, so as the card tilts the sheen glides over the surface instead of
+     following the pointer. Long, eased edges: no spot, no visible boundary */
+  background: linear-gradient(118deg,
+    transparent 28%,
+    color-mix(in oklab, var(--tint, #2e4eca) 2%, transparent) 38%,
+    color-mix(in oklab, var(--tint, #2e4eca) 5.5%, transparent) 47%,
+    color-mix(in oklab, var(--tint, #2e4eca) 3%, transparent) 54%,
+    color-mix(in oklab, var(--tint, #2e4eca) 1%, transparent) 62%,
+    transparent 72%) var(--bx, 50%) var(--by, 50%) / 260% 260% no-repeat;
+  transition: opacity 600ms ease, background-position 700ms cubic-bezier(.2,.8,.2,1);
 }
 .tilt-card:hover .tilt-light { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .tilt-card, .tilt-card:hover { transform: none; transition: none; } }

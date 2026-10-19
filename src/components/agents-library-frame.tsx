@@ -498,15 +498,17 @@ function ToolMark({ tool }: { tool: Tool }) {
 
 /*
  * The cards' hover: a subtle 3D tilt toward the pointer (4° at most), a hair of lift, a shadow that leans away
- * from the tilt, and a faint light under the pointer. Eases back flat on leave. Styles: .tilt-card in index.css.
+ * from the tilt, and a soft diagonal sheen of light (from a fixed source, top left) that slides across the
+ * surface as it tilts, in the agent's colour. Eases back flat on leave. Styles: .tilt-card in index.css.
  */
 function useTilt() {
   const still = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
   const set = (el: HTMLElement, x: number, y: number) => {
     el.style.setProperty("--rx", `${(-y * 4).toFixed(2)}deg`)
     el.style.setProperty("--ry", `${(x * 4).toFixed(2)}deg`)
-    el.style.setProperty("--lx", `${((x + 1) * 50).toFixed(1)}%`)
-    el.style.setProperty("--ly", `${((y + 1) * 50).toFixed(1)}%`)
+    // where the sheen sits: it slides against the tilt, like fixed light catching a turning surface
+    el.style.setProperty("--bx", `${(50 - x * 22).toFixed(1)}%`)
+    el.style.setProperty("--by", `${(50 - y * 22).toFixed(1)}%`)
     el.style.setProperty("--sx", `${(-x * 6).toFixed(1)}px`)
     el.style.setProperty("--sy", `${(8 - y * 4).toFixed(1)}px`)
   }
