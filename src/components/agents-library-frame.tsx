@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react"
 import { AppWindow, Bandage, Bot, Clock, Cloud, Crosshair, KeyRound, ShieldCheck, Swords, UsersRound, type LucideIcon } from "lucide-react"
-import { agentOutcomes, type Outcome } from "@/data/outcomes"
+import { agentOutcomes, subOutcomes, type Outcome } from "@/data/outcomes"
 import { blockers, getSuperAgent } from "@/data/super-agents"
 import { useNav } from "@/lib/nav"
-import type { AgentKind } from "@/components/chat/agents"
-import { SubAgentDetail } from "@/components/tasks/sub-agent-card"
+import { agents, type AgentKind } from "@/components/chat/agents"
+import { SubAgentDetail, subName, usedBy } from "@/components/tasks/sub-agent-card"
 import { TemplateDetail } from "@/components/tasks/template-detail"
 import { withTransition } from "@/lib/view-transition"
 import { cn } from "@/lib/utils"
@@ -148,6 +148,9 @@ export function AgentsLibraryFrame() {
   const { navigate } = useNav()
   // The picked card's side panel (the Hex version's docked panel): an agent's, or a sub agent's. Esc or ✕ closes it
   const [picked, setPicked] = useState<{ agent?: string; kind?: AgentKind; name: string } | null>(null)
+  const [tab, setTab] = useState<"agents" | "subs">("agents")
+  const switchTab = (t: typeof tab) => withTransition(() => { setTab(t); setPicked(null) })
+  const list = tab === "agents" ? library : subLibrary
   const pick = (a: LibraryAgent) => withTransition(() => setPicked(a.templateId ? { agent: a.templateId, name: a.name } : { kind: a.kind, name: a.name }))
   const close = () => withTransition(() => setPicked(null))
   useEffect(() => {
@@ -158,44 +161,54 @@ export function AgentsLibraryFrame() {
   }, [picked])
   const agent = picked?.agent ? getSuperAgent(picked.agent) : undefined
   return (
-    <div className="flex flex-1 flex-col items-start bg-white whitespace-nowrap">
+    // With a panel open, the page makes room for it (the panel takes the whole right side, under the top bar)
+    <div className={cn("flex flex-1 flex-col items-start bg-white whitespace-nowrap", picked && "mr-[35rem]")}>
       <div {...alive} className="alive-box relative isolate flex w-full flex-col items-start justify-center gap-3 overflow-hidden border-b border-[#ecebe9] bg-white p-10">
         <span aria-hidden className="alive-base" />
         <span aria-hidden className="alive-glow" />
         <ShimmerGrid />
         <p className="text-[1.25rem] leading-4 font-medium text-[#121212]">Agents Library</p>
-        <p className="text-[0.875rem] leading-4 font-normal text-[#6c6a68]">
+        <p className="max-w-full truncate text-[0.875rem] leading-4 font-normal text-[#6c6a68]">
           Ready-made security agents by Rival. Pick one, make it yours in a short chat, and it joins My Agents.
         </p>
+      </div>
+      {/* Agents | Sub Agents: a row of tabs under the header, its own line below */}
+      <div role="tablist" aria-label="Library" className="flex w-full items-center gap-2 border-b border-[#ecebe9] px-10 py-2">
+        {([["agents", "Agents"], ["subs", "Sub Agents"]] as const).map(([id, label]) => (
+          <button key={id} role="tab" aria-selected={tab === id} onClick={() => switchTab(id)} className="lib-tab">{label}</button>
+        ))}
       </div>
       {/* The cards area: a drafting-sheet margin on both sides (fine diagonal hatching, a hairline rail), cards go between */}
       <div className="relative flex w-full flex-1">
         <span aria-hidden className="sheet-margin left-0 border-r" />
-        <div className={cn("mx-auto grid w-full max-w-[68rem] min-w-0 content-start gap-4 px-10 pt-8 pb-10", picked ? "grid-cols-[repeat(2,minmax(0,1fr))]" : "grid-cols-[repeat(3,minmax(0,1fr))]")}>
-          {library.map((a) => <AgentCard key={a.name} a={a} selected={picked?.name === a.name} onSelect={() => pick(a)} />)}
+        <div className={cn("mx-auto grid w-full max-w-[68rem] min-w-0 content-start gap-4 px-10 pt-8 pb-10", picked ? "grid-cols-[repeat(auto-fill,minmax(18rem,1fr))]" : "grid-cols-[repeat(3,minmax(0,1fr))]")}>
+          {list.map((a) => <AgentCard key={a.name} a={a} selected={picked?.name === a.name} onSelect={() => pick(a)} />)}
         </div>
-        {picked ? (
-          // Docked on the right, under the header box, and stays in view while the cards scroll
-          <section aria-label={picked.name} className="sticky top-0 h-svh w-[35rem] shrink-0 self-start overflow-hidden border-l border-[#ecebe9] bg-background whitespace-normal" style={{ viewTransitionName: "template-detail" }}>
+        {!picked && <span aria-hidden className="sheet-margin right-0 border-l" />}
+      </div>
+      <FrameCorners right={!picked} />
+      {picked && (
+        // The whole right side, from the top bar down, and stays put while the cards scroll
+        <section aria-label={picked.name} className="fixed top-12 right-0 bottom-0 z-30 w-[35rem] overflow-hidden border-l border-[#ecebe9] bg-background whitespace-normal" style={{ viewTransitionName: "template-detail" }}>
             {agent
               ? <TemplateDetail key={agent.id} sa={agent} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={close} />
               : picked.kind && <SubAgentDetail key={picked.name} kind={picked.kind} template onClose={close} onOpenAgent={(sa) => withTransition(() => setPicked({ agent: sa.id, name: sa.name }))} />}
-          </section>
-        ) : <span aria-hidden className="sheet-margin right-0 border-l" />}
-      </div>
+        </section>
+      )}
     </div>
   )
 }
 
-// The four squares, on the top bar's line and the header's line, at both ends (as in the frame)
-export function FrameCorners() {
+// The four squares, on the top bar's line and the header's line, at both ends (as in the frame).
+// The right pair goes while the side panel covers that side.
+function FrameCorners({ right }: { right: boolean }) {
   const sq = "absolute size-3 border border-[#dddcda] bg-white"
   return (
     <>
       <div aria-hidden className={sq} style={{ left: -1, top: "10.4375rem" }} />
       <div aria-hidden className={sq} style={{ left: -1, top: "2.625rem" }} />
-      <div aria-hidden className={sq} style={{ right: 0, top: "2.625rem" }} />
-      <div aria-hidden className={sq} style={{ right: -1, top: "10.4375rem" }} />
+      {right && <div aria-hidden className={sq} style={{ right: 0, top: "2.625rem" }} />}
+      {right && <div aria-hidden className={sq} style={{ right: -1, top: "10.4375rem" }} />}
     </>
   )
 }
@@ -205,7 +218,7 @@ export function FrameCorners() {
  * (the real Agents page on dev): their outcomes and what they run on, as there. Taglines shortened to fit the card.
  */
 // kind: the sub agent whose panel it opens (closest match in the demo); templateId: an agent with its own panel
-type LibraryAgent = { name: string; tagline: string; icon: LucideIcon; outcomes: Outcome[]; runsOn: string[]; templateId?: string; kind?: AgentKind }
+type LibraryAgent = { name: string; tagline: string; icon: LucideIcon; outcomes: Outcome[]; runsOn: string[]; templateId?: string; kind?: AgentKind; partOf?: number }
 const exploit: Outcome[] = [{ label: "Exploitable", tone: "risk" }, { label: "Not exploitable", tone: "clear" }, { label: "Unclear", tone: "unclear" }]
 const triage = getSuperAgent("triage")!
 const library: LibraryAgent[] = [
@@ -221,6 +234,12 @@ const library: LibraryAgent[] = [
   { name: "App Inventory", tagline: "Discovers every deployable app and shared library.", icon: AppWindow, outcomes: [], runsOn: ["Branch"], kind: "asset-discovery" },
   { name: "Deployment Mapping", tagline: "Maps non-containerized apps to their cloud workloads.", icon: Cloud, outcomes: [], runsOn: [], kind: "asset-discovery" },
 ]
+
+// The Sub Agents tab: the demo's single-mission agents (components/chat/agents.ts), with the agents they're part of
+const subLibrary: LibraryAgent[] = (Object.keys(agents) as AgentKind[]).map((k) => ({
+  name: subName(k), tagline: agents[k].role + ".", icon: agents[k].icon, kind: k,
+  outcomes: (subOutcomes[k] ?? []).filter((o) => o.label !== "Failed"), runsOn: [], partOf: usedBy(k).length,
+}))
 
 /*
  * An agent card. The top is the Figma card "Frame 2147206362" as drawn: white, a #F0F0F0 edge, drop shadow
@@ -265,12 +284,12 @@ function AgentCard({ a, selected, onSelect }: { a: LibraryAgent; selected: boole
           )) : <span className="text-[#c9c7c3]">—</span>}
         </span>
         <span className="flex h-5 min-w-0 items-center gap-3 overflow-hidden">
-          <span className="w-12 shrink-0 text-[#9a9893]">Runs on</span>
-          <span className="flex items-center gap-1">
+          <span className="w-12 shrink-0 text-[#9a9893]">{a.partOf !== undefined ? "Part of" : "Runs on"}</span>
+          {a.partOf !== undefined ? <span>{a.partOf} {a.partOf === 1 ? "agent" : "agents"}</span> : <span className="flex items-center gap-1">
             {a.runsOn.length > 0 ? a.runsOn.map((r) => (
               <span key={r} className="rounded-[0.1875rem] border border-[#ecebe9] px-1.5 text-[0.6875rem] leading-[1.125rem] text-[#6c6a68]">{r}</span>
             )) : <span className="text-[#c9c7c3]">—</span>}
-          </span>
+          </span>}
           {sa && (
             <span className="ml-auto flex items-center gap-3 text-[#9a9893]">
               {setup ? (

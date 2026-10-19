@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
-import { FrameCorners } from "@/components/agents-library-frame"
 import { BreadcrumbRobotIcon } from "@/components/nav-icons"
 import { NewChatFab } from "@/components/new-chat-fab"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
@@ -40,7 +39,7 @@ function Shell({ page: pageId }: { page: string }) {
   const full = page.id === "explorer"
   return (
     <>
-      <SidebarInset className="relative bg-white font-[Geist,ui-sans-serif,system-ui,sans-serif]">
+      <SidebarInset className="relative min-w-0 bg-white font-[Geist,ui-sans-serif,system-ui,sans-serif]">
         {/* The top bar from the frame: h 48, px 16 · py 12, a #ECEBE9 line under it, the breadcrumb (robot 16 · gap 6 · Geist 12/16 #121212) */}
         <header className="flex h-12 w-full shrink-0 items-center border-b border-[#ecebe9] px-4 py-3">
           <div className="flex items-center gap-1.5">
@@ -51,7 +50,6 @@ function Shell({ page: pageId }: { page: string }) {
         <main className={full ? "flex flex-1 flex-col" : "flex flex-1 flex-col overflow-auto p-6"}>
           <page.component />
         </main>
-        {full && <FrameCorners />}
       </SidebarInset>
       {!page.hideFab && <NewChatFab onClick={() => navigate("chat")} />}
     </>

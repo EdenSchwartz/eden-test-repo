@@ -586,3 +586,13 @@ html[data-vt="expand"]::view-transition-new(root) { animation: vt-fade-in 240ms 
   -webkit-mask-image: radial-gradient(ellipse 70% 120% at 50% 30%, #000 0%, rgb(0 0 0 / 0.5) 50%, transparent 100%);
   mask-image: radial-gradient(ellipse 70% 120% at 50% 30%, #000 0%, rgb(0 0 0 / 0.5) 50%, transparent 100%);
 }
+
+/* Agents | Sub Agents tabs on the Agents Library (as drawn): resting is plain grey text; hover gets a white
+   box with a hairline edge and dark text; selected a soft grey box with the same edge */
+.lib-tab {
+  height: 1.625rem; padding: 0 0.375rem; border: 1px solid transparent; border-radius: 0.25rem;
+  font-size: 0.875rem; line-height: 1rem; color: #6c6a68; cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+.lib-tab:hover { background: #fff; border-color: #ecebe9; color: #121212; }
+.lib-tab[aria-selected="true"] { background: #f8f8f7; border-color: #ecebe9; color: #121212; }
