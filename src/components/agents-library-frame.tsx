@@ -123,8 +123,8 @@ function FluidGrid() {
       const band = 0.5 + 0.5 * Math.cos(2 * Math.PI * p)
       const tint = Math.sin(2 * Math.PI * p * 0.5 + 1.3)
       const l = Math.min(1, band * 0.7 + sheen * 0.4)
-      const base = [72 + l * 140, 80 + l * 142, 94 + l * 140]
-      return [base[0] + tint * 8, base[1] + tint * 3, base[2] - tint * 6].map((c) => Math.round(Math.min(228, Math.max(64, c))))
+      const base = [86 + l * 104, 96 + l * 106, 114 + l * 104]
+      return [base[0] + tint * 6, base[1] + tint * 2, base[2] - tint * 4].map((c) => Math.round(Math.min(222, Math.max(80, c))))
     }
     const sample = (x: number, y: number) => {
       const i = Math.min(N, Math.max(1, Math.round(x / res + 0.5))), j = Math.min(M, Math.max(1, Math.round(y / res + 0.5)))
@@ -132,11 +132,14 @@ function FluidGrid() {
     }
     const seg = (x: number, y: number, horiz: boolean, t: number) => {
       const k = sample(horiz ? x + res / 2 : x, horiz ? y : y + res / 2)
-      const a = Math.min(1, d[k] * 1.1)
+      const a = Math.min(1, d[k] * 1.35)
       if (a < 0.02) return 0
       const speed = Math.hypot(u[k], v[k])
       const [r, g, b] = metal(x / w * 3.2 + y / h * 0.9 + d[k] * 0.6 + t * 0.00005, Math.min(1, speed * 0.25))
-      ctx.fillStyle = `rgba(${r},${g},${b},${a * 0.95})`
+      // a soft 3px sheen around the line (the metal catching light), then the line itself
+      ctx.fillStyle = `rgba(${r},${g},${b},${a * 0.14})`
+      if (horiz) ctx.fillRect(x, y - 1, res, 3); else ctx.fillRect(x - 1, y, 3, res)
+      ctx.fillStyle = `rgba(${r},${g},${b},${a})`
       if (horiz) ctx.fillRect(x, y, res, 1); else ctx.fillRect(x, y, 1, res)
       return a
     }
