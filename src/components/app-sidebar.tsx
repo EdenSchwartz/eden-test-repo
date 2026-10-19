@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils"
  * 196px wide, background #FCFCFA, a #ECEBE9 line on its right, no line under its header, Geist 14/16.
  *   Navigation px 12 · py 6, gap 16; main nav gap 24; groups px 2 gap 12, title rows px 4, items pl 26,
  *   the tree line at left 14 / top 28 (#9A9893 at 20%)
- *   Active: white, #ECEBE9 border, drop shadow 0 1 0.5 rgba(119,131,152,.2), pl 12 py 6 gap 14, bar and text #0170FD
+ *   Active: white, #ECEBE9 border, drop shadow 0 1 0.5 rgba(119,131,152,.2), pl 12 py 6 gap 14, bar and text #2E4ECA
  *   Bottom: px 14 · py 8, gap 6; the workspace px 2
  * The Chats group lists the frame's own items. The collapse button is drawn as in the frame and does nothing.
  */
@@ -89,8 +89,8 @@ export function AppSidebar() {
                     const active = g.id !== "chats" && page === it.page
                     return active ? (
                       <button key={it.label} onClick={() => navigate(it.page)} aria-current="page" className="flex w-full cursor-pointer items-center gap-3.5 rounded-[0.25rem] border border-[#ecebe9] bg-white py-1.5 pr-1 pl-3 text-left drop-shadow-[0px_1px_0.5px_rgba(119,131,152,0.2)]">
-                        <span aria-hidden className="relative h-3.5 w-0 shrink-0"><span className="absolute inset-y-0 -left-[0.75px] w-[1.5px] bg-[#0170fd]" /></span>
-                        <span className="min-w-px flex-[1_0_0] truncate text-[0.875rem] leading-4 text-[#0170fd]">{it.label}</span>
+                        <span aria-hidden className="relative h-3.5 w-0 shrink-0"><span className="absolute inset-y-0 -left-[0.75px] w-[1.5px] bg-[#2e4eca]" /></span>
+                        <span className="min-w-px flex-[1_0_0] truncate text-[0.875rem] leading-4 text-[#2e4eca]">{it.label}</span>
                       </button>
                     ) : (
                       <button key={it.label} onClick={() => navigate(it.page)} className={cn("flex h-6 w-full cursor-pointer items-center rounded-[0.25rem] pr-1 pl-[1.625rem] text-left", text)}>
