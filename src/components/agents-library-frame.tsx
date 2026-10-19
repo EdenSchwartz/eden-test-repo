@@ -181,9 +181,11 @@ export function AgentsLibraryFrame() {
       {/* The cards area: a drafting-sheet margin on both sides (fine diagonal hatching, a hairline rail), cards go between */}
       <div className="relative flex w-full flex-1">
         <span aria-hidden className="sheet-margin left-0 border-r" />
-        {/* In line with the title and the tabs (2.5rem in, the strip plus 0.5rem), filling the width between the strips:
-            as many columns as fit (3 on a laptop, 4 on a big screen; fewer beside the panel) */}
-        <div className="mx-8 grid min-w-0 flex-1 grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] content-start gap-4 px-2 pt-6 pb-10">
+        {/* Smaller screens (under 1800px): centered, 3 to a row (68rem at most). Big screens: in line with the title and
+            the tabs, filling the width between the strips (4 or more to a row). Beside the panel: as many as fit */}
+        <div className={cn("grid min-w-0 flex-1 content-start gap-4 pt-6 pb-10", picked
+          ? "mx-8 grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] px-2"
+          : "mx-auto max-w-[68rem] grid-cols-[repeat(3,minmax(0,1fr))] px-10 min-[1800px]:mx-8 min-[1800px]:max-w-none min-[1800px]:grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] min-[1800px]:px-2")}>
           {list.map((a) => <AgentCard key={a.name} a={a} selected={picked?.name === a.name} onSelect={() => pick(a)} />)}
         </div>
         {!picked && <span aria-hidden className="sheet-margin right-0 border-l" />}
