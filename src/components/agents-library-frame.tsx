@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils"
  * bluish silver-white highlights sweeping through and, where the flow is fast, short white glints (the shine) with a cool steel / faint champagne tint, and faster flow
  * catches the light. Darker than the resting grid so it reads on white, at most 80% strength.
  * Coming near the box from outside (within 18rem) pours a little dye in at the closest edge, as a hint.
- * Left alone, it pulses on its own now and then (every 30 to 60s): one soft stroke drifts across and fades.
+ * Left alone, it pulses on its own now and then (every 14 to 22s): one soft stroke drifts across and fades.
  * Runs only while there's dye to show; still (no fluid) if the user prefers reduced motion.
  */
 function FluidGrid() {
@@ -175,12 +175,12 @@ function FluidGrid() {
     }
     const start = () => { if (!raf) raf = requestAnimationFrame(loop) }
 
-    // The idle pulse: now and then (every 30 to 60s, never while you're on or near it, never in a hidden tab)
+    // The idle pulse: now and then (first a few seconds in, then every 14 to 22s; never while you're on or near it, never in a hidden tab)
     // a soft stroke drifts across part of the header by itself, as if someone breathed on it, then fades
     let pulseTimer = 0, pulseRaf = 0
-    const schedule = (first = false) => { pulseTimer = window.setTimeout(pulse, first ? 9000 + Math.random() * 4000 : 30000 + Math.random() * 30000) }
+    const schedule = (first = false) => { pulseTimer = window.setTimeout(pulse, first ? 3500 + Math.random() * 1500 : 14000 + Math.random() * 8000) }
     const pulse = () => {
-      if (document.hidden || box.matches(":hover") || performance.now() - touched < 12000 || !w) return schedule()
+      if (document.hidden || box.matches(":hover") || performance.now() - touched < 6000 || !w) return schedule()
       const dir = Math.random() < 0.5 ? 1 : -1
       const len = Math.min(w * 0.35, 26 * cell), x0 = w * (dir > 0 ? 0.1 + Math.random() * 0.35 : 0.55 + Math.random() * 0.35)
       const y0 = h * (0.3 + Math.random() * 0.4), t0 = performance.now(), dur = 1600
@@ -242,7 +242,7 @@ export function AgentsLibraryFrame() {
         </p>
       </div>
       {/* Agents | Sub Agents: a row of tabs under the header, its own line below */}
-      <div className="flex w-full items-center gap-2 border-b border-[#ecebe9] px-10 py-2">
+      <div className="flex w-full items-center gap-2 border-b border-[#ecebe9] py-2 pr-4 pl-10">
         <div role="tablist" aria-label="Library" className="flex items-center gap-2">
           {([["agents", "Agents"], ["subs", "Sub Agents"]] as const).map(([id, label]) => (
             <button key={id} role="tab" aria-selected={tab === id} onClick={() => switchTab(id)} className="lib-tab">{label}</button>
