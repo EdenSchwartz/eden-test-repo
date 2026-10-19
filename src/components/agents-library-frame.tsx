@@ -159,7 +159,8 @@ function FluidGrid() {
     const draw = (t: number) => {
       ctx.clearRect(0, 0, w, h)
       let lit = 0
-      for (let y = 0; y <= h; y += cell) for (let x = 0; x < w; x += res) lit += seg(x, y, true, t)
+      // rows counted up from the bottom stroke, like the resting grid (index.css .alive-base)
+      for (let y = h % cell; y < h; y += cell) for (let x = 0; x < w; x += res) lit += seg(x, y, true, t)
       for (let x = 0; x <= w; x += cell) for (let y = 0; y < h; y += res) lit += seg(x, y, false, t)
       return lit
     }
