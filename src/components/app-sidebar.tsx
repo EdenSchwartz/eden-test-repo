@@ -1,8 +1,9 @@
 import { Sidebar } from "@/components/ui/sidebar"
 import {
   AgentsIcon, AskRivalIcon, ChatsIcon, CollapseIcon, ConnectorsIcon, ExpandSimpleIcon, HomeIcon, PlatformIcon, PlusIcon,
-  RivalMark, RivalWordmark, SettingsIcon, WaitingIcon,
+  RivalMark, RivalWordmark, SectionToggleIcon, SettingsIcon, WaitingIcon,
 } from "@/components/nav-icons"
+import { useState } from "react"
 import { useConversations } from "@/lib/conversations"
 import { useNav } from "@/lib/nav"
 import { cn } from "@/lib/utils"
@@ -16,7 +17,7 @@ import { cn } from "@/lib/utils"
  *   the tree line at left 14 / top 28 (#9A9893 at 20%)
  *   Active: white, #ECEBE9 border, drop shadow 0 1 0.5 rgba(119,131,152,.2), pl 12 py 6 gap 14, bar and text #2E4ECA
  *   Bottom: px 14 · py 8, gap 6; the workspace px 2
- * The Chats group lists your conversations. The collapse button is drawn as in the frame and does nothing.
+ * The Recents group lists your conversations. Each group title collapses / expands its section (hover shows the triangle). The collapse button is drawn as in the frame and does nothing.
  */
 
 type Item = { label: string; page: string; params?: Record<string, string> }
@@ -38,9 +39,12 @@ const top = cn("flex h-6 w-full cursor-pointer items-center gap-1.5 rounded-[0.2
 export function AppSidebar() {
   const { navigate, page, params } = useNav()
   const { convs } = useConversations()
-  // Chats: your conversations, newest first (+ starts a new one)
+  // Sections you've collapsed (all open to start). Hovering a title swaps its icon for the toggle triangle
+  const [closed, setClosed] = useState<Set<string>>(() => new Set())
+  const toggle = (id: string) => setClosed((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n })
+  // Recents: your conversations, newest first (+ starts a new one)
   const all = [...groups, {
-    id: "chats", label: "Chats", icon: ChatsIcon, plus: true,
+    id: "recents", label: "Recents", icon: ChatsIcon, plus: true,
     items: convs.map((c) => ({ label: c.title, page: "chat", params: { conversationId: c.id } })),
   }]
 
@@ -71,20 +75,26 @@ export function AppSidebar() {
             </div>
 
             {all.map((g) => (
-              <div key={g.id} className="relative flex w-full flex-col items-start gap-3 px-0.5">
-                <span aria-hidden className="absolute top-7 bottom-0 left-3.5 w-px bg-[#9a9893]/20" />
+              <div key={g.id} className="relative flex w-full flex-col items-start px-0.5">
+                <span aria-hidden className={cn("absolute top-7 bottom-0 left-3.5 w-px bg-[#9a9893]/20 transition-opacity duration-200", closed.has(g.id) && "opacity-0")} />
                 <div className="relative flex w-full items-center gap-1.5 px-1">
-                  <div className="flex min-w-px flex-[1_0_0] items-center gap-1.5">
-                    <g.icon className="size-4 shrink-0 text-[#9a9893]" />
-                    <span className="truncate text-[0.875rem] leading-4 text-[#9a9893]">{g.label}</span>
-                  </div>
+                  {/* The title: click to collapse or expand; on hover its icon becomes the triangle (down = open) */}
+                  <button onClick={() => toggle(g.id)} aria-expanded={!closed.has(g.id)} className="group/title flex min-w-px flex-[1_0_0] cursor-pointer items-center gap-1.5 text-left">
+                    <span className="relative size-4 shrink-0">
+                      <g.icon className="absolute inset-0 size-4 text-[#9a9893] transition-opacity duration-150 group-hover/title:opacity-0" />
+                      <SectionToggleIcon className={cn("absolute inset-0 size-4 text-[#6c6a68] opacity-0 transition-[opacity,rotate] duration-200 group-hover/title:opacity-100", !closed.has(g.id) && "rotate-90")} />
+                    </span>
+                    <span className="truncate text-[0.875rem] leading-4 text-[#9a9893] transition-colors group-hover/title:text-[#6c6a68]">{g.label}</span>
+                  </button>
                   {g.plus && (
                     <button onClick={() => navigate("chat")} aria-label="New chat" className="flex size-4 shrink-0 cursor-pointer items-center justify-center text-[#6c6a68]">
                       <PlusIcon className="size-4" />
                     </button>
                   )}
                 </div>
-                <div className="flex w-full flex-col items-start gap-1.5">
+                {/* The items fold away (rows animate from their height to 0) */}
+                <div className={cn("grid w-full transition-[grid-template-rows] duration-200 ease-out", closed.has(g.id) ? "grid-rows-[0fr]" : "grid-rows-[1fr]")}>
+                <div className="flex min-h-0 w-full flex-col items-start gap-1.5 overflow-hidden pt-3">
                   {g.items.map((it) => {
                     const active = it.params ? page === "chat" && params.conversationId === it.params.conversationId : page === it.page
                     return active ? (
@@ -98,6 +108,7 @@ export function AppSidebar() {
                       </button>
                     )
                   })}
+                </div>
                 </div>
               </div>
             ))}
