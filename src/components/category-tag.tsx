@@ -26,7 +26,7 @@ export function CategoryIcon({ category, className }: { category: string; classN
 
 export function CategoryTag({ category }: { category: string }) {
   return (
-    <span className="flex h-6 items-center gap-1 rounded-[0.25rem] bg-[#f7f7f8] pr-1.5 pl-1 text-[0.8125rem] leading-4 whitespace-nowrap text-[#68696c]">
+    <span className="flex h-6 items-center gap-1 rounded-[0.25rem] bg-[#f7f7f8] pr-1.5 pl-1 text-[0.8125rem] leading-4 whitespace-nowrap text-[#a2a4a8]">
       <CategoryIcon category={category} />
       {category}
     </span>
