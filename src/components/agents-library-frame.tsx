@@ -488,7 +488,7 @@ const subMeta: Partial<Record<AgentKind, Meta>> = {
   correlation: { categories: [VM], cap: ["Dedup", Combine], ctx: ["wiz", "snyk", "semgrep"] },
   prioritization: { categories: [VM], cap: ["Memory Usage", Brain], ctx: ["wiz", "defender"] },
 }
-// A category tag: soft grey chip, the category's icon (Central Icons style, 1.5 stroke) and its name
+// A category tag: the category's icon (Central Icons style, 1.5 stroke) in a soft grey circle; overlapping, its name on hover
 const categoryIcon: Record<string, React.ReactNode> = {
   [APP]: <><rect x="3.75" y="3.75" width="16.5" height="16.5" rx="2.5" /><path d="M10 9.5 7.5 12l2.5 2.5M14 9.5l2.5 2.5-2.5 2.5" /></>,
   [VM]: <><path d="M9 8.25a3 3 0 0 1 6 0" /><rect x="7" y="8.25" width="10" height="12" rx="5" /><path d="M12 11.5v8.5M7 11.5 4.5 10.5M7 14.75H4.25M7 18l-2.5 1M17 11.5l2.5-1M17 14.75h2.75M17 18l2.5 1" /></>,
@@ -498,11 +498,10 @@ const categoryIcon: Record<string, React.ReactNode> = {
 }
 function CategoryTag({ category }: { category: string }) {
   return (
-    <span className="flex items-center gap-1 rounded-[0.25rem] bg-[#f4f4f3] py-0.5 pr-1.5 pl-1 text-[0.75rem] leading-4 whitespace-nowrap text-[#6c6a68]">
-      <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="size-3.5 shrink-0">
+    <span title={category} aria-label={category} className="grid size-6 place-items-center rounded-full bg-[#f4f4f3] text-[#6c6a68] ring-2 ring-white">
+      <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="size-3.5">
         {categoryIcon[category]}
       </svg>
-      {category}
     </span>
   )
 }
@@ -590,7 +589,7 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
           </span>
           {mine && <StatusChip status={mine.status} />}
         </span>
-        <span className={cn("flex items-center gap-1 transition-opacity", off && "opacity-50")}>
+        <span className={cn("flex items-center -space-x-1 transition-opacity", off && "opacity-50")}>
           {m.categories.map((c) => (
             <CategoryTag key={c} category={c} />
           ))}
