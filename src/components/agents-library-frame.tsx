@@ -459,7 +459,7 @@ function AgentTile({ seed, hue }: { seed: string; hue: number }) {
  * An agent card (the design: Figma "Frame 2147206365", Triage Hunter, 342px wide). White, a #ECEBE9 hairline drawn
  * inside the edge (an outline, so it takes no room), 6px corners, 16px padding.
  *   Top:    the agent's colour tile (44px, a 12px white square in the middle); beside it the name (Geist 16 medium,
- *           #121212) over its categories (soft grey tags, name only), then the description (14/20, #6C6A68)
+ *           #121212) over its categories (soft grey tags, name only), then the description (14/20, #6C6A68, always two lines tall)
  *   Footer: under a hairline, three columns spread edge to edge: Created by (Rival mark + "Rival") · Capabilities
  *           (their icons in grey circles, names on hover; components/capability.tsx) · Context (the tools it reads from, their logos alone, 16px; names on hover).
  *           Labels Geist 11 uppercase #A2A4A8, values 14 #121212. One line, never wraps.
@@ -585,7 +585,7 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
           </span>
           {mine && <StatusChip status={mine.status} />}
         </span>
-        <span className={cn("line-clamp-2 text-[0.875rem] leading-5 whitespace-normal text-pretty text-[#6c6a68] transition-opacity", off && "opacity-50")}>{a.tagline}</span>
+        <span className={cn("line-clamp-2 min-h-10 text-[0.875rem] leading-5 whitespace-normal text-pretty text-[#6c6a68] transition-opacity", off && "opacity-50")}>{a.tagline}</span>
       </span>
       <span className={cn("mt-auto flex items-start justify-between gap-4 border-t border-[#ecebe9] px-4 pt-4 pb-4 whitespace-nowrap transition-opacity", off && "opacity-50")}>
         <span className="flex flex-col gap-2">
