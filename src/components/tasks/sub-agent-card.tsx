@@ -70,7 +70,7 @@ export function SubAgentDetail({ kind, color, categories, nav, template, onClose
           <ColorTile color={color ?? colorFor(`sub:${kind}`)} icon={Icon} />
           <h2 className="min-w-0 font-title text-2xl leading-[1.1] font-medium tracking-[-0.015em] [--title-wght:450]">{subName(kind)}</h2>
         </div>
-        <dl className="flex flex-wrap gap-x-10 gap-y-3">
+        <dl className="flex flex-nowrap gap-x-8 overflow-hidden">
           {template ? <Prop label="Created by"><span className="flex items-center gap-2"><RivalMark className="-mx-1.5 -my-1 size-6 shrink-0 text-[#0350d0]" />Rival</span></Prop> : <Prop label="Status"><StatusChip status={status} className="mt-0.5" /></Prop>}
           {categories && <Prop label="Category"><CategoryList categories={categories} /></Prop>}
           <Prop label="Used in">{used.length} {used.length === 1 ? "agent" : "agents"}</Prop>

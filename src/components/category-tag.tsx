@@ -34,7 +34,7 @@ export function CategoryTag({ category }: { category: string }) {
 
 export function CategoryList({ categories }: { categories: string[] }) {
   return (
-    <span className="flex flex-wrap items-center gap-1">
+    <span className="flex items-center gap-1">
       {categories.map((c) => <CategoryTag key={c} category={c} />)}
     </span>
   )
