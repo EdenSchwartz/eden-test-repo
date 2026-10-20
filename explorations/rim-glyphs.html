@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Rival Rim Glyphs</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a pit-lane parts catalogue. Glyphs sit on a quiet sheet like parts laid out on a garage floor,
+   each tagged with its circuit name and spec. Ink on paper; Rival blue only for interaction. */
+:root {
+  --paper: #fbfbf9;
+  --sheet: #ffffff;
+  --ink: #161618;
+  --muted: #6c6a68;
+  --faint: #9a9893;
+  --line: #e7e6e3;
+  --accent: #2e4eca;
+  --amber: #c98a1a;
+  --display: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --body: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #111213; --sheet: #17181a; --ink: #ececea; --muted: #a3a19c; --faint: #75736f; --line: #2a2b2e;
+    --accent: #8197f0; --amber: #e0a43c; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #111213; --sheet: #17181a; --ink: #ececea; --muted: #a3a19c; --faint: #75736f; --line: #2a2b2e;
+  --accent: #8197f0; --amber: #e0a43c; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 64px;
+}
+.wrap { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 72px; }
+header { padding-top: 56px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: end; }
+.eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--display); font-weight: 600; font-size: clamp(36px, 6vw, 64px); line-height: 1; letter-spacing: -0.03em; margin: 10px 0 16px; text-wrap: balance; }
+.lede { max-width: 62ch; color: var(--muted); margin: 0; }
+.hero-wheel { width: 168px; height: 168px; color: var(--ink); }
+.hero-wheel svg { animation: spin 14s linear infinite; }
+section { display: flex; flex-direction: column; gap: 24px; }
+.sec-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 18px; }
+h2 { font-family: var(--display); font-weight: 600; font-size: 24px; letter-spacing: -0.015em; margin: 0; }
+.sec-note { color: var(--muted); max-width: 60ch; margin: 0; }
+svg.glyph { display: block; width: 100%; height: 100%; overflow: visible; }
+
+/* Library */
+.grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.part { background: var(--sheet); padding: 22px 16px 14px; display: flex; flex-direction: column; align-items: center; gap: 14px; cursor: pointer; border: 0; color: var(--ink); font: inherit; text-align: center; transition: background-color .2s; }
+.part:hover, .part:focus-visible { background: var(--paper); outline: none; }
+.part:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
+.part .g { width: 76px; height: 76px; transition: transform .9s cubic-bezier(.2,.8,.2,1); }
+.part:hover .g { transform: rotate(72deg); }
+.part .name { font-weight: 500; font-size: 14px; line-height: 1.2; }
+.part .spec { font-family: var(--mono); font-size: 10.5px; color: var(--faint); letter-spacing: .02em; }
+.fam-tag { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+/* Anatomy */
+.build { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
+.step { display: flex; flex-direction: column; gap: 12px; }
+.step .g { width: 100%; aspect-ratio: 1; max-width: 140px; color: var(--ink); }
+.step h3 { margin: 0; font-size: 14px; font-weight: 500; }
+.step p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+.step .n { font-family: var(--mono); font-size: 11px; color: var(--faint); }
+
+/* Families */
+.families { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.fam { background: var(--sheet); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.fam .row { display: flex; gap: 8px; }
+.fam .row .g { width: 34px; height: 34px; }
+.fam h3 { margin: 0; font-size: 15px; font-weight: 600; }
+.fam p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+
+/* In use */
+.use { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.panel { background: var(--sheet); border: 1px solid var(--line); border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 13px; font-family: var(--mono); font-weight: 400; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.agents { display: flex; flex-direction: column; }
+.agent { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.agent:last-child { border-bottom: 0; }
+.agent .g { width: 22px; height: 22px; }
+.agent .nm { font-weight: 500; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip { font-family: var(--mono); font-size: 10.5px; color: var(--muted); background: color-mix(in oklab, var(--ink) 6%, transparent); border-radius: 3px; padding: 1px 6px; white-space: nowrap; }
+.sizes { display: flex; align-items: end; gap: 22px; flex-wrap: wrap; }
+.sizes figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.sizes figcaption { font-family: var(--mono); font-size: 10.5px; color: var(--faint); font-variant-numeric: tabular-nums; }
+.states { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.state { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.state .g { width: 44px; height: 44px; color: var(--ink); }
+.state b { font-weight: 500; font-size: 13px; }
+.state span { color: var(--muted); font-size: 12px; line-height: 1.35; }
+.run .g svg { animation: spin 5s linear infinite; }
+.stop .g svg { animation: pit 4s cubic-bezier(.6,0,.2,1) infinite; }
+.need .g { color: var(--amber); }
+.need .g svg { animation: nudge 2.4s ease-in-out infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pit { 0%, 45% { transform: rotate(0); } 90%, 100% { transform: rotate(1080deg); } }
+@keyframes nudge { 0%, 70%, 100% { transform: rotate(0); } 78% { transform: rotate(-14deg); } 86% { transform: rotate(8deg); } }
+
+/* Builder */
+.builder { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+.stage { background: var(--sheet); border: 1px solid var(--line); border-radius: 8px; padding: 28px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: center; }
+.stage .big { width: 100%; max-width: 240px; aspect-ratio: 1; justify-self: center; }
+.stage .small { display: flex; flex-direction: column; gap: 14px; align-items: center; }
+.controls { display: flex; flex-direction: column; gap: 16px; }
+.ctl { display: grid; grid-template-columns: 96px minmax(0, 1fr) 36px; gap: 12px; align-items: center; }
+.ctl label { font-size: 13px; color: var(--muted); }
+.ctl output { font-family: var(--mono); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
+.ctl input[type=range] { width: 100%; accent-color: var(--accent); }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { font: inherit; font-size: 12.5px; padding: 5px 10px; border-radius: 4px; border: 1px solid var(--line); background: var(--sheet); color: var(--ink); cursor: pointer; }
+.seg button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.seg button:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn { align-self: start; font: inherit; font-size: 13px; font-weight: 500; padding: 7px 14px; border-radius: 4px; border: 1px solid var(--ink); background: var(--ink); color: var(--paper); cursor: pointer; }
+.toast { font-size: 12.5px; color: var(--muted); min-height: 1.2em; }
+.colors { display: flex; gap: 6px; flex-wrap: wrap; }
+.colors button { width: 22px; height: 22px; border-radius: 4px; border: 2px solid transparent; cursor: pointer; padding: 0; }
+.colors button[aria-pressed="true"] { border-color: var(--ink); }
+
+footer { color: var(--faint); font-size: 12.5px; border-top: 1px solid var(--line); padding-top: 18px; }
+
+@media (max-width: 1000px) { .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 420px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 860px) {
+  .build, .families { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .use, .builder { grid-template-columns: minmax(0, 1fr); }
+  header { grid-template-columns: minmax(0, 1fr); }
+  .hero-wheel { width: 120px; height: 120px; }
+}
+@media (max-width: 460px) {
+  .states { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stage { grid-template-columns: minmax(0, 1fr); }
+  .stage .small { flex-direction: row; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-wheel svg, .run .g svg, .stop .g svg, .need .g svg { animation: none; }
+  .part .g { transition: none; }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Rival · iconography exploration</div>
+      <h1>Rim glyphs</h1>
+      <p class="lede">A visual language taken from the inside of a race wheel. The tire is gone; what's left is the rim face: spokes, windows, the lug ring and the hub. Each pattern is distinct at a glance, so it can stand for an agent, a category or a state. Every glyph is named after a circuit.</p>
+    </div>
+    <div class="hero-wheel" id="hero" aria-hidden="true"></div>
+  </header>
+
+  <section aria-labelledby="lib">
+    <div class="sec-head">
+      <h2 id="lib">The library</h2>
+      <p class="sec-note">24 rim faces in six families. Hover to turn one; click to open it in the builder below.</p>
+    </div>
+    <div class="grid" id="library"></div>
+  </section>
+
+  <section aria-labelledby="anat">
+    <div class="sec-head">
+      <h2 id="anat">How a glyph is built</h2>
+      <p class="sec-note">Every glyph is one disc with shapes cut out of it, in the same order a rim is machined. Swapping one step changes the whole character.</p>
+    </div>
+    <div class="build" id="build"></div>
+  </section>
+
+  <section aria-labelledby="fams">
+    <div class="sec-head">
+      <h2 id="fams">Families as categories</h2>
+      <p class="sec-note">The family carries the category; the count and detail carry the individual agent. Two agents in Vuln Management share straight spokes but never the same number.</p>
+    </div>
+    <div class="families" id="families"></div>
+  </section>
+
+  <section aria-labelledby="use">
+    <div class="sec-head">
+      <h2 id="use">In the product</h2>
+      <p class="sec-note">As agent marks in the library, in each agent's own color, at the sizes the interface actually uses.</p>
+    </div>
+    <div class="use">
+      <div class="panel">
+        <h3>Agents Library</h3>
+        <div class="agents" id="agents"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:24px;min-width:0">
+        <div class="panel">
+          <h3>Sizes</h3>
+          <div class="sizes" id="sizes"></div>
+          <p class="sec-note" style="font-size:13px">Below 20px, keep to families with five or fewer openings. The turbine and mesh faces need 32px or more to read.</p>
+        </div>
+        <div class="panel">
+          <h3>States</h3>
+          <div class="states" id="states"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="bld">
+    <div class="sec-head">
+      <h2 id="bld">Builder</h2>
+      <p class="sec-note">Try new faces. Copy the result as SVG; it uses the current text color, so it takes any color it's placed in.</p>
+    </div>
+    <div class="builder">
+      <div class="stage">
+        <div class="big" id="bigPreview"></div>
+        <div class="small" id="smallPreview"></div>
+      </div>
+      <div class="controls">
+        <div class="seg" id="famSeg" role="group" aria-label="Family"></div>
+        <div class="ctl"><label for="cN">Openings</label><input id="cN" type="range" min="3" max="16" step="1"><output id="oN"></output></div>
+        <div class="ctl"><label for="cW">Spoke weight</label><input id="cW" type="range" min="1" max="7" step="0.5"><output id="oW"></output></div>
+        <div class="ctl"><label for="cT">Twist</label><input id="cT" type="range" min="0" max="0.9" step="0.05"><output id="oT"></output></div>
+        <div class="ctl"><label for="cL">Lug nuts</label><input id="cL" type="range" min="0" max="10" step="1"><output id="oL"></output></div>
+        <div class="ctl"><label for="cH">Hub size</label><input id="cH" type="range" min="8" max="20" step="1"><output id="oH"></output></div>
+        <div class="colors" id="colors" role="group" aria-label="Color"></div>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <button class="btn" id="copy" type="button">Copy SVG</button>
+          <span class="toast" id="toast" role="status"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>Exploration for the Rival brand, Oct 2026. Glyphs are drawn live from a handful of parameters, so any of them can be regenerated, tuned or extended.</footer>
+</div>
+
+<script>
+(() => {
+  const TAU = Math.PI * 2, A0 = -Math.PI / 2
+  const f = (n) => +n.toFixed(2)
+  const P = (r, a) => `${f(r * Math.cos(a))} ${f(r * Math.sin(a))}`
+  const arc = (r, a1, a2, sweep) => `A ${r} ${r} 0 ${Math.abs(a2 - a1) > Math.PI ? 1 : 0} ${sweep} ${P(r, a2)}`
+  let uid = 0
+
+  // Windows between consecutive spokes (spokes are what's left of the disc). Angles in radians.
+  function windows(angles, o) {
+    const { rIn, rOut, wi, wo, twist = 0, bend = 0 } = o, rm = (rIn + rOut) / 2
+    let d = ""
+    for (let i = 0; i < angles.length; i++) {
+      const s = angles[i]; let e = angles[(i + 1) % angles.length]; if (e <= s) e += TAU
+      const t1 = s + wi / rIn, t2 = e - wi / rIn, T1 = s + twist + wo / rOut, T2 = e + twist - wo / rOut
+      if (t2 - t1 < 0.04 || T2 - T1 < 0.04) continue
+      const edge = (a, A) => bend ? `Q ${P(rm, (a + A) / 2 + bend)} ` : "L "
+      d += `M ${P(rIn, t1)} ${arc(rIn, t1, t2, 1)} ${edge(t2, T2)}${P(rOut, T2)} ${arc(rOut, T2, T1, 0)} ${edge(T1, t1)}${P(rIn, t1)} Z `
+    }
+    return `<path d="${d}" fill="#000" stroke="#000" stroke-width="2.4" stroke-linejoin="round"/>`
+  }
+
+  // One glyph: an ink disc with a mask of cut-outs, built in the order a rim is machined
+  function glyph(s, upto = 5) {
+    const id = "m" + (++uid)
+    const hub = s.hub ?? 12, rIn = hub + 3, rOut = 39.5, rm = (rIn + rOut) / 2, n = s.n
+    const step = TAU / n, c = (k) => A0 + k * step
+    const w = s.w ?? 3, cut = []
+    if (upto >= 2 && s.lip !== false) cut.push(`<circle r="43.6" fill="none" stroke="#000" stroke-width="1.5"/>`)
+    if (upto >= 3) {
+      switch (s.fam) {
+        case "spokes": cut.push(windows(Array.from({ length: n }, (_, k) => c(k)), { rIn, rOut, wi: w * 2.1, wo: w * 1.6 })); break
+        case "twin": {
+          const a = []; for (let k = 0; k < n; k++) { a.push(c(k) - (s.split ?? 0.13), c(k) + (s.split ?? 0.13)) }
+          cut.push(windows(a, { rIn, rOut, wi: w * 1.05, wo: w * 0.85 })); break
+        }
+        case "turbine": cut.push(windows(Array.from({ length: n }, (_, k) => c(k)), { rIn, rOut, wi: w * 1.25, wo: w * 1.05, twist: s.twist ?? 0.45, bend: (s.twist ?? 0.45) * 0.55 })); break
+        case "holes": {
+          const ring = (r, hr, off) => Array.from({ length: n }, (_, k) => { const a = c(k) + off; return `<circle cx="${f(r * Math.cos(a))}" cy="${f(r * Math.sin(a))}" r="${hr}" fill="#000"/>` }).join("")
+          const hr = s.hr ?? Math.min(6.5, (rm * Math.PI / n) * 0.62)
+          cut.push(s.rings === 2 ? ring(rOut - hr * 0.62 - 1.5, hr * 0.62, 0) + ring(rIn + hr * 0.62 + 1.5, hr * 0.5, step / 2) : ring(rm, hr, 0)); break
+        }
+        case "ovals": {
+          const len = (rOut - rIn) / 2 - 1, wid = Math.min(5.5, (rm * Math.PI / n) * 0.5)
+          cut.push(Array.from({ length: n }, (_, k) => { const a = c(k), deg = f(a * 180 / Math.PI); return `<ellipse cx="${f(rm * Math.cos(a))}" cy="${f(rm * Math.sin(a))}" rx="${f(len)}" ry="${f(wid)}" transform="rotate(${deg} ${f(rm * Math.cos(a))} ${f(rm * Math.sin(a))})" fill="#000"/>` }).join("")); break
+        }
+        case "petals": {
+          const a = step * (s.open ?? 0.34)
+          cut.push(`<path d="${Array.from({ length: n }, (_, k) => { const x = c(k) + step / 2, q = rIn + (rOut - rIn) * 0.35; return `M ${P(rIn + 1, x)} C ${P(q, x - a)} ${P(rOut, x - a * 1.15)} ${P(rOut, x)} C ${P(rOut, x + a * 1.15)} ${P(q, x + a)} ${P(rIn + 1, x)} Z` }).join(" ")}" fill="#000" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/>`); break
+        }
+        case "star": {
+          const a = step * (s.open ?? 0.3)
+          cut.push(`<path d="${Array.from({ length: n }, (_, k) => { const x = c(k) + step / 2; return `M ${P(rIn + 1.5, x)} L ${P(rm + 2, x - a)} L ${P(rOut, x)} L ${P(rm + 2, x + a)} Z` }).join(" ")}" fill="#000" stroke="#000" stroke-width="2.6" stroke-linejoin="round"/>`); break
+        }
+        case "gear": {
+          const a = step * (s.open ?? 0.33)
+          cut.push(`<path d="${Array.from({ length: n }, (_, k) => { const x = c(k) + step / 2; return `M ${P(rIn + 4, x)} L ${P(rOut, x - a)} ${arc(rOut, x - a, x + a, 1)} Z` }).join(" ")}" fill="#000" stroke="#000" stroke-width="2" stroke-linejoin="round"/>`); break
+        }
+        case "mesh": {
+          cut.push(`<circle r="${rm}" fill="none" stroke="#000" stroke-width="${rOut - rIn}"/>`)
+          const tw = s.twist ?? 0.42, lines = []
+          for (let k = 0; k < n; k++) { lines.push(`M ${P(rIn - 1, c(k))} L ${P(rOut + 1, c(k) + tw)}`, `M ${P(rIn - 1, c(k))} L ${P(rOut + 1, c(k) - tw)}`) }
+          cut.push(`<path d="${lines.join(" ")}" stroke="#fff" stroke-width="${f(w * 0.75)}" stroke-linecap="round" fill="none"/>`)
+          cut.push(`<circle r="${rOut + 0.6}" fill="none" stroke="#fff" stroke-width="1.6"/>`); break
+        }
+        case "dish": {
+          const rings = s.rings ?? [rIn + 3, rm, rOut - 2]
+          cut.push(rings.map((r) => `<circle r="${f(r)}" fill="none" stroke="#000" stroke-width="${s.ring ?? 1.6}"/>`).join(""))
+          if (n) cut.push(Array.from({ length: n }, (_, k) => { const a = c(k) + step / 2, r = (rings[1] + rings[2]) / 2; return `<circle cx="${f(r * Math.cos(a))}" cy="${f(r * Math.sin(a))}" r="1.7" fill="#000"/>` }).join(""))
+          break
+        }
+      }
+    }
+    if (upto >= 4 && s.lugs) {
+      const lr = s.lugR ?? Math.max(6.5, hub * 0.62)
+      cut.push(Array.from({ length: s.lugs }, (_, k) => { const a = A0 + k * TAU / s.lugs; return `<circle cx="${f(lr * Math.cos(a))}" cy="${f(lr * Math.sin(a))}" r="1.55" fill="#000"/>` }).join(""))
+    }
+    if (upto >= 5) cut.push(`<circle r="${s.cap ?? 3.4}" fill="#000"/>`)
+    if (upto >= 4 && s.hubRing) cut.push(`<circle r="${hub + 0.6}" fill="none" stroke="#000" stroke-width="1.3"/>`)
+    return `<svg class="glyph" viewBox="-50 -50 100 100" aria-hidden="true"><defs><mask id="${id}"><rect x="-50" y="-50" width="100" height="100" fill="#fff"/>${cut.join("")}</mask></defs><circle r="48" fill="currentColor" mask="url(#${id})"/></svg>`
+  }
+
+  const FAMILIES = {
+    spokes: { label: "Spokes", cat: "Vuln Management", note: "Straight spokes: the workhorse. Plain, sturdy, counts well at any size." },
+    twin: { label: "Twin spokes", cat: "Vuln Management", note: "Spokes split in pairs, for the agents that hand work on." },
+    holes: { label: "Windows", cat: "AppSec", note: "Round and oval openings in a solid face: looking into the code." },
+    turbine: { label: "Turbine", cat: "CloudSec", note: "Curved blades that read as airflow and movement." },
+    star: { label: "Star & gear", cat: "Threats", note: "Pointed openings, the sharpest family, for anything adversarial." },
+    dish: { label: "Dish", cat: "GRC", note: "Concentric rings and few openings: order, layers, records." },
+  }
+  const famOf = (fam) => ({ ovals: "holes", petals: "holes", gear: "star", mesh: "turbine" }[fam] ?? fam)
+
+  const LIB = [
+    { name: "Monza", fam: "spokes", n: 5, w: 3.2, lugs: 5 },
+    { name: "Imola", fam: "spokes", n: 3, w: 4.6, lugs: 3, hub: 14 },
+    { name: "Spa", fam: "spokes", n: 6, w: 2.6, lugs: 6 },
+    { name: "Hockenheim", fam: "spokes", n: 4, w: 3.6, lugs: 4, hubRing: true },
+    { name: "Suzuka", fam: "twin", n: 5, w: 3, lugs: 5 },
+    { name: "Silverstone", fam: "twin", n: 6, w: 2.6, split: 0.1, lugs: 6 },
+    { name: "Interlagos", fam: "twin", n: 4, w: 3.4, split: 0.17, lugs: 4 },
+    { name: "Monaco", fam: "holes", n: 8, lugs: 5 },
+    { name: "Zandvoort", fam: "holes", n: 12, rings: 2, lugs: 6, hub: 10 },
+    { name: "Baku", fam: "ovals", n: 6, lugs: 6 },
+    { name: "Jeddah", fam: "ovals", n: 9, lugs: 5 },
+    { name: "Barcelona", fam: "petals", n: 6, lugs: 6 },
+    { name: "Mugello", fam: "petals", n: 5, open: 0.38, lugs: 5 },
+    { name: "Yas Marina", fam: "turbine", n: 12, w: 2.4, twist: 0.5, lugs: 0, hub: 11 },
+    { name: "Shanghai", fam: "turbine", n: 8, w: 3, twist: 0.4, lugs: 4 },
+    { name: "Austin", fam: "turbine", n: 16, w: 1.8, twist: 0.62, lugs: 0, hub: 10 },
+    { name: "Lusail", fam: "turbine", n: 5, w: 4, twist: 0.55, lugs: 5 },
+    { name: "Melbourne", fam: "mesh", n: 10, w: 3, twist: 0.42, lugs: 0, hub: 11 },
+    { name: "Las Vegas", fam: "mesh", n: 14, w: 2.4, twist: 0.32, lugs: 0, hub: 11 },
+    { name: "Montréal", fam: "star", n: 6, lugs: 6 },
+    { name: "Singapore", fam: "star", n: 8, open: 0.26, lugs: 0 },
+    { name: "Red Bull Ring", fam: "gear", n: 10, lugs: 5 },
+    { name: "Hungaroring", fam: "dish", n: 0, lugs: 5, hub: 11 },
+    { name: "Zolder", fam: "dish", n: 8, rings: [17, 26, 36], lugs: 0, hub: 11 },
+  ]
+  const spec = (s) => {
+    const what = { spokes: "spokes", twin: "twin spokes", holes: "windows", ovals: "ovals", petals: "petals", turbine: "blades", mesh: "mesh", star: "points", gear: "teeth", dish: "rings" }[s.fam]
+    const count = s.fam === "dish" ? (s.rings?.length ?? 3) : s.fam === "holes" && s.rings === 2 ? s.n * 2 : s.n
+    return `${count} ${what}${s.lugs ? ` · ${s.lugs} lugs` : ""}`
+  }
+
+  // Hero
+  document.getElementById("hero").innerHTML = glyph(LIB[13])
+
+  // Library
+  const lib = document.getElementById("library")
+  LIB.forEach((s, i) => {
+    const b = document.createElement("button")
+    b.className = "part"; b.type = "button"; b.setAttribute("aria-label", `${s.name}, ${spec(s)}. Open in builder`)
+    b.innerHTML = `<span class="g">${glyph(s)}</span><span class="name">${s.name}</span><span class="spec">${spec(s)}</span><span class="fam-tag">${FAMILIES[famOf(s.fam)].cat}</span>`
+    b.addEventListener("click", () => { load(s); document.getElementById("bld").scrollIntoView({ behavior: "smooth", block: "start" }) })
+    lib.appendChild(b)
+  })
+
+  // Anatomy: the machining order
+  const steps = [
+    ["Disc", "One solid circle. The tire is left out; the rim edge is the outline."],
+    ["Lip", "A thin cut near the edge separates the barrel from the face."],
+    ["Windows", "Openings between spokes. This step sets the family."],
+    ["Lug ring", "Small holes around the hub. Their count can encode a version or tier."],
+    ["Hub", "The center bore. Always there, so every glyph reads as a wheel."],
+  ]
+  document.getElementById("build").innerHTML = steps.map(([h, p], i) =>
+    `<div class="step"><div class="g">${glyph(LIB[0], i + 1)}</div><span class="n">${i + 1} of 5</span><h3>${h}</h3><p>${p}</p></div>`).join("")
+
+  // Families
+  const famKeys = ["spokes", "holes", "turbine", "star", "dish"]
+  document.getElementById("families").innerHTML = famKeys.map((k) => {
+    const members = LIB.filter((s) => famOf(s.fam) === k || (k === "spokes" && s.fam === "twin")).slice(0, 4)
+    return `<div class="fam"><span class="fam-tag">${FAMILIES[k].cat}</span><div class="row">${members.map((s) => `<span class="g">${glyph(s)}</span>`).join("")}</div><h3>${FAMILIES[k].label}</h3><p>${FAMILIES[k].note}</p></div>`
+  }).join("")
+
+  // In the product: the library's agents, each in its own color
+  const AGENTS = [
+    ["Triage Hunter", "Monza", "#3e6f8e", "Vuln Management"],
+    ["Code CVE Exploitability", "Spa", "#4f8a5f", "Vuln Management"],
+    ["Cloud Exploitability", "Yas Marina", "#cf9f45", "CloudSec"],
+    ["Code SAST Exploitability", "Monaco", "#b85a55", "AppSec"],
+    ["Red Team Simulation", "Montréal", "#6a7f4a", "Threats"],
+    ["Finding Ownership", "Suzuka", "#2f7a78", "Vuln Management"],
+    ["WAF Analysis", "Shanghai", "#c47a4a", "CloudSec"],
+    ["Remediation", "Imola", "#8a6aa0", "Vuln Management"],
+    ["Secret Validation", "Baku", "#5a6f9e", "AppSec"],
+    ["App Inventory", "Barcelona", "#a3835a", "AppSec"],
+  ]
+  const byName = (n) => LIB.find((s) => s.name === n)
+  document.getElementById("agents").innerHTML = AGENTS.map(([a, g, col, cat]) =>
+    `<div class="agent"><span class="g" style="color:${col}">${glyph(byName(g))}</span><span class="nm">${a}</span><span class="chip">${cat}</span></div>`).join("")
+
+  document.getElementById("sizes").innerHTML = [16, 20, 24, 32, 48, 72].map((px) =>
+    `<figure><div style="width:${px}px;height:${px}px;color:var(--ink)">${glyph(px < 24 ? byName("Monza") : byName("Yas Marina"))}</div><figcaption>${px}px</figcaption></figure>`).join("")
+
+  const triage = byName("Monza")
+  document.getElementById("states").innerHTML = [
+    ["", "Idle", "Still, at rest"],
+    ["run", "Running", "Turns slowly while it works"],
+    ["stop", "Pit stop", "A quick spin when a run finishes"],
+    ["need", "Needs you", "Stops, nudges, turns amber"],
+  ].map(([cls, b, t]) => `<div class="state ${cls}"><div class="g">${glyph(triage)}</div><b>${b}</b><span>${t}</span></div>`).join("")
+
+  // Builder
+  const famList = [["spokes", "Spokes"], ["twin", "Twin"], ["holes", "Windows"], ["ovals", "Ovals"], ["petals", "Petals"], ["turbine", "Turbine"], ["mesh", "Mesh"], ["star", "Star"], ["gear", "Gear"], ["dish", "Dish"]]
+  const palette = ["currentColor", "#3e6f8e", "#4f8a5f", "#cf9f45", "#b85a55", "#8a6aa0", "#2e4eca"]
+  let cur = { ...LIB[0] }, color = "currentColor"
+  const $ = (id) => document.getElementById(id)
+  const seg = $("famSeg")
+  seg.innerHTML = famList.map(([k, l]) => `<button type="button" data-f="${k}" aria-pressed="false">${l}</button>`).join("")
+  seg.addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; cur.fam = b.dataset.f; if (cur.fam === "dish") cur.rings = undefined; render() })
+  $("colors").innerHTML = palette.map((c, i) => `<button type="button" data-c="${c}" aria-label="${i ? c : "Ink"}" aria-pressed="${i === 0}" style="background:${i ? c : "var(--ink)"}"></button>`).join("")
+  $("colors").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; color = b.dataset.c; render() })
+  const ctl = [["cN", "oN", "n"], ["cW", "oW", "w"], ["cT", "oT", "twist"], ["cL", "oL", "lugs"], ["cH", "oH", "hub"]]
+  ctl.forEach(([i, , k]) => $(i).addEventListener("input", (e) => { cur[k] = +e.target.value; render() }))
+
+  function load(s) { cur = { w: 3, twist: 0.45, lugs: 5, hub: 12, ...s, n: s.n || 6 }; render() }
+  function render() {
+    ctl.forEach(([i, o, k]) => { const v = cur[k] ?? { w: 3, twist: 0.45, lugs: 0, hub: 12 }[k]; $(i).value = v; $(o).textContent = k === "twist" ? (+v).toFixed(2) : v })
+    seg.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.f === cur.fam)))
+    $("colors").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.c === color)))
+    const tint = color === "currentColor" ? "var(--ink)" : color
+    $("bigPreview").style.color = tint
+    $("bigPreview").innerHTML = glyph(cur)
+    $("smallPreview").innerHTML = [48, 24, 16].map((px) => `<div style="width:${px}px;height:${px}px;color:${tint}">${glyph(cur)}</div>`).join("")
+    $("toast").textContent = ""
+  }
+  $("copy").addEventListener("click", () => {
+    const svg = $("bigPreview").innerHTML.replace('class="glyph" ', "").replace('aria-hidden="true"', 'width="96" height="96"')
+    const done = () => { $("toast").textContent = "Copied SVG to the clipboard" }
+    const fallback = () => {
+      const t = document.createElement("textarea"); t.value = svg; t.setAttribute("readonly", ""); t.style.position = "fixed"; t.style.opacity = "0"
+      document.body.appendChild(t); t.select(); let ok = false; try { ok = document.execCommand("copy") } catch {}
+      t.remove(); $("toast").textContent = ok ? "Copied SVG to the clipboard" : "Copy didn't work here. Select the glyph's code from your browser's inspector instead."
+    }
+    try { navigator.clipboard.writeText(svg).then(done, fallback) } catch { fallback() }
+  })
+  load(LIB[13])
+})()
+</script>
+
+</body>
+</html>

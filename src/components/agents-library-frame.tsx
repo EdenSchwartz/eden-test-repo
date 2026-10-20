@@ -9,7 +9,7 @@ import { SubAgentDetail, subName, usedBy } from "@/components/tasks/sub-agent-ca
 import { TemplateDetail } from "@/components/tasks/template-detail"
 import { withTransition } from "@/lib/view-transition"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
-import { ColorTile, colorFor, flatColors, registerColor } from "@/components/tasks/color-tile"
+import { colorFor, flatColors, registerColor } from "@/components/tasks/color-tile"
 import { StatusChip } from "@/components/tasks/status-chip"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useEnabled } from "@/lib/enabled"
@@ -411,6 +411,15 @@ const colorOf = (a: LibraryAgent) => colors.get(a) ?? flatColors[0]
 // Shared with every other place an agent's icon shows (color-tile.tsx), so an agent keeps its colour across the demo
 for (const [a, c] of colors) { registerColor(a.name, c); if (a.partOf !== undefined && a.kind) registerColor(`sub:${a.kind}`, c) }
 
+// The card's colour mark: a small square in the agent's colour with a white square in the middle
+function FlatTile({ color }: { color: string }) {
+  return (
+    <span aria-hidden className="tile-gloss grid size-5 shrink-0 place-items-center rounded-[0.25rem]" style={{ background: color }}>
+      <span className="size-[0.4375rem] rounded-[0.09375rem] bg-white" />
+    </span>
+  )
+}
+
 
 /*
  * An agent's tile: a soft gradient under heavy film grain in the agent's own colour, with a white circle in the middle.
@@ -453,49 +462,76 @@ function AgentTile({ seed, hue }: { seed: string; hue: number }) {
  *           Context (the tools it reads from, as small marks; their names on hover). One line, never wraps.
  * Click: opens its side panel.
  */
-type Tool = "defender" | "sunburst" | "paloalto" | "wiz" | "github" | "aws"
-type Meta = { category: string; cap: [string, LucideIcon]; ctx: Tool[] }
+type Tool = "wiz" | "snyk" | "github" | "defender" | "paloalto" | "semgrep"
+// category: one or two; ctx: the integrations it pulls its data from (sources only)
+type Meta = { categories: string[]; cap: [string, LucideIcon]; ctx: Tool[] }
 const VM = "Vuln Management", APP = "AppSec", CLOUD = "CloudSec", THREATS = "Threats", GRC = "GRC"
 const meta: Record<string, Meta> = {
-  "Triage Hunter": { category: VM, cap: ["Memory Usage", Brain], ctx: ["defender", "sunburst", "paloalto"] },
-  "Code CVE Exploitability": { category: VM, cap: ["Code Search", FileSearch], ctx: ["github", "sunburst"] },
-  "Cloud Exploitability": { category: CLOUD, cap: ["Cloud Graph", Network], ctx: ["wiz", "aws", "paloalto"] },
-  "Code SAST Exploitability": { category: APP, cap: ["Code Search", FileSearch], ctx: ["github", "sunburst"] },
-  "Red Team Simulation": { category: THREATS, cap: ["Sandbox", Box], ctx: ["aws", "github", "defender"] },
-  "Finding Ownership": { category: VM, cap: ["Git History", GitBranch], ctx: ["github", "wiz"] },
-  "WAF Analysis": { category: CLOUD, cap: ["Traffic Replay", Activity], ctx: ["paloalto", "aws"] },
-  "Remediation": { category: VM, cap: ["Code Changes", GitPullRequest], ctx: ["github", "wiz", "sunburst"] },
-  "Secret Validation": { category: APP, cap: ["Live Check", KeyRound], ctx: ["github", "aws"] },
-  "App Inventory": { category: APP, cap: ["Repo Scan", FolderSearch], ctx: ["github", "wiz"] },
-  "Deployment Mapping": { category: CLOUD, cap: ["Cloud Graph", Network], ctx: ["aws", "wiz", "github"] },
+  "Triage Hunter": { categories: [VM, APP], cap: ["Memory Usage", Brain], ctx: ["wiz", "snyk", "github"] },
+  "Code CVE Exploitability": { categories: [VM, APP], cap: ["Code Search", FileSearch], ctx: ["snyk", "github"] },
+  "Cloud Exploitability": { categories: [CLOUD, VM], cap: ["Cloud Graph", Network], ctx: ["wiz", "defender", "paloalto"] },
+  "Code SAST Exploitability": { categories: [APP], cap: ["Code Search", FileSearch], ctx: ["semgrep", "github"] },
+  "Red Team Simulation": { categories: [THREATS, APP], cap: ["Sandbox", Box], ctx: ["snyk", "semgrep", "wiz"] },
+  "Finding Ownership": { categories: [VM], cap: ["Git History", GitBranch], ctx: ["github", "wiz"] },
+  "WAF Analysis": { categories: [CLOUD, THREATS], cap: ["Traffic Replay", Activity], ctx: ["paloalto", "wiz"] },
+  "Remediation": { categories: [VM, APP], cap: ["Code Changes", GitPullRequest], ctx: ["github", "snyk", "semgrep"] },
+  "Secret Validation": { categories: [APP, THREATS], cap: ["Live Check", KeyRound], ctx: ["github", "semgrep"] },
+  "App Inventory": { categories: [APP, GRC], cap: ["Repo Scan", FolderSearch], ctx: ["github", "wiz"] },
+  "Deployment Mapping": { categories: [CLOUD, APP], cap: ["Cloud Graph", Network], ctx: ["wiz", "github"] },
 }
 const subMeta: Partial<Record<AgentKind, Meta>> = {
-  exploitability: { category: VM, cap: ["Sandbox", Box], ctx: ["github", "wiz"] },
-  remediation: { category: VM, cap: ["Code Changes", GitPullRequest], ctx: ["github", "paloalto"] },
-  "threat-intel": { category: THREATS, cap: ["Threat Feeds", Radar], ctx: ["defender", "sunburst"] },
-  "red-team": { category: THREATS, cap: ["Sandbox", Box], ctx: ["aws", "defender"] },
-  "asset-discovery": { category: CLOUD, cap: ["Cloud Graph", Network], ctx: ["aws", "wiz", "github"] },
-  ownership: { category: VM, cap: ["Git History", GitBranch], ctx: ["github"] },
-  "data-leak": { category: APP, cap: ["Traffic Scan", Fingerprint], ctx: ["defender", "paloalto"] },
-  reporting: { category: GRC, cap: ["Reports", FileText], ctx: ["github", "sunburst"] },
-  correlation: { category: VM, cap: ["Dedup", Combine], ctx: ["wiz", "sunburst", "defender"] },
-  prioritization: { category: VM, cap: ["Memory Usage", Brain], ctx: ["wiz", "defender"] },
+  exploitability: { categories: [VM, APP], cap: ["Sandbox", Box], ctx: ["snyk", "wiz"] },
+  remediation: { categories: [VM], cap: ["Code Changes", GitPullRequest], ctx: ["github", "snyk"] },
+  "threat-intel": { categories: [THREATS], cap: ["Threat Feeds", Radar], ctx: ["defender", "paloalto"] },
+  "red-team": { categories: [THREATS, APP], cap: ["Sandbox", Box], ctx: ["semgrep", "wiz"] },
+  "asset-discovery": { categories: [CLOUD], cap: ["Cloud Graph", Network], ctx: ["wiz", "github"] },
+  ownership: { categories: [VM], cap: ["Git History", GitBranch], ctx: ["github"] },
+  "data-leak": { categories: [APP, THREATS], cap: ["Traffic Scan", Fingerprint], ctx: ["defender", "paloalto"] },
+  reporting: { categories: [GRC], cap: ["Reports", FileText], ctx: ["wiz", "snyk"] },
+  correlation: { categories: [VM], cap: ["Dedup", Combine], ctx: ["wiz", "snyk", "semgrep"] },
+  prioritization: { categories: [VM], cap: ["Memory Usage", Brain], ctx: ["wiz", "defender"] },
 }
 const metaOf = (a: LibraryAgent): Meta =>
-  meta[a.name] ?? ((a.partOf !== undefined && a.kind && subMeta[a.kind]) || { category: VM, cap: ["Memory Usage", Brain], ctx: ["github"] })
+  meta[a.name] ?? ((a.partOf !== undefined && a.kind && subMeta[a.kind]) || { categories: [VM], cap: ["Memory Usage", Brain], ctx: ["github"] })
 
 // Small marks for the tools an agent reads from, in each tool's colours (simplified, not the official logos)
-const toolNames: Record<Tool, string> = { defender: "Microsoft Defender", sunburst: "Sumo Logic", paloalto: "Palo Alto Networks", wiz: "Wiz", github: "GitHub", aws: "AWS" }
+const toolNames: Record<Tool, string> = { wiz: "Wiz", snyk: "Snyk", github: "GitHub", defender: "Microsoft Defender", paloalto: "Palo Alto Prisma", semgrep: "Semgrep" }
 function ToolMark({ tool }: { tool: Tool }) {
   const art: Record<Tool, React.ReactNode> = {
     defender: <path d="M8 1.2 2.6 3.1v4.3c0 3.4 2.3 6.1 5.4 7.4 3.1-1.3 5.4-4 5.4-7.4V3.1L8 1.2Zm-.6 2.1v4.4H3.8V4.1l3.6-.8Zm1.2 0 3.6.8v3.6H8.6V3.3ZM3.9 8.9h3.5v4.2C5.5 12.1 4.2 10.6 3.9 8.9Zm4.7 0h3.5c-.3 1.7-1.6 3.2-3.5 4.2V8.9Z" fill="#0078d4" />,
-    sunburst: <g stroke="#121212" strokeWidth="1.3" strokeLinecap="round">{Array.from({ length: 12 }, (_, i) => { const t = (i / 12) * Math.PI * 2; return <line key={i} x1={8 + Math.cos(t) * 3.4} y1={8 + Math.sin(t) * 3.4} x2={8 + Math.cos(t) * 6.6} y2={8 + Math.sin(t) * 6.6} /> })}</g>,
     paloalto: <g fill="#fa582d"><path d="m6.2 2.4 3 3-5.3 5.3-3-3z" /><path d="m11.1 5.3 3 3-5.3 5.3-3-3z" /></g>,
-    wiz: <text x="8" y="12" textAnchor="middle" fontSize="11" fontWeight="800" fontFamily="Geist, sans-serif" fill="#1b4dff">W</text>,
+    wiz: <><rect x="1" y="1" width="14" height="14" rx="3.5" fill="#1b4dff" /><text x="8" y="11.6" textAnchor="middle" fontSize="9.5" fontWeight="800" fontFamily="Geist, sans-serif" fill="#fff">W</text></>,
+    snyk: <><rect x="1" y="1" width="14" height="14" rx="3.5" fill="#4c4a73" /><text x="8" y="11.6" textAnchor="middle" fontSize="9.5" fontWeight="800" fontFamily="Geist, sans-serif" fill="#fff">S</text></>,
+    semgrep: <><circle cx="8" cy="8" r="7" fill="#2bc28a" /><circle cx="8" cy="8" r="2.6" fill="#fff" /></>,
     github: <><circle cx="8" cy="8" r="6.6" fill="#24292f" /><path d="M6.2 11.6v-1.4c-1.6.3-2-.7-2-.7-.3-.7-.7-.9-.7-.9-.6-.4 0-.4 0-.4.6 0 1 .7 1 .7.5.9 1.4.7 1.7.5 0-.4.2-.7.4-.8-1.3-.1-2.6-.6-2.6-2.8 0-.6.2-1.1.6-1.5-.1-.2-.3-.8 0-1.5 0 0 .5-.2 1.6.6a5.4 5.4 0 0 1 2.9 0c1.1-.8 1.6-.6 1.6-.6.3.7.1 1.3 0 1.5.4.4.6.9.6 1.5 0 2.2-1.3 2.7-2.6 2.8.2.2.4.5.4 1v1.9" fill="#fff" /></>,
-    aws: <><path d="M2.5 10.2c3.4 2 7.6 2 11 0" stroke="#ff9900" strokeWidth="1.4" fill="none" strokeLinecap="round" /><path d="m12 9.2 1.8.9-.6 1.9" stroke="#ff9900" strokeWidth="1.3" fill="none" strokeLinecap="round" strokeLinejoin="round" /><text x="8" y="8" textAnchor="middle" fontSize="6.4" fontWeight="700" fontFamily="Geist, sans-serif" fill="#232f3e">aws</text></>,
   }
   return <svg viewBox="0 0 16 16" className="size-[1.125rem] shrink-0" role="img" aria-label={toolNames[tool]}><title>{toolNames[tool]}</title>{art[tool]}</svg>
+}
+
+/*
+ * The cards' hover, after the reference video: the card turns toward the pointer in real perspective (6° at most),
+ * lifts a little, and its shadow grows and leans away. Light comes from a fixed source (top left): the agent's
+ * colour square catches it as a soft highlight that moves as the card turns, and the paper only shades faintly on
+ * the side turning away. Eases back flat on leave. Styles: .tilt-card in index.css.
+ */
+function useTilt() {
+  const still = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  const set = (el: HTMLElement, x: number, y: number) => {
+    el.style.setProperty("--rx", `${(-y * 6).toFixed(2)}deg`)
+    el.style.setProperty("--ry", `${(x * 6).toFixed(2)}deg`)
+    // where the light falls (from the top left): it moves against the tilt, like a fixed source on a turning surface
+    el.style.setProperty("--bx", `${(35 - x * 30).toFixed(1)}%`)
+    el.style.setProperty("--by", `${(30 - y * 30).toFixed(1)}%`)
+    el.style.setProperty("--sx", `${(-x * 6).toFixed(1)}px`)
+    el.style.setProperty("--sy", `${(8 - y * 4).toFixed(1)}px`)
+  }
+  return still ? {} : {
+    onPointerMove: (e: React.PointerEvent<HTMLElement>) => {
+      const b = e.currentTarget.getBoundingClientRect()
+      set(e.currentTarget, ((e.clientX - b.left) / b.width) * 2 - 1, ((e.clientY - b.top) / b.height) * 2 - 1)
+    },
+    onPointerLeave: (e: React.PointerEvent<HTMLElement>) => set(e.currentTarget, 0, 0),
+  }
 }
 
 // mine: on My Agents: its status chip top right, you (IB) as Created by on your own agents, and switched off
@@ -505,25 +541,34 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
   a: LibraryAgent; from?: LibraryAgent; selected: boolean; onSelect: () => void
   mine?: { status: TaskStatus; enabledKey: string; you?: boolean }
 }) {
+  const tilt = useTilt()
   const m = metaOf(from)
   const Cap = m.cap[1]
+  const tint = colors.has(from) ? colorOf(from) : colorFor(a.name)
   const { isEnabled } = useEnabled()
   const off = !!mine && !isEnabled(mine.enabledKey)
   return (
     <button
       onClick={onSelect}
       aria-pressed={selected}
-      className="group flex cursor-pointer flex-col items-stretch rounded-[0.375rem] border border-[#ecebe9] bg-white text-left whitespace-nowrap shadow-[0px_1px_1px_rgba(0,0,0,0.04)] transition-[border-color,translate] duration-200 hover:-translate-y-px hover:border-[#dddcda] aria-pressed:border-[#2e4eca]/40"
+      {...tilt}
+      style={{ "--tint": tint } as React.CSSProperties}
+      className="tilt-card group relative flex cursor-pointer flex-col items-stretch overflow-hidden rounded-[0.375rem] border border-[#ecebe9] bg-white text-left whitespace-nowrap hover:border-[#dddcda] aria-pressed:border-[#2e4eca]/40"
     >
+      <span aria-hidden className="tilt-light" />
       <span className="flex flex-col items-start gap-3.5 p-5">
         <span className="flex w-full min-w-0 items-center gap-2.5">
           <span className={cn("flex min-w-0 flex-1 items-center gap-2.5 transition-opacity", off && "opacity-50")}>
-            {TILE_STYLE === "flat" ? <ColorTile color={colors.has(from) ? colorOf(from) : colorFor(a.name)} icon={a.icon} /> : <AgentTile seed={a.name} hue={hueOf(from)} />}
+            {TILE_STYLE === "flat" ? <FlatTile color={tint} /> : <AgentTile seed={a.name} hue={hueOf(from)} />}
             <span className="min-w-0 flex-1 truncate text-[1rem] leading-5 font-medium text-[#121212]">{a.name}</span>
           </span>
           {mine && <StatusChip status={mine.status} />}
         </span>
-        <span className={cn("rounded-[0.25rem] bg-[#f2f2f1] px-2 py-0.5 transition-opacity", off && "opacity-50")}><span className=" font-[IBM_Plex_Mono,ui-monospace,monospace] text-[0.75rem] leading-5 whitespace-nowrap text-[#6c6a68]">{m.category}</span></span>
+        <span className={cn("flex items-center gap-1 transition-opacity", off && "opacity-50")}>
+          {m.categories.map((c) => (
+            <span key={c} className="rounded-[0.1875rem] bg-[#f2f2f1] px-1.5 font-[IBM_Plex_Mono,ui-monospace,monospace] text-[0.6875rem] leading-[1.125rem] whitespace-nowrap text-[#6c6a68]">{c}</span>
+          ))}
+        </span>
         <span className={cn("line-clamp-2 text-[0.875rem] leading-5 whitespace-normal text-pretty text-[#6c6a68] transition-opacity", off && "opacity-50")}>{a.tagline}</span>
       </span>
       <span className={cn("mt-auto grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-4 border-t border-[#ecebe9] px-5 pt-5 pb-5 whitespace-nowrap transition-opacity", off && "opacity-50")}>
