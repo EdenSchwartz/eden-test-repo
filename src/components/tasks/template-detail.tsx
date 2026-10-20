@@ -29,11 +29,11 @@ import { CategoryList } from "@/components/category-tag"
 
 type Tab = "overview" | "skills" | "triggers" | "schedule"
 
-export function TemplateDetail({ sa, color, nav, categories, capability, context, onUse, onClose, wide }: {
+export function TemplateDetail({ sa, color, nav, categories, capabilities, context, onUse, onClose, wide }: {
   sa: SuperAgent; color?: string; onUse: (sa: SuperAgent) => void; onClose: () => void; wide?: boolean
   nav?: DrawerNav // step through the cards it was opened from
   categories?: string[] // as on its card
-  capability?: { label: string; icon: LucideIcon } // as on its card; else "Read only"
+  capabilities?: React.ReactNode // as on its card (the icons); else "Read only"
   context?: React.ReactNode // its sources as on its card (the tool marks); else the source stack
 }) {
   const [tab, setTab] = useState<Tab>("overview")
@@ -46,7 +46,6 @@ export function TemplateDetail({ sa, color, nav, categories, capability, context
     { id: "skills", label: "Skills", icon: BookOpen, count: sa.skills.length },
     ...(sa.custom ? [{ id: "triggers" as const, label: "Triggers", icon: Zap }, { id: "schedule" as const, label: "Activity", icon: Activity }] : []),
   ]
-  const Cap = capability?.icon
   const pad = wide ? "px-6" : "px-5"
   const scope = scopeOf(sa)
   const outcomes = agentOutcomes[sa.clonedFrom ?? sa.id]
@@ -77,7 +76,7 @@ export function TemplateDetail({ sa, color, nav, categories, capability, context
           {!sa.custom && <Prop label="Created by"><span className="flex items-center gap-2"><RivalMark className="-mx-1.5 -my-1 size-6 shrink-0 text-[#0350d0]" />Rival</span></Prop>}
           {categories && <Prop label="Category"><CategoryList categories={categories} /></Prop>}
           <Prop label="Capabilities">
-            {Cap ? <span className="flex items-center gap-1.5"><Cap className="size-3.5 text-muted-foreground" strokeWidth={1.75} />{capability.label}</span> : "Read only"}
+            {capabilities ?? "Read only"}
           </Prop>
           {sa.custom && <Prop label="Scope" title={scope.full}>{scope.short}</Prop>}
           {sa.custom && <Prop label="Trigger" title={trigger.full}>{trigger.short}</Prop>}

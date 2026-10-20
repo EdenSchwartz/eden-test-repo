@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { Activity, AppWindow, Bandage, Box, Cloud, Combine, Crosshair, FileSearch, FileText, Fingerprint, FolderSearch, GitBranch, GitPullRequest, KeyRound, Network, Radar, Search, ShieldCheck, Swords, UsersRound, X, type LucideIcon } from "lucide-react"
+import { AppWindow, Bandage, Cloud, Crosshair, KeyRound, Search, ShieldCheck, Swords, UsersRound, X, type LucideIcon } from "lucide-react"
 import { agentOutcomes, subOutcomes, type Outcome } from "@/data/outcomes"
 import { getSuperAgent, type SuperAgent } from "@/data/super-agents"
 import { RivalMark } from "@/components/nav-icons"
@@ -16,6 +16,7 @@ import { useEnabled } from "@/lib/enabled"
 import type { TaskStatus } from "@/lib/task-status"
 import { cn } from "@/lib/utils"
 import { APP, CLOUD, GRC, THREATS, VM, CategoryTag } from "@/components/category-tag"
+import { CapabilityMarks, type Capability } from "@/components/capability"
 
 /*
  * The header box's grid lit by a fluid. A small Navier-Stokes simulation (Jos Stam's "stable fluids":
@@ -461,48 +462,40 @@ function AgentTile({ seed, hue }: { seed: string; hue: number }) {
  *   Top:    the agent's colour tile (44px, a 12px white square in the middle); beside it the name (Geist 16 medium,
  *           #121212) over its categories (soft grey tags, name only), then the description (14/20, #6C6A68)
  *   Footer: under a hairline, three columns spread edge to edge: Created by (Rival mark + "Rival") · Capabilities
- *           (icon + name) · Context (the tools it reads from, logos in overlapping grey circles; names on hover).
+ *           (their icons in grey circles, names on hover; components/capability.tsx) · Context (the tools it reads from, logos in overlapping grey circles; names on hover).
  *           Labels Geist 11 uppercase #A2A4A8, values 14 #121212. One line, never wraps.
  * Click: opens its side panel.
  */
 type Tool = "wiz" | "snyk" | "github" | "defender" | "paloalto" | "semgrep"
 // category: one or two; ctx: the integrations it pulls its data from (sources only)
-type Meta = { categories: string[]; cap: [string, LucideIcon]; ctx: Tool[] }
-// Memory Usage's icon: the Central Icons brain (round, a line down the middle, a branch either side)
-const BrainIcon = (({ className, strokeWidth = 1.5 }: { className?: string; strokeWidth?: number }) => (
-  <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M12 4.6c-1.1-1.2-3.5-1.1-4.2.7-1.9-.1-3.2 1.7-2.5 3.4-1.7 1-1.7 3.5-.2 4.5-.7 1.9.6 3.9 2.7 3.8.5 2.1 3 3 4.2 1.5 1.2 1.5 3.7.6 4.2-1.5 2.1.1 3.4-1.9 2.7-3.8 1.5-1 1.5-3.5-.2-4.5.7-1.7-.6-3.5-2.5-3.4-.7-1.8-3.1-1.9-4.2-.7Z" />
-    <path d="M12 4.6v14.3M12 10.2l2.6-1.7M12 14l-2.6 1.6" />
-  </svg>
-)) as unknown as LucideIcon
-
+type Meta = { categories: string[]; cap: Capability[]; ctx: Tool[] }
 const meta: Record<string, Meta> = {
-  "Triage Hunter": { categories: [APP, VM], cap: ["Memory Usage", BrainIcon], ctx: ["defender", "paloalto"] },
-  "Code CVE Exploitability": { categories: [VM, APP], cap: ["Code Search", FileSearch], ctx: ["snyk", "github"] },
-  "Cloud Exploitability": { categories: [CLOUD, VM], cap: ["Cloud Graph", Network], ctx: ["wiz", "defender", "paloalto"] },
-  "Code SAST Exploitability": { categories: [APP], cap: ["Code Search", FileSearch], ctx: ["semgrep", "github"] },
-  "Red Team Simulation": { categories: [THREATS, APP], cap: ["Sandbox", Box], ctx: ["snyk", "semgrep", "wiz"] },
-  "Finding Ownership": { categories: [VM], cap: ["Git History", GitBranch], ctx: ["github", "wiz"] },
-  "WAF Analysis": { categories: [CLOUD, THREATS], cap: ["Traffic Replay", Activity], ctx: ["paloalto", "wiz"] },
-  "Remediation": { categories: [VM, APP], cap: ["Code Changes", GitPullRequest], ctx: ["github", "snyk", "semgrep"] },
-  "Secret Validation": { categories: [APP, THREATS], cap: ["Live Check", KeyRound], ctx: ["github", "semgrep"] },
-  "App Inventory": { categories: [APP, GRC], cap: ["Repo Scan", FolderSearch], ctx: ["github", "wiz"] },
-  "Deployment Mapping": { categories: [CLOUD, APP], cap: ["Cloud Graph", Network], ctx: ["wiz", "github"] },
+  "Triage Hunter": { categories: [APP, VM], cap: ["memory", "graph"], ctx: ["defender", "paloalto"] },
+  "Code CVE Exploitability": { categories: [VM, APP], cap: ["graph", "sandbox"], ctx: ["snyk", "github"] },
+  "Cloud Exploitability": { categories: [CLOUD, VM], cap: ["graph", "internet"], ctx: ["wiz", "defender", "paloalto"] },
+  "Code SAST Exploitability": { categories: [APP], cap: ["graph", "sandbox"], ctx: ["semgrep", "github"] },
+  "Red Team Simulation": { categories: [THREATS, APP], cap: ["sandbox", "internet"], ctx: ["snyk", "semgrep", "wiz"] },
+  "Finding Ownership": { categories: [VM], cap: ["memory", "graph"], ctx: ["github", "wiz"] },
+  "WAF Analysis": { categories: [CLOUD, THREATS], cap: ["sandbox", "internet"], ctx: ["paloalto", "wiz"] },
+  "Remediation": { categories: [VM, APP], cap: ["memory", "sandbox"], ctx: ["github", "snyk", "semgrep"] },
+  "Secret Validation": { categories: [APP, THREATS], cap: ["sandbox", "internet"], ctx: ["github", "semgrep"] },
+  "App Inventory": { categories: [APP, GRC], cap: ["graph"], ctx: ["github", "wiz"] },
+  "Deployment Mapping": { categories: [CLOUD, APP], cap: ["graph"], ctx: ["wiz", "github"] },
 }
 const subMeta: Partial<Record<AgentKind, Meta>> = {
-  exploitability: { categories: [VM, APP], cap: ["Sandbox", Box], ctx: ["snyk", "wiz"] },
-  remediation: { categories: [VM], cap: ["Code Changes", GitPullRequest], ctx: ["github", "snyk"] },
-  "threat-intel": { categories: [THREATS], cap: ["Threat Feeds", Radar], ctx: ["defender", "paloalto"] },
-  "red-team": { categories: [THREATS, APP], cap: ["Sandbox", Box], ctx: ["semgrep", "wiz"] },
-  "asset-discovery": { categories: [CLOUD], cap: ["Cloud Graph", Network], ctx: ["wiz", "github"] },
-  ownership: { categories: [VM], cap: ["Git History", GitBranch], ctx: ["github"] },
-  "data-leak": { categories: [APP, THREATS], cap: ["Traffic Scan", Fingerprint], ctx: ["defender", "paloalto"] },
-  reporting: { categories: [GRC], cap: ["Reports", FileText], ctx: ["wiz", "snyk"] },
-  correlation: { categories: [VM], cap: ["Dedup", Combine], ctx: ["wiz", "snyk", "semgrep"] },
-  prioritization: { categories: [VM], cap: ["Memory Usage", BrainIcon], ctx: ["wiz", "defender"] },
+  exploitability: { categories: [VM, APP], cap: ["graph", "sandbox"], ctx: ["snyk", "wiz"] },
+  remediation: { categories: [VM], cap: ["sandbox"], ctx: ["github", "snyk"] },
+  "threat-intel": { categories: [THREATS], cap: ["memory", "internet"], ctx: ["defender", "paloalto"] },
+  "red-team": { categories: [THREATS, APP], cap: ["sandbox", "internet"], ctx: ["semgrep", "wiz"] },
+  "asset-discovery": { categories: [CLOUD], cap: ["graph"], ctx: ["wiz", "github"] },
+  ownership: { categories: [VM], cap: ["memory", "graph"], ctx: ["github"] },
+  "data-leak": { categories: [APP, THREATS], cap: ["internet"], ctx: ["defender", "paloalto"] },
+  reporting: { categories: [GRC], cap: ["memory"], ctx: ["wiz", "snyk"] },
+  correlation: { categories: [VM], cap: ["memory", "graph"], ctx: ["wiz", "snyk", "semgrep"] },
+  prioritization: { categories: [VM], cap: ["memory", "graph"], ctx: ["wiz", "defender"] },
 }
 const metaOf = (a: LibraryAgent): Meta =>
-  meta[a.name] ?? ((a.partOf !== undefined && a.kind && subMeta[a.kind]) || { categories: [VM], cap: ["Memory Usage", BrainIcon], ctx: ["github"] })
+  meta[a.name] ?? ((a.partOf !== undefined && a.kind && subMeta[a.kind]) || { categories: [VM], cap: ["memory"], ctx: ["github"] })
 
 // What an agent's drawer shows as Category, Capabilities and Context: the same as its card
 const drawerProps = (a?: LibraryAgent) => {
@@ -510,7 +503,7 @@ const drawerProps = (a?: LibraryAgent) => {
   const m = metaOf(a)
   return {
     categories: m.categories,
-    capability: { label: m.cap[0], icon: m.cap[1] },
+    capabilities: <CapabilityMarks caps={m.cap} />,
     context: <span className="flex items-center gap-1">{m.ctx.map((t) => <ToolMark key={t} tool={t} />)}</span>,
   }
 }
@@ -568,7 +561,6 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
 }) {
   const tilt = useTilt()
   const m = metaOf(from)
-  const Cap = m.cap[1]
   const tint = colors.has(from) ? colorOf(from) : colorFor(a.name)
   const { isEnabled } = useEnabled()
   const off = !!mine && !isEnabled(mine.enabledKey)
@@ -607,10 +599,7 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
         </span>
         <span className="flex min-w-0 flex-col gap-2">
           <span className="truncate text-[0.6875rem] leading-4 text-[#a2a4a8] [text-transform:uppercase]">Capabilities</span>
-          <span className="flex h-5 min-w-0 items-center gap-1.5 text-[0.875rem] leading-5 text-[#121212]">
-            <Cap className="size-[1.125rem] shrink-0 text-[#68696c]" strokeWidth={1.5} />
-            <span className="truncate">{m.cap[0]}</span>
-          </span>
+          <span className="flex h-5 items-center"><CapabilityMarks caps={m.cap} /></span>
         </span>
         <span className="flex flex-col items-end gap-2">
           <span className="text-[0.6875rem] leading-4 text-[#a2a4a8] [text-transform:uppercase]">Context</span>
