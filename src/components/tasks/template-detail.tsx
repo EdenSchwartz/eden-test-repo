@@ -74,7 +74,7 @@ export function TemplateDetail({ sa, color, nav, categories, capability, context
         </div>
         {/* Only what tells it apart: who made it, its category, what it may do, what it reads from (scope and trigger on your own) */}
         <dl className="flex flex-wrap gap-x-10 gap-y-3">
-          {!sa.custom && <Prop label="Created by"><span className="flex items-center gap-1.5"><RivalMark className="size-3.5 text-[#0350d0]" />Rival</span></Prop>}
+          {!sa.custom && <Prop label="Created by"><span className="flex items-center gap-2"><RivalMark className="-mx-1.5 -my-1 size-6 shrink-0 text-[#0350d0]" />Rival</span></Prop>}
           {categories && <Prop label="Category"><CategoryList categories={categories} /></Prop>}
           <Prop label="Capabilities">
             {Cap ? <span className="flex items-center gap-1.5"><Cap className="size-3.5 text-muted-foreground" strokeWidth={1.75} />{capability.label}</span> : "Read only"}

@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
  * The agent categories. These five are the only ones, spelled exactly so; don't add, rename or merge.
  * Each has a Central Icons style icon (24 grid, 1.5 stroke). The drawings fill about 14px of a 20px icon.
  *   CategoryTag:  a soft grey tag, the name only, regular weight (the cards)
- *   CategoryList: icon + name, side by side (the drawers' properties)
+ *   CategoryList: the same tags, side by side (the drawers' properties)
  */
 export const VM = "Vuln Management", APP = "Appsec", CLOUD = "CloudSec", THREATS = "Threats", GRC = "GRC"
 
@@ -34,13 +34,8 @@ export function CategoryTag({ category }: { category: string }) {
 
 export function CategoryList({ categories }: { categories: string[] }) {
   return (
-    <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-      {categories.map((c) => (
-        <span key={c} className="flex items-center gap-1">
-          <CategoryIcon category={c} className="-my-0.5 text-muted-foreground" />
-          {c}
-        </span>
-      ))}
+    <span className="flex flex-wrap items-center gap-1">
+      {categories.map((c) => <CategoryTag key={c} category={c} />)}
     </span>
   )
 }
