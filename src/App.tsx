@@ -18,6 +18,8 @@ export default function App() {
     <NavContext.Provider value={{ navigate, page: nav.page, params: nav.params }}>
     <ConversationsProvider>
     <TooltipProvider>
+      {/* A hairline along the very top, over everything (drawers too), so the browser's own bars read as outside the product */}
+      <div aria-hidden className="pointer-events-none fixed inset-x-0 top-0 z-[100] h-px bg-[#dddcda]" />
       <SidebarProvider className="overflow-x-clip" style={{ "--sidebar-width": "12.25rem" } as React.CSSProperties}>
         <AppSidebar />
         <Shell page={nav.page} />
