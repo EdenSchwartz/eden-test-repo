@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils"
 
 /*
  * One task template, in a panel on the right of the Task templates page (pages/gallery.tsx), styled like the
- * Rival Harness agent sheet: a blue-washed icon and a Hubot Sans title, hairline dividers, blue line tabs,
+ * Rival Harness agent sheet: a blue-washed icon and a Geist title, hairline dividers, blue line tabs,
  * small icon-led section labels, the prompt as a blue-ruled quote. Kept light for someone opening it the first time:
  *   Name, its properties (created by, agents, capabilities, time per run; scope and trigger on your own; sources as an
  *   icon stack), Use template at the bottom.

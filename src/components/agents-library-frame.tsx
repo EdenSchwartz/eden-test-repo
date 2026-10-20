@@ -566,7 +566,7 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
         </span>
         <span className={cn("flex items-center gap-1 transition-opacity", off && "opacity-50")}>
           {m.categories.map((c) => (
-            <span key={c} className="rounded-[0.1875rem] bg-[#f2f2f1] px-1.5 font-[IBM_Plex_Mono,ui-monospace,monospace] text-[0.6875rem] leading-[1.125rem] whitespace-nowrap text-[#6c6a68]">{c}</span>
+            <span key={c} className="rounded-[0.1875rem] bg-[#f2f2f1] px-1.5 font-[Geist_Mono,ui-monospace,monospace] text-[0.6875rem] leading-[1.125rem] whitespace-nowrap text-[#6c6a68]">{c}</span>
           ))}
         </span>
         <span className={cn("line-clamp-2 text-[0.875rem] leading-5 whitespace-normal text-pretty text-[#6c6a68] transition-opacity", off && "opacity-50")}>{a.tagline}</span>

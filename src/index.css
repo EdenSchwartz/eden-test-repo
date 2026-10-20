@@ -1,15 +1,15 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "./fonts.css";
 @source "../node_modules/streamdown/dist/*.js";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-    /* Rival Harness type: Mona Sans for text, Hubot Sans (condensed) for titles */
-    --font-sans: "Mona Sans", "Mona Sans Fallback", ui-sans-serif, system-ui, -apple-system, sans-serif;
-    --font-title: "Hubot Sans", "Hubot Sans Fallback", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    /* Type: Geist everywhere (text and titles), Geist Mono for small mono labels */
+    --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --font-title: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
     /* One easing for every animation. Tweak here to change the feel app-wide. */
     --ease-snappy: cubic-bezier(0.32, 0.72, 0, 1);
     --default-transition-timing-function: var(--ease-snappy);
@@ -425,11 +425,10 @@ html[data-vt="split"]::view-transition-group(*) {
 
 /* ---------- Rival Harness components (matching the reference demo) ---------- */
 
-/* Titles: Hubot Sans, condensed; weight via --title-wght (e.g. [--title-wght:450]), width via --title-wdth (75–125) */
+/* Titles: Geist; weight via --title-wght (e.g. [--title-wght:450]) */
 .font-title {
   font-family: var(--font-title);
-  font-variation-settings: "wdth" var(--title-wdth, 85), "wght" var(--title-wght, 700);
-  font-stretch: 85%;
+  font-variation-settings: "wght" var(--title-wght, 600);
 }
 
 /* A clickable card: hairline ring instead of a border, a soft lift on hover */

@@ -6,7 +6,7 @@
  *            a bit and its frame draws itself); ruled lines only where
  *            they divide real content (Home's grid). No page rails or header rules (too much)
  *   Labels:  small uppercase mono labels (sidebar groups, panel sections, Home's grid), like Hex's technical labels
- *   Type:    Rival's own fonts (Mona Sans, Hubot Sans titles); only the small labels switch to IBM Plex Mono
+ *   Type:    Geist; the small labels switch to Geist Mono
  *            (Google Fonts in index.html). Instrument Sans / Serif were tried and dropped.
  *   Chat:    no background by default; a faint grid appears only around the mouse on New chat (Home), not in
  *            conversations (it was there first; moved).
@@ -15,7 +15,7 @@
  */
 
 :root[data-look="hex"] {
-  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --radius: 0.25rem; /* 4px: square-ish, softened by 2px from the first pass */
 }
 
