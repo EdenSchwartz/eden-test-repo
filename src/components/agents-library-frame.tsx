@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { Activity, AppWindow, Bandage, Box, Brain, Cloud, Combine, Crosshair, FileSearch, FileText, Fingerprint, FolderSearch, GitBranch, GitPullRequest, KeyRound, Network, Radar, Search, ShieldCheck, Swords, UsersRound, X, type LucideIcon } from "lucide-react"
+import { Activity, AppWindow, Bandage, Box, Cloud, Combine, Crosshair, FileSearch, FileText, Fingerprint, FolderSearch, GitBranch, GitPullRequest, KeyRound, Network, Radar, Search, ShieldCheck, Swords, UsersRound, X, type LucideIcon } from "lucide-react"
 import { agentOutcomes, subOutcomes, type Outcome } from "@/data/outcomes"
 import { getSuperAgent, type SuperAgent } from "@/data/super-agents"
 import { RivalMark } from "@/components/nav-icons"
@@ -274,9 +274,9 @@ export function AgentsLibraryFrame() {
       </div>
       {/* The cards area: plain white space around the cards, nothing in the margins */}
       <div className="relative flex w-full flex-1">
-        {/* Smaller screens (under 1800px): centered, 3 to a row (68rem at most). Big screens: in line with the title and
+        {/* Smaller screens (under 1800px): centered, 3 to a row (342px cards, 71.125rem at most). Big screens: in line with the title and
             the tabs, filling the width between the strips (4 or more to a row). The drawer slides over them, nothing reflows */}
-        <div className="mx-auto grid max-w-[68rem] min-w-0 flex-1 content-start gap-4 px-10 pt-6 pb-10 grid-cols-[repeat(3,minmax(0,1fr))] min-[1800px]:mx-8 min-[1800px]:max-w-none min-[1800px]:grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] min-[1800px]:px-2">
+        <div className="mx-auto grid max-w-[71.125rem] min-w-0 flex-1 content-start gap-4 px-10 pt-6 pb-10 grid-cols-[repeat(3,minmax(0,1fr))] min-[1800px]:mx-8 min-[1800px]:max-w-none min-[1800px]:grid-cols-[repeat(auto-fill,minmax(21.375rem,1fr))] min-[1800px]:px-2">
           {list.map((a) => <AgentCard key={a.name} a={a} selected={open && picked?.name === a.name} onSelect={() => pick(a)} />)}
           {list.length === 0 && (
             <p className="col-span-full py-10 text-center text-[0.875rem] leading-5 whitespace-normal text-[#6c6a68]">
@@ -411,8 +411,8 @@ for (const [a, c] of colors) { registerColor(a.name, c); if (a.partOf !== undefi
 // The card's colour mark: a small square in the agent's colour with a white square in the middle
 function FlatTile({ color }: { color: string }) {
   return (
-    <span aria-hidden className="tile-gloss grid size-5 shrink-0 place-items-center rounded-[0.25rem]" style={{ background: color }}>
-      <span className="size-[0.4375rem] rounded-[0.09375rem] bg-white" />
+    <span aria-hidden className="tile-gloss grid size-11 shrink-0 place-items-center rounded-[0.25rem]" style={{ background: color }}>
+      <span className="size-3 rounded-[0.125rem] bg-white" />
     </span>
   )
 }
@@ -452,19 +452,29 @@ function AgentTile({ seed, hue }: { seed: string; hue: number }) {
 }
 
 /*
- * An agent card (the design: Figma "Triage Hunter" card). White, a #ECEBE9 hairline, 6px corners, 24px padding.
- *   Top:    the agent's colour tile (40px, a white rounded square in the middle) and its name (Geist 16, #121212),
- *           its category as a small mono chip (#F2F2F1), then the description (14/20, #6C6A68, up to two lines)
- *   Footer: under a hairline, three columns: Created by (the Rival mark) · Capabilities (icon + name) ·
- *           Context (the tools it reads from, as small marks; their names on hover). One line, never wraps.
+ * An agent card (the design: Figma "Frame 2147206365", Triage Hunter, 342px wide). White, a #ECEBE9 hairline drawn
+ * inside the edge (an outline, so it takes no room), 6px corners, 16px padding.
+ *   Top:    the agent's colour tile (44px, a 12px white square in the middle); beside it the name (Geist 16 medium,
+ *           #121212) over its categories (icons in 20px #F7F7F8 circles, overlapping), then the description (14/20, #6C6A68)
+ *   Footer: under a hairline, three columns spread edge to edge: Created by (Rival mark + "Rival") · Capabilities
+ *           (icon + name) · Context (the tools it reads from, logos in overlapping grey circles; names on hover).
+ *           Labels Geist 12 uppercase #A2A4A8, values 14 #121212. One line, never wraps.
  * Click: opens its side panel.
  */
-type Tool = "wiz" | "snyk" | "github" | "defender" | "paloalto" | "semgrep"
+type Tool = "wiz" | "snyk" | "github" | "defender" | "paloalto" | "semgrep" | "ring"
 // category: one or two; ctx: the integrations it pulls its data from (sources only)
 type Meta = { categories: string[]; cap: [string, LucideIcon]; ctx: Tool[] }
+// Memory Usage's icon: the Central Icons brain (round, a line down the middle, a branch either side)
+const BrainIcon = (({ className, strokeWidth = 1.5 }: { className?: string; strokeWidth?: number }) => (
+  <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M12 4.6c-1.1-1.2-3.5-1.1-4.2.7-1.9-.1-3.2 1.7-2.5 3.4-1.7 1-1.7 3.5-.2 4.5-.7 1.9.6 3.9 2.7 3.8.5 2.1 3 3 4.2 1.5 1.2 1.5 3.7.6 4.2-1.5 2.1.1 3.4-1.9 2.7-3.8 1.5-1 1.5-3.5-.2-4.5.7-1.7-.6-3.5-2.5-3.4-.7-1.8-3.1-1.9-4.2-.7Z" />
+    <path d="M12 4.6v14.3M12 10.2l2.6-1.7M12 14l-2.6 1.6" />
+  </svg>
+)) as unknown as LucideIcon
+
 const VM = "Vuln Management", APP = "Appsec", CLOUD = "CloudSec", THREATS = "Threats", GRC = "GRC"
 const meta: Record<string, Meta> = {
-  "Triage Hunter": { categories: [VM, APP], cap: ["Memory Usage", Brain], ctx: ["wiz", "snyk", "github"] },
+  "Triage Hunter": { categories: [APP, VM], cap: ["Memory Usage", BrainIcon], ctx: ["defender", "ring", "paloalto"] },
   "Code CVE Exploitability": { categories: [VM, APP], cap: ["Code Search", FileSearch], ctx: ["snyk", "github"] },
   "Cloud Exploitability": { categories: [CLOUD, VM], cap: ["Cloud Graph", Network], ctx: ["wiz", "defender", "paloalto"] },
   "Code SAST Exploitability": { categories: [APP], cap: ["Code Search", FileSearch], ctx: ["semgrep", "github"] },
@@ -486,7 +496,7 @@ const subMeta: Partial<Record<AgentKind, Meta>> = {
   "data-leak": { categories: [APP, THREATS], cap: ["Traffic Scan", Fingerprint], ctx: ["defender", "paloalto"] },
   reporting: { categories: [GRC], cap: ["Reports", FileText], ctx: ["wiz", "snyk"] },
   correlation: { categories: [VM], cap: ["Dedup", Combine], ctx: ["wiz", "snyk", "semgrep"] },
-  prioritization: { categories: [VM], cap: ["Memory Usage", Brain], ctx: ["wiz", "defender"] },
+  prioritization: { categories: [VM], cap: ["Memory Usage", BrainIcon], ctx: ["wiz", "defender"] },
 }
 // A category tag: the category's icon (Central Icons style, 1.5 stroke) in a soft grey circle; overlapping, its name on hover
 const categoryIcon: Record<string, React.ReactNode> = {
@@ -498,8 +508,8 @@ const categoryIcon: Record<string, React.ReactNode> = {
 }
 function CategoryTag({ category }: { category: string }) {
   return (
-    <span title={category} aria-label={category} className="grid size-7 place-items-center rounded-full bg-[#f4f4f3] text-[#6c6a68] ring-2 ring-white">
-      <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="size-5">
+    <span title={category} aria-label={category} className="grid size-5 place-items-center rounded-full bg-[#f7f7f8] text-[#68696c] ring-1 ring-white">
+      <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="size-3.5">
         {categoryIcon[category]}
       </svg>
     </span>
@@ -507,7 +517,7 @@ function CategoryTag({ category }: { category: string }) {
 }
 
 const metaOf = (a: LibraryAgent): Meta =>
-  meta[a.name] ?? ((a.partOf !== undefined && a.kind && subMeta[a.kind]) || { categories: [VM], cap: ["Memory Usage", Brain], ctx: ["github"] })
+  meta[a.name] ?? ((a.partOf !== undefined && a.kind && subMeta[a.kind]) || { categories: [VM], cap: ["Memory Usage", BrainIcon], ctx: ["github"] })
 
 // What an agent's drawer shows as Capabilities and Context: the same as its card
 const drawerProps = (a?: LibraryAgent) => {
@@ -520,17 +530,22 @@ const drawerProps = (a?: LibraryAgent) => {
 }
 
 // Small marks for the tools an agent reads from, in each tool's colours (simplified, not the official logos)
-const toolNames: Record<Tool, string> = { wiz: "Wiz", snyk: "Snyk", github: "GitHub", defender: "Microsoft Defender", paloalto: "Palo Alto Prisma", semgrep: "Semgrep" }
+const toolNames: Record<Tool, string> = { wiz: "Wiz", snyk: "Snyk", github: "GitHub", defender: "Microsoft Defender", paloalto: "Palo Alto Prisma", semgrep: "Semgrep", ring: "Context source" }
 function ToolMark({ tool }: { tool: Tool }) {
   const art: Record<Tool, React.ReactNode> = {
     defender: <path d="M8 1.2 2.6 3.1v4.3c0 3.4 2.3 6.1 5.4 7.4 3.1-1.3 5.4-4 5.4-7.4V3.1L8 1.2Zm-.6 2.1v4.4H3.8V4.1l3.6-.8Zm1.2 0 3.6.8v3.6H8.6V3.3ZM3.9 8.9h3.5v4.2C5.5 12.1 4.2 10.6 3.9 8.9Zm4.7 0h3.5c-.3 1.7-1.6 3.2-3.5 4.2V8.9Z" fill="#0078d4" />,
     paloalto: <g fill="#fa582d"><path d="m6.2 2.4 3 3-5.3 5.3-3-3z" /><path d="m11.1 5.3 3 3-5.3 5.3-3-3z" /></g>,
     wiz: <><rect x="1" y="1" width="14" height="14" rx="3.5" fill="#1b4dff" /><text x="8" y="11.6" textAnchor="middle" fontSize="9.5" fontWeight="800" fontFamily="Geist, sans-serif" fill="#fff">W</text></>,
     snyk: <><rect x="1" y="1" width="14" height="14" rx="3.5" fill="#4c4a73" /><text x="8" y="11.6" textAnchor="middle" fontSize="9.5" fontWeight="800" fontFamily="Geist, sans-serif" fill="#fff">S</text></>,
+    ring: <g stroke="#121212" strokeWidth="0.8" strokeLinecap="round">{Array.from({ length: 20 }, (_, i) => { const t = (i / 20) * Math.PI * 2; return <line key={i} x1={8 + Math.cos(t) * 4} y1={8 + Math.sin(t) * 4} x2={8 + Math.cos(t) * 7.2} y2={8 + Math.sin(t) * 7.2} /> })}</g>,
     semgrep: <><circle cx="8" cy="8" r="7" fill="#2bc28a" /><circle cx="8" cy="8" r="2.6" fill="#fff" /></>,
     github: <><circle cx="8" cy="8" r="6.6" fill="#24292f" /><path d="M6.2 11.6v-1.4c-1.6.3-2-.7-2-.7-.3-.7-.7-.9-.7-.9-.6-.4 0-.4 0-.4.6 0 1 .7 1 .7.5.9 1.4.7 1.7.5 0-.4.2-.7.4-.8-1.3-.1-2.6-.6-2.6-2.8 0-.6.2-1.1.6-1.5-.1-.2-.3-.8 0-1.5 0 0 .5-.2 1.6.6a5.4 5.4 0 0 1 2.9 0c1.1-.8 1.6-.6 1.6-.6.3.7.1 1.3 0 1.5.4.4.6.9.6 1.5 0 2.2-1.3 2.7-2.6 2.8.2.2.4.5.4 1v1.9" fill="#fff" /></>,
   }
-  return <svg viewBox="0 0 16 16" className="size-[1.125rem] shrink-0" role="img" aria-label={toolNames[tool]}><title>{toolNames[tool]}</title>{art[tool]}</svg>
+  return (
+    <span title={toolNames[tool]} className="grid size-5 shrink-0 place-items-center rounded-full bg-[#f7f7f8] ring-1 ring-white">
+      <svg viewBox="0 0 16 16" className="size-3" role="img" aria-label={toolNames[tool]}>{art[tool]}</svg>
+    </span>
+  )
 }
 
 /*
@@ -578,43 +593,43 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
       aria-pressed={selected}
       {...tilt}
       style={{ "--tint": tint } as React.CSSProperties}
-      className="tilt-card group relative flex cursor-pointer flex-col items-stretch overflow-hidden rounded-[0.375rem] border border-[#ecebe9] bg-white text-left whitespace-nowrap hover:border-[#dddcda] aria-pressed:border-[#2e4eca]/40"
+      className="tilt-card group relative flex cursor-pointer flex-col items-stretch overflow-hidden rounded-[0.375rem] bg-white text-left whitespace-nowrap outline-1 -outline-offset-1 outline-[#ecebe9] hover:outline-[#dddcda] aria-pressed:outline-[#2e4eca]/40"
     >
       <span aria-hidden className="tilt-light" />
-      <span className="flex flex-col items-start gap-3.5 p-5">
-        <span className="flex w-full min-w-0 items-center gap-2.5">
-          <span className={cn("flex min-w-0 flex-1 items-center gap-2.5 transition-opacity", off && "opacity-50")}>
+      <span className="flex flex-col items-start gap-3 px-4 pt-4 pb-3">
+        <span className="flex w-full min-w-0 items-start gap-3">
+          <span className={cn("flex min-w-0 flex-1 items-start gap-3 transition-opacity", off && "opacity-50")}>
             {TILE_STYLE === "flat" ? <FlatTile color={tint} /> : <AgentTile seed={a.name} hue={hueOf(from)} />}
-            <span className="min-w-0 flex-1 truncate text-[1rem] leading-5 font-medium text-[#121212]">{a.name}</span>
+            <span className="flex min-w-0 flex-1 flex-col gap-1">
+              <span className="truncate text-[1rem] leading-5 font-medium text-[#121212]">{a.name}</span>
+              <span className="flex items-center -space-x-1">
+                {m.categories.map((c) => <CategoryTag key={c} category={c} />)}
+              </span>
+            </span>
           </span>
           {mine && <StatusChip status={mine.status} />}
         </span>
-        <span className={cn("flex items-center -space-x-1.5 transition-opacity", off && "opacity-50")}>
-          {m.categories.map((c) => (
-            <CategoryTag key={c} category={c} />
-          ))}
-        </span>
         <span className={cn("line-clamp-2 text-[0.875rem] leading-5 whitespace-normal text-pretty text-[#6c6a68] transition-opacity", off && "opacity-50")}>{a.tagline}</span>
       </span>
-      <span className={cn("mt-auto grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-4 border-t border-[#ecebe9] px-5 pt-5 pb-5 whitespace-nowrap transition-opacity", off && "opacity-50")}>
-        <span className="flex flex-col gap-3">
-          <span className="text-[0.875rem] leading-4 text-[#6c6a68]">Created by</span>
-          <span className="flex h-5 items-center">
+      <span className={cn("mt-auto flex items-start justify-between gap-4 border-t border-[#ecebe9] px-4 pt-4 pb-4 whitespace-nowrap transition-opacity", off && "opacity-50")}>
+        <span className="flex flex-col gap-2">
+          <span className="text-[0.75rem] leading-4 text-[#a2a4a8] [text-transform:uppercase]">Created by</span>
+          <span className="flex h-5 items-center gap-2 text-[0.875rem] leading-5 text-[#121212]">
             {mine?.you
-              ? <Avatar className="size-5" title="Created by you"><AvatarFallback className="text-[9px] font-semibold">IB</AvatarFallback></Avatar>
-              : <RivalMark className="size-4 text-[#0350d0]" />}
+              ? <><Avatar className="size-4" title="Created by you"><AvatarFallback className="text-[7px] font-semibold">IB</AvatarFallback></Avatar>You</>
+              : <><RivalMark className="-mx-1.5 size-6 shrink-0 text-[#0350d0]" />Rival</>}
           </span>
         </span>
-        <span className="flex min-w-0 flex-col gap-3">
-          <span className="truncate text-[0.875rem] leading-4 text-[#6c6a68]">Capabilities</span>
+        <span className="flex min-w-0 flex-col gap-2">
+          <span className="truncate text-[0.75rem] leading-4 text-[#a2a4a8] [text-transform:uppercase]">Capabilities</span>
           <span className="flex h-5 min-w-0 items-center gap-1.5 text-[0.875rem] leading-5 text-[#121212]">
-            <Cap className="size-4 shrink-0 text-[#6c6a68]" strokeWidth={1.5} />
+            <Cap className="size-[1.0625rem] shrink-0 text-[#68696c]" strokeWidth={1.5} />
             <span className="truncate">{m.cap[0]}</span>
           </span>
         </span>
-        <span className="flex flex-col gap-3">
-          <span className="text-[0.875rem] leading-4 text-[#6c6a68]">Context</span>
-          <span className="flex h-5 items-center gap-1">{m.ctx.map((t) => <ToolMark key={t} tool={t} />)}</span>
+        <span className="flex flex-col items-end gap-2">
+          <span className="text-[0.75rem] leading-4 text-[#a2a4a8] [text-transform:uppercase]">Context</span>
+          <span className="flex h-5 items-center -space-x-1">{m.ctx.map((t) => <ToolMark key={t} tool={t} />)}</span>
         </span>
       </span>
     </button>

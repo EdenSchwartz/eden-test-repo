@@ -7,7 +7,7 @@ import type { LucideIcon } from "lucide-react"
  * The colours grow from a warm, muted four (sage, slate blue, ochre, brick) into a family of 21.
  */
 export const flatColors = [
-  "#3e6f8e", "#4f8a5f", "#cf9f45", "#b85a55", // slate blue (Triage Hunter), sage, ochre, brick (the reference)
+  "#5e64bf", "#4f8a5f", "#cf9f45", "#b85a55", // indigo (Triage Hunter), sage, ochre, brick (the reference)
   "#6a7f4a", "#2f7a78", "#c47a4a", "#8a6aa0", // olive, teal, terracotta, dusty violet
   "#5a6f9e", "#a3835a", "#9a4f6a", "#6e9a8a", // denim, camel, mulberry, eucalyptus
   "#d08a5e", "#4a5d7a", "#8f9a4f", "#b86a7a", // apricot, navy slate, moss, rose
