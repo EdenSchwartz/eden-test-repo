@@ -456,7 +456,7 @@ function AgentTile({ seed, hue }: { seed: string; hue: number }) {
  * An agent card (the design: Figma "Frame 2147206365", Triage Hunter, 342px wide). White, a #ECEBE9 hairline drawn
  * inside the edge (an outline, so it takes no room), 6px corners, 16px padding.
  *   Top:    the agent's colour tile (44px, a 12px white square in the middle); beside it the name (Geist 16 medium,
- *           #121212) over its categories (icons in 20px #F7F7F8 circles, overlapping), then the description (14/20, #6C6A68)
+ *           #121212) over its categories (soft grey tags, icon + name), then the description (14/20, #6C6A68)
  *   Footer: under a hairline, three columns spread edge to edge: Created by (Rival mark + "Rival") · Capabilities
  *           (icon + name) · Context (the tools it reads from, logos in overlapping grey circles; names on hover).
  *           Labels Geist 12 uppercase #A2A4A8, values 14 #121212. One line, never wraps.
@@ -584,7 +584,7 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
             {TILE_STYLE === "flat" ? <FlatTile color={tint} /> : <AgentTile seed={a.name} hue={hueOf(from)} />}
             <span className="flex min-w-0 flex-1 flex-col gap-1">
               <span className="truncate text-[1rem] leading-5 font-medium text-[#121212]">{a.name}</span>
-              <span className="flex items-center -space-x-1">
+              <span className="flex min-w-0 items-center gap-1 overflow-hidden">
                 {m.categories.map((c) => <CategoryTag key={c} category={c} />)}
               </span>
             </span>

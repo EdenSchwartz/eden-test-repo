@@ -1,10 +1,9 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
 /*
  * The agent categories. These five are the only ones, spelled exactly so; don't add, rename or merge.
  * Each has a Central Icons style icon (24 grid, 1.5 stroke). The drawings fill about 14px of a 20px icon.
- *   CategoryTag:  the icon alone in a soft grey circle (24px), its name in a tooltip on hover (the cards, overlapping)
+ *   CategoryTag:  a soft grey tag, icon + name (the cards)
  *   CategoryList: icon + name, side by side (the drawers' properties)
  */
 export const VM = "Vuln Management", APP = "Appsec", CLOUD = "CloudSec", THREATS = "Threats", GRC = "GRC"
@@ -27,14 +26,10 @@ export function CategoryIcon({ category, className }: { category: string; classN
 
 export function CategoryTag({ category }: { category: string }) {
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span aria-label={category} className="grid size-6 place-items-center rounded-full bg-[#f7f7f8] text-[#68696c] ring-1 ring-white">
-          <CategoryIcon category={category} />
-        </span>
-      </TooltipTrigger>
-      <TooltipContent side="top" sideOffset={6}>{category}</TooltipContent>
-    </Tooltip>
+    <span className="flex h-6 items-center gap-1 rounded-[0.25rem] bg-[#f7f7f8] pr-1.5 pl-1 text-[0.8125rem] leading-4 whitespace-nowrap text-[#68696c]">
+      <CategoryIcon category={category} />
+      {category}
+    </span>
   )
 }
 
