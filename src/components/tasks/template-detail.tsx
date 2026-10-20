@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Activity, ArrowUp, BookOpen, Bot, Check, ChevronDown, ChevronRight, ChevronUp, Copy, FileText, Flag, GitFork, Hand, ListTree, MessageSquareText, Workflow, X, Zap, type LucideIcon } from "lucide-react"
+import { Activity, ArrowUp, BookOpen, Bot, ChevronDown, ChevronRight, ChevronUp, FileText, Flag, GitFork, Hand, ListTree, MessageSquareText, Workflow, X, Zap, type LucideIcon } from "lucide-react"
 import { RivalMark } from "@/components/nav-icons"
 import { MessageResponse } from "@/components/ai-elements/message"
 import { agents, type AgentKind } from "@/components/chat/agents"
@@ -19,7 +19,7 @@ import { CategoryList } from "@/components/category-tag"
 
 /*
  * One task template, in a panel on the right of the Task templates page (pages/gallery.tsx), styled like the
- * Rival Harness agent sheet: a top bar (step through the cards: down / 1 of n / up; copy link, close), the agent's colour tile and a Geist title,
+ * Rival Harness agent sheet: a top bar (step through the cards: down / 1 of n / up; close), the agent's colour tile and a Geist title,
  * hairline dividers, ink tabs with icons, section headers with their icon in a soft square. Kept light:
  *   Name, its properties (created by, capabilities, context as on its card; scope and trigger on your own),
  *   Use Agent at the bottom.
@@ -275,37 +275,30 @@ export function Section({ icon: Icon, title, grow, children }: { icon: typeof Bo
   )
 }
 
-// The drawer's top bar. Left: down / "1 / 9" / up, to step through the cards it was opened from (down = next,
-// up = previous; off at either end). Right: actions, copy link, close. No breadcrumbs.
+// The drawer's top bar. Left: down / "1 / 9" / up, to step through the cards it was opened from (up = the next
+// number, down = the one before; off at either end). Right: actions, close. No breadcrumbs.
 export type DrawerNav = { index: number; total: number; onPrev: () => void; onNext: () => void }
-const barBtn = "flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-35"
+const barBtn = "flex shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-35"
 export function DrawerTopBar({ nav, onClose, pad = "px-5", children }: { nav?: DrawerNav; onClose: () => void; pad?: string; children?: React.ReactNode }) {
-  const [copied, setCopied] = useState(false)
-  const copy = () => {
-    try { navigator.clipboard.writeText(window.location.href).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1400) }, () => {}) } catch { /* ok */ }
-  }
   return (
     <div className={cn("flex h-12 shrink-0 items-center gap-3 border-b border-hairline", pad)}>
-      <div className="flex min-w-0 flex-1 items-center gap-1">
+      <div className="flex min-w-0 flex-1 items-center gap-0.5">
         {nav && nav.index >= 0 && (
           <>
-            <button onClick={nav.onNext} disabled={nav.index >= nav.total - 1} aria-label="Next agent" title="Next" className={cn(barBtn, "-ml-1.5")}>
-              <ChevronDown className="size-4" />
+            <button onClick={nav.onPrev} disabled={nav.index <= 0} aria-label="Previous agent" title="Previous" className={cn(barBtn, "-ml-1 size-6")}>
+              <ChevronDown className="size-3.5" />
             </button>
-            <span className="text-sm tabular-nums text-muted-foreground" aria-live="polite">
+            <span className="px-0.5 text-xs tabular-nums text-muted-foreground" aria-live="polite">
               <span className="text-foreground">{nav.index + 1}</span> / {nav.total}
             </span>
-            <button onClick={nav.onPrev} disabled={nav.index <= 0} aria-label="Previous agent" title="Previous" className={barBtn}>
-              <ChevronUp className="size-4" />
+            <button onClick={nav.onNext} disabled={nav.index >= nav.total - 1} aria-label="Next agent" title="Next" className={cn(barBtn, "size-6")}>
+              <ChevronUp className="size-3.5" />
             </button>
           </>
         )}
       </div>
       {children}
-      <button onClick={copy} aria-label="Copy link" title={copied ? "Copied" : "Copy link"} className={barBtn}>
-        {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-      </button>
-      <button onClick={onClose} aria-label="Close" title="Close" className={barBtn}>
+      <button onClick={onClose} aria-label="Close" title="Close" className={cn(barBtn, "size-7")}>
         <X className="size-4" />
       </button>
     </div>
