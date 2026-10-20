@@ -459,7 +459,7 @@ function AgentTile({ seed, hue }: { seed: string; hue: number }) {
  *           #121212) over its categories (soft grey tags, icon + name), then the description (14/20, #6C6A68)
  *   Footer: under a hairline, three columns spread edge to edge: Created by (Rival mark + "Rival") · Capabilities
  *           (icon + name) · Context (the tools it reads from, logos in overlapping grey circles; names on hover).
- *           Labels Geist 12 uppercase #A2A4A8, values 14 #121212. One line, never wraps.
+ *           Labels Geist 11 uppercase #A2A4A8, values 14 #121212. One line, never wraps.
  * Click: opens its side panel.
  */
 type Tool = "wiz" | "snyk" | "github" | "defender" | "paloalto" | "semgrep"
@@ -595,7 +595,7 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
       </span>
       <span className={cn("mt-auto flex items-start justify-between gap-4 border-t border-[#ecebe9] px-4 pt-4 pb-4 whitespace-nowrap transition-opacity", off && "opacity-50")}>
         <span className="flex flex-col gap-2">
-          <span className="text-[0.75rem] leading-4 text-[#a2a4a8] [text-transform:uppercase]">Created by</span>
+          <span className="text-[0.6875rem] leading-4 text-[#a2a4a8] [text-transform:uppercase]">Created by</span>
           <span className="flex h-5 items-center gap-2 text-[0.875rem] leading-5 text-[#121212]">
             {mine?.you
               ? <><Avatar className="size-4" title="Created by you"><AvatarFallback className="text-[7px] font-semibold">IB</AvatarFallback></Avatar>You</>
@@ -603,14 +603,14 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
           </span>
         </span>
         <span className="flex min-w-0 flex-col gap-2">
-          <span className="truncate text-[0.75rem] leading-4 text-[#a2a4a8] [text-transform:uppercase]">Capabilities</span>
+          <span className="truncate text-[0.6875rem] leading-4 text-[#a2a4a8] [text-transform:uppercase]">Capabilities</span>
           <span className="flex h-5 min-w-0 items-center gap-1.5 text-[0.875rem] leading-5 text-[#121212]">
             <Cap className="size-[1.125rem] shrink-0 text-[#68696c]" strokeWidth={1.5} />
             <span className="truncate">{m.cap[0]}</span>
           </span>
         </span>
         <span className="flex flex-col items-end gap-2">
-          <span className="text-[0.75rem] leading-4 text-[#a2a4a8] [text-transform:uppercase]">Context</span>
+          <span className="text-[0.6875rem] leading-4 text-[#a2a4a8] [text-transform:uppercase]">Context</span>
           <span className="-my-0.5 flex h-6 items-center -space-x-1">{m.ctx.map((t) => <ToolMark key={t} tool={t} />)}</span>
         </span>
       </span>
