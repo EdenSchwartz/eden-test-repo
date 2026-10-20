@@ -6,7 +6,7 @@ import { days, howOften, nextRun, ordinal, setTrigger, useTriggers, when, type E
 import { cn } from "@/lib/utils"
 
 /*
- * Triggers: what starts one of your agents (top of its Activity tab, components/super-agent-panel.tsx ScheduleTab).
+ * Triggers: what starts one of your agents (its own Triggers tab in the agent drawer, components/tasks/template-detail.tsx; still atop Activity in the older super-agent-panel.tsx).
  *   On demand  always on: you can always ask it (the panel's button, or a chat)
  *   Schedule   how often and when, the next run; its own switch
  *   Event      which event, from where, any filter; its own switch

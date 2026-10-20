@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react"
+import { useRef, useState } from "react"
 import { ArrowLeft, ArrowRight, Bot, ChevronDown, ChevronRight, LayoutGrid, Rows3, Search, Shapes } from "lucide-react"
 import { agents, type AgentKind } from "@/components/chat/agents"
 import { StepsLine } from "@/components/tasks/empty-state"
 import { SubAgentCard, SubAgentDetail, subName } from "@/components/tasks/sub-agent-card"
 import { TaskTable } from "@/components/tasks/task-table"
 import { TemplateCard } from "@/components/tasks/template-card"
+import { MyAgentCard, MySubAgentCard } from "@/components/agents-library-frame"
 import { TemplateDetail } from "@/components/tasks/template-detail"
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger,
@@ -15,6 +16,7 @@ import { useNav } from "@/lib/nav"
 import { useEnabled } from "@/lib/enabled"
 import { subAgentStatus, taskStatus, type TaskStatus } from "@/lib/task-status"
 import { withTransition } from "@/lib/view-transition"
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 
 /*
@@ -24,8 +26,7 @@ import { cn } from "@/lib/utils"
  *              Use template → the setup chat (pages/chat.tsx) → it joins My Agents.
  *   My Agents (default export, mode "mine"): your agents: search, a Status filter, and Cards | List. List groups them
  *              Linear-style under the template they were made from (components/tasks/task-table.tsx).
- *              Clicking an agent card expands it into a full page (the card's box grows into the page's, a shared
- *              view-transition name; data-vt="expand" in index.css); ✕ or Esc shrinks it back into its card.
+ *              Clicking an agent card opens its details in the side drawer, as in Agent Library.
  *              None yet: an empty state pointing at Agent Library.
  *   Agents | Sub agents: a switch under the intro. Agents = the multi-step ones above (templates or yours);
  *              Sub agents = the single-mission helpers they're built from (components/tasks/sub-agent-card.tsx),
@@ -52,9 +53,11 @@ const subKinds = Object.keys(agents) as AgentKind[]
 
 
 // Cards keep one size whether the page is split or not: fixed-width columns, 3 per row full width, 2 when split.
-// The page column (Split, max-w-[55.5rem]) is exactly 3 cards + padding wide, so full rows share its edges.
+// The page column (Split, max-w-[68rem], as Agents Library) fits three cards to a row.
 // The search is two cards wide (34.75rem), ending where the second card does
 const grid = "grid gap-3 grid-cols-[repeat(auto-fill,17rem)]"
+// My Agents: the Agents Library grid (agents-library-frame.tsx), three to a row, so the shared cards get the same width
+const libGrid = "grid gap-4 grid-cols-[repeat(3,minmax(0,1fr))]"
 
 // ponytail: substring search over the obvious fields; real search when the catalog grows
 const matches = (sa: SuperAgent, q: string) =>
@@ -81,26 +84,11 @@ function Gallery({ mode }: { mode: "explore" | "mine" }) {
   const [subId, setSubId] = useState<AgentKind | null>(null)
   // An agent opened from the sub agent's "Part of" list: shown in the same panel, under a breadcrumb back to the sub agent
   const [nestedId, setNestedId] = useState<string | null>(null)
-  // My Agents: the agent expanded into a full page (its card grows into it), or none. Esc shrinks it back
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-  const expanded = expandedId ? getSuperAgent(expandedId) ?? null : null
-  // After an expand, the grid comes back without its entrance animation: the shrink-back needs the card visible
-  const [settled, setSettled] = useState(false)
-  const expand = (sa: SuperAgent) => withTransition(() => { setExpandedId(sa.id); setSettled(true) }, {}, "expand")
-  const collapse = () => withTransition(() => setExpandedId(null), {}, "expand")
-  useEffect(() => {
-    if (!expandedId) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") collapse() }
-    window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
-  }, [expandedId])
   const nested = nestedId ? getSuperAgent(nestedId) ?? null : null
   const [view, setViewState] = useState<"cards" | "list">(() => {
     try { return localStorage.getItem("tasks-view") === "list" ? "list" : "cards" } catch { return "cards" }
   })
   const setView = (v: typeof view) => withTransition(() => { setViewState(v); try { localStorage.setItem("tasks-view", v) } catch { /* ok */ } })
-  // ponytail: the panel layout; Docked for now (Floating and Wide still work in Split, the switch to compare them is gone)
-  const layout = "docked" as "docked" | "floating" | "wide"
   // The picked one (split view): what you arrived with (e.g. "Open in My Agents" after creating it), else none
   const [selectedId, setSelectedId] = useState<string | null>(() => {
     const sa = getSuperAgent(params.superAgentId)
@@ -124,14 +112,14 @@ function Gallery({ mode }: { mode: "explore" | "mine" }) {
     (!sq || [agents[k].name, agents[k].role].some((f) => f.toLowerCase().includes(sq))))
 
   const use = (sa: SuperAgent) => navigate("chat", { superAgentId: sa.id, startChat: true }) // Use template (pages/chat.tsx)
-  // Picking / closing animates (view transition): cards glide to their new spots, the details slide in from the right
-  const select = (sa: SuperAgent) => withTransition(() => setSelectedId(sa.id))
-  const close = () => withTransition(() => { setSelectedId(null); setSubId(null); setNestedId(null) })
-  const selectSub = (k: AgentKind) => withTransition(() => { setSubId(k); setNestedId(null) })
+  // The details open in a drawer (Sheet), which does its own slide in / out
+  const select = (sa: SuperAgent) => setSelectedId(sa.id)
+  const close = () => { setSelectedId(null); setSubId(null); setNestedId(null) }
+  const selectSub = (k: AgentKind) => { setSubId(k); setNestedId(null) }
   const switchKind = (k: typeof kind) => withTransition(() => { setKind(k); setSelectedId(null); setSubId(null); setNestedId(null) })
   // From a sub agent's "Part of" list: the agent opens in the same panel (you stay on Sub agents); the breadcrumb goes back
-  const openAgent = (sa: SuperAgent) => withTransition(() => setNestedId(sa.id))
-  const backToSub = () => withTransition(() => setNestedId(null))
+  const openAgent = (sa: SuperAgent) => setNestedId(sa.id)
+  const backToSub = () => setNestedId(null)
 
   const search = (value: string, onChange: (v: string) => void, placeholder = "Search templates") => (
     <label className="flex h-8 min-w-0 flex-1 items-center gap-2 rounded-lg border bg-card px-2.5 focus-within:ring-2 focus-within:ring-ring/50">
@@ -182,37 +170,22 @@ function Gallery({ mode }: { mode: "explore" | "mine" }) {
     </p>
   )
 
-  // My Agents, one expanded: a full page in place of the grid. It carries the card's view-transition name
-  // (tpl-<id>), so the browser grows the card's box into this one, and shrinks it back on close
-  if (!explore && expanded) {
-    return (
-      <div className="relative -m-6 h-[calc(100svh-3rem)] [contain:inline-size]">
-        <section aria-label={expanded.name} className="h-full overflow-hidden bg-background" style={{ viewTransitionName: `tpl-${expanded.id}` }}>
-          <div className="mx-auto h-full max-w-5xl border-x border-hairline">
-            <TemplateDetail key={expanded.id} sa={expanded} onUse={use} onClose={collapse} wide />
-          </div>
-        </section>
-      </div>
-    )
-  }
-
   return (
     // -m-6 cancels main's padding: the page fills the area, both sides scroll on their own
-    <div className="relative -m-6 h-[calc(100svh-3rem)] [contain:inline-size]" data-settled={settled || undefined}>
+    <div className="relative -m-6 h-[calc(100svh-3rem)] [contain:inline-size]">
       <Split
-        layout={layout}
-        panelName="template-detail"
+        onClose={close}
         label={kind === "subs" ? (nested?.name ?? (subId ? subName(subId) : undefined)) : selected?.name}
         panel={kind === "subs"
           ? subId && (nested ? (
             <div className="flex h-full min-h-0 flex-col bg-popover">
               <Crumbs sub={subId} agent={nested.name} onBack={backToSub} />
               <div className="min-h-0 flex-1">
-                <TemplateDetail key={nested.id} sa={nested} onUse={use} onClose={close} wide={layout === "wide"} />
+                <TemplateDetail key={nested.id} sa={nested} onUse={use} onClose={close} />
               </div>
             </div>
           ) : <SubAgentDetail key={subId} kind={subId} template={explore} onClose={close} onOpenAgent={openAgent} />)
-          : selected && <TemplateDetail key={selected.id} sa={selected} onUse={use} onClose={close} wide={layout === "wide"} />}
+          : selected && <TemplateDetail key={selected.id} sa={selected} onUse={use} onClose={close} />}
       >
         <header className="space-y-1" style={{ viewTransitionName: "templates-head" }}>
           <h1 className="font-title text-[28px] leading-[1.08] tracking-[-0.01em] [--title-wght:450]">{explore ? "Agent Library" : "My Agents"}</h1>
@@ -250,9 +223,11 @@ function Gallery({ mode }: { mode: "explore" | "mine" }) {
             {subs.length === 0
               ? empty(() => { setSubQuery(""); setSubStatus("all") }, subQuery.trim())
               : (
-                <div className={grid}>
+                <div className={explore ? grid : libGrid}>
                   {subs.map((k, i) => (
-                    <SubAgentCard key={k} kind={k} delay={i * 30} template={explore} status={explore ? undefined : subAgentStatus(k, convs)} selected={subId === k} onSelect={selectSub} />
+                    explore
+                      ? <SubAgentCard key={k} kind={k} delay={i * 30} template selected={subId === k} onSelect={selectSub} />
+                      : <MySubAgentCard key={k} kind={k} status={subAgentStatus(k, convs)} selected={subId === k} onSelect={() => selectSub(k)} />
                   ))}
                 </div>
               )}
@@ -290,8 +265,9 @@ function Gallery({ mode }: { mode: "explore" | "mine" }) {
             {mine.length === 0
               ? empty(() => { setTaskQuery(""); setStatus("all") }, taskQuery.trim())
               : view === "cards" ? (
-                <div className={grid}>
-                  {mine.map((sa, i) => <TemplateCard key={sa.id} sa={sa} delay={i * 30} selected={selected?.id === sa.id} onSelect={expand} status={taskStatus(sa, convs)} />)}
+                <div className={libGrid}>
+                  {/* The Agents Library card (agents-library-frame.tsx), so agents look the same across the demo */}
+                  {mine.map((sa) => <MyAgentCard key={sa.id} sa={sa} status={taskStatus(sa, convs)} selected={selected?.id === sa.id} onSelect={() => select(sa)} />)}
                 </div>
               ) : (
                 <TaskTable tasks={mine} convs={convs} selectedId={selected?.id} onSelect={select} />
@@ -304,40 +280,27 @@ function Gallery({ mode }: { mode: "explore" | "mine" }) {
   )
 }
 
-// The cards on the left (the whole page until you pick one) and the picked one's details in a narrow panel on the right.
-// Docked: beside the grid, which makes room. Floating: a card over the grid, which stays as it is.
-// Wide: the same split with a wider details side (36rem).
-function Split({ panel, label, layout, panelName, children }: {
+// The cards fill the page; the picked one's details slide in over them in a drawer (shadcn Sheet).
+// The drawer keeps showing the last details while it slides out, so closing doesn't flash empty.
+function Split({ panel, label, onClose, children }: {
   panel: React.ReactNode // the picked one's details (an agent's or a sub agent's), or nothing
   label?: string
-  layout: "docked" | "floating" | "wide"
-  panelName: string // the panel's view-transition-name
+  onClose: () => void
   children: React.ReactNode
 }) {
-  const selected = !!panel
-  const floating = layout === "floating" // sits over the grid
-  const split = !!selected && layout === "wide" // details on a fixed 36rem right side, cards get the rest (two per row)
+  const last = useRef<{ panel: React.ReactNode; label?: string }>({ panel: null })
+  // ponytail: read in render on purpose; it only matters on the closing frames, when the parent re-renders anyway
+  // oxlint-disable-next-line react/refs
+  const shown = panel ? (last.current = { panel, label }) : last.current
   return (
-    <div className="relative flex h-full">
-      <div className={cn("min-w-0 flex-1 flex-col", selected && !floating ? "hidden md:flex" : "flex")}>
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <div className={cn("mx-auto w-full max-w-[55.5rem] space-y-5 pt-6 pb-12", split ? "px-5" : "px-6")}>{children}</div>
-        </div>
-      </div>
-      {selected && (
-        <section
-          aria-label={label}
-          className={cn(
-            "bg-background",
-            floating
-              ? "absolute inset-3 z-20 overflow-hidden rounded-2xl border shadow-xl md:left-auto md:w-[30rem]"
-              : cn("w-full shrink-0 border-l md:w-[35rem]"),
-          )}
-          style={{ viewTransitionName: panelName }}
-        >
-          {panel}
-        </section>
-      )}
+    <div className="h-full overflow-y-auto">
+      <div className="mx-auto w-full max-w-[68rem] space-y-5 px-10 pt-6 pb-12">{children}</div>
+      <Sheet open={!!panel} onOpenChange={(open) => !open && onClose()}>
+        <SheetContent showCloseButton={false} aria-describedby={undefined} className="w-full gap-0 overflow-hidden p-0 sm:max-w-[35rem]">
+          <SheetTitle className="sr-only">{shown.label}</SheetTitle>
+          {shown.panel}
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }

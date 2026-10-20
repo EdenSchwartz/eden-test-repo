@@ -1,11 +1,13 @@
 import { useState } from "react"
-import { Bot, ChevronRight, FileText, Flag, GitFork, MessageSquareText, Workflow, X } from "lucide-react"
+import { Bot, ChevronRight, FileText, Flag, GitFork, Hand, MessageSquareText, Workflow, X } from "lucide-react"
 import { MessageResponse } from "@/components/ai-elements/message"
 import { agents, type AgentKind } from "@/components/chat/agents"
 import { Outcomes } from "@/components/tasks/outcomes"
 import { WorkflowCanvas } from "@/components/tasks/workflow-canvas"
 import { agentOutcomes } from "@/data/outcomes"
 import { ScheduleTab, skillMd, slug } from "@/components/super-agent-panel"
+import { TriggersSection } from "@/components/tasks/triggers"
+import { ColorTile, colorFor } from "@/components/tasks/color-tile"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { blockers, type SuperAgent } from "@/data/super-agents"
 import { days, ordinal, useTriggers, when, type Schedule } from "@/lib/triggers"
@@ -23,9 +25,9 @@ import { cn } from "@/lib/utils"
  * wide: the workflow as the zoomable flow chart (workflow-canvas.tsx) instead of the timeline.
  */
 
-type Tab = "overview" | "skills" | "schedule"
+type Tab = "overview" | "skills" | "triggers" | "schedule"
 
-export function TemplateDetail({ sa, onUse, onClose, wide }: { sa: SuperAgent; onUse: (sa: SuperAgent) => void; onClose: () => void; wide?: boolean }) {
+export function TemplateDetail({ sa, color, onUse, onClose, wide }: { sa: SuperAgent; color?: string; onUse: (sa: SuperAgent) => void; onClose: () => void; wide?: boolean }) {
   const [tab, setTab] = useState<Tab>("overview")
   const [openSkill, setOpenSkill] = useState<SuperAgent["skills"][number] | null>(null)
   const Icon = sa.icon
@@ -33,7 +35,7 @@ export function TemplateDetail({ sa, onUse, onClose, wide }: { sa: SuperAgent; o
   const tabs: { id: Tab; label: string; count?: number }[] = [
     { id: "overview", label: "Overview" },
     { id: "skills", label: "Skills", count: sa.skills.length },
-    ...(sa.custom ? [{ id: "schedule" as const, label: "Activity" }] : []),
+    ...(sa.custom ? [{ id: "triggers" as const, label: "Triggers" }, { id: "schedule" as const, label: "Activity" }] : []),
   ]
   const pad = wide ? "px-6" : "px-5"
   const scope = scopeOf(sa)
@@ -41,17 +43,16 @@ export function TemplateDetail({ sa, onUse, onClose, wide }: { sa: SuperAgent; o
   const trigger = triggerLabel(useTriggers(sa))
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-popover">
+    // ⌘⏎ / Ctrl+⏎ anywhere in the panel uses it (on the panel, not the window, so only the focused drawer reacts)
+    <div className="flex h-full min-h-0 flex-col bg-popover" onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); onUse(sa) } }}>
       {/* ---------- Name + metadata ---------- */}
       <div className={cn("shrink-0 space-y-4 pt-5 pb-4", pad)}>
         {/* Icon + name only (no subtitle: who made it is in Created by below) */}
         <div className="flex items-center gap-3">
-          <span aria-hidden className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-wash text-blue [&_svg]:size-5">
-            <Icon />
-          </span>
+          <ColorTile color={color ?? colorFor(sa.name)} icon={Icon} />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="font-title text-2xl leading-[1.1] font-medium tracking-[-0.015em] [--title-wght:450]">{sa.name}</h2>
+              <h2 className="font-title text-2xl leading-[1.1] font-medium tracking-[-0.015em] [--title-wght:450] [--title-wdth:var(--drawer-title-wdth,100)]">{sa.name}</h2>
               {setup && (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-wash px-2 py-px text-xs font-semibold whitespace-nowrap text-warning">
                   <span aria-hidden className="size-1.5 rounded-full bg-warning" />
@@ -129,7 +130,7 @@ export function TemplateDetail({ sa, onUse, onClose, wide }: { sa: SuperAgent; o
                   <WorkflowCanvas sa={sa} noRoles scrollPage />
                 </div>
               ) : (
-                <Steps sa={sa} />
+                <Steps pattern={sa.pattern} />
               )}
             </Section>
           </div>
@@ -153,16 +154,18 @@ export function TemplateDetail({ sa, onUse, onClose, wide }: { sa: SuperAgent; o
           </ul>
         )}
 
-        {tab === "schedule" && sa.custom && <ScheduleTab sa={sa} />}
+        {tab === "triggers" && sa.custom && <TriggersSection sa={sa} />}
+        {tab === "schedule" && sa.custom && <ScheduleTab sa={sa} noTriggers />}
       </div>
 
       {/* ---------- Use it: always at the bottom ---------- */}
       <div className={cn("flex shrink-0 justify-end border-t border-hairline py-3", pad)}>
         <button
           onClick={() => onUse(sa)}
-          className={cn("flex h-8 cursor-pointer items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80", !wide && "w-full")}
+          className={cn("flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80", !wide && "w-full")}
         >
-          {sa.custom ? "Use agent" : "Use template"}
+          Use Agent
+          <kbd className="rounded bg-white/15 px-1.5 py-px font-sans text-xs text-primary-foreground/85">⌘⏎</kbd>
         </button>
       </div>
 
@@ -181,22 +184,23 @@ export function TemplateDetail({ sa, onUse, onClose, wide }: { sa: SuperAgent; o
 
 // The workflow as a quiet vertical timeline: one icon per agent, a line between steps.
 // Agents that run at the same time share a dashed outline marked "In parallel", the line passing through it.
-function Steps({ sa }: { sa: SuperAgent }) {
+// Also the workflow card in chat while you set an agent up (components/tasks/workflow-mini.tsx), so both read the same.
+export function Steps({ pattern, approval }: { pattern: AgentKind[][]; approval?: (kind: AgentKind) => boolean }) {
   return (
     <ol className="relative">
       {/* The rail, through the middle of the icons */}
       <span aria-hidden className="absolute top-3 bottom-3 left-[13.5px] w-px bg-border" />
-      {sa.pattern.map((group, i) => (
+      {pattern.map((group, i) => (
         <li key={i} className="relative pb-4 last:pb-0">
           {group.length === 1 ? (
-            <Step kind={group[0]} />
+            <Step kind={group[0]} approval={approval?.(group[0])} />
           ) : (
             <div className="relative -mx-2 rounded-xl border border-dashed border-line px-2 py-2.5">
               <span className="absolute top-2 right-2 inline-flex items-center gap-1 text-xs font-semibold text-blue">
                 <GitFork className="size-3" /> In parallel
               </span>
               <div className="space-y-3">
-                {group.map((kind) => <Step key={kind} kind={kind} />)}
+                {group.map((kind) => <Step key={kind} kind={kind} approval={approval?.(kind)} />)}
               </div>
             </div>
           )}
@@ -206,7 +210,7 @@ function Steps({ sa }: { sa: SuperAgent }) {
   )
 }
 
-function Step({ kind }: { kind: AgentKind }) {
+function Step({ kind, approval }: { kind: AgentKind; approval?: boolean }) {
   const { name, icon: Icon, short } = agents[kind]
   return (
     <div className="flex items-center gap-3">
@@ -217,6 +221,11 @@ function Step({ kind }: { kind: AgentKind }) {
         <span className="block leading-tight font-medium">{name.replace(/ agent$/, "")}</span>
         <span className="block text-xs text-muted-foreground">{short}</span>
       </span>
+      {approval && (
+        <span className="ml-auto inline-flex h-5 shrink-0 items-center gap-1 rounded-md bg-amber-500/10 px-1.5 text-[11px] font-medium text-amber-600 dark:text-amber-500">
+          <Hand className="size-3" /> Needs approval
+        </span>
+      )}
     </div>
   )
 }

@@ -8,6 +8,7 @@ import { EnabledToggle, Prop, Section } from "@/components/tasks/template-detail
 import { superAgents, type SuperAgent } from "@/data/super-agents"
 import { useConversations } from "@/lib/conversations"
 import { subAgentStatus, type TaskStatus } from "@/lib/task-status"
+import { ColorTile, colorFor } from "@/components/tasks/color-tile"
 
 /*
  * Sub agents on the Agents page (pages/gallery.tsx, "Sub agents" in the switch): the single-mission helpers
@@ -51,7 +52,7 @@ export function SubAgentCard({ kind, status, template, selected, delay, onSelect
   )
 }
 
-export function SubAgentDetail({ kind, template, onClose, onOpenAgent }: { kind: AgentKind; template?: boolean; onClose: () => void; onOpenAgent: (sa: SuperAgent) => void }) {
+export function SubAgentDetail({ kind, color, template, onClose, onOpenAgent }: { kind: AgentKind; color?: string; template?: boolean; onClose: () => void; onOpenAgent: (sa: SuperAgent) => void }) {
   const { convs } = useConversations()
   const a = agents[kind]
   const Icon = a.icon
@@ -61,11 +62,9 @@ export function SubAgentDetail({ kind, template, onClose, onOpenAgent }: { kind:
     <div className="flex h-full min-h-0 flex-col bg-popover">
       <div className="shrink-0 space-y-4 px-5 pt-5 pb-4">
         <div className="flex items-start gap-3">
-          <span aria-hidden className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-wash text-blue [&_svg]:size-5">
-            <Icon />
-          </span>
+          <ColorTile color={color ?? colorFor(subName(kind))} icon={Icon} />
           <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <h2 className="font-title text-2xl leading-[1.1] font-medium tracking-[-0.015em] [--title-wght:450]">{subName(kind)}</h2>
+            <h2 className="font-title text-2xl leading-[1.1] font-medium tracking-[-0.015em] [--title-wght:450] [--title-wdth:var(--drawer-title-wdth,100)]">{subName(kind)}</h2>
             <p className="text-sm text-muted-foreground">Sub agent by Rival</p>
           </div>
           {!template && <EnabledToggle id={`sub:${kind}`} name={subName(kind)} />}

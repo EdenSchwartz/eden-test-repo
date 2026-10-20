@@ -413,50 +413,22 @@ html[data-vt="split"]::view-transition-group(*) {
   animation-duration: 300ms;
   animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
 }
-html[data-vt="split"]::view-transition-new(template-detail):only-child {
-  animation: vt-detail-in 260ms cubic-bezier(0.2, 0, 0, 1) both;
-}
-html[data-vt="split"]::view-transition-old(template-detail):only-child {
-  animation: vt-detail-out 180ms ease-in both;
-}
-
-/* A card expanding into a full page (My agents, pages/gallery.tsx) and back: the card's box grows into the page's
-   (~420ms, a quick start easing to rest, like the reference); its old picture fades out early and the page fades in
-   early, so the content reads as zooming out of the card. The rest of the screen crossfades. */
-html[data-vt="expand"]::view-transition-group(*) {
-  animation-duration: 420ms;
-  animation-timing-function: cubic-bezier(0.3, 0.7, 0.15, 1);
-}
-html[data-vt="expand"]::view-transition-old(*) { animation: vt-fade-out 160ms ease-out both; }
-html[data-vt="expand"]::view-transition-new(*) { animation: vt-fade-in 220ms ease-out both; }
-html[data-vt="expand"]::view-transition-old(*):only-child,
-html[data-vt="expand"]::view-transition-new(*):only-child { animation-duration: 200ms; }
-html[data-vt="expand"]::view-transition-old(root) { animation: vt-fade-out 180ms ease-out both; }
-html[data-vt="expand"]::view-transition-new(root) { animation: vt-fade-in 240ms 60ms ease-out both; mask-image: none; }
-
-/* Back from an expanded card: no entrance animation on the grid (it would hide the card the page shrinks into) */
-[data-settled] .rise-in { animation: none; }
 
 @keyframes vt-fade-in { from { opacity: 0; } }
 @keyframes vt-fade-out { to { opacity: 0; } }
-@keyframes vt-detail-in { from { opacity: 0; transform: translateX(12px); } }
-@keyframes vt-detail-out { to { opacity: 0; transform: translateX(12px); } }
 
 @media (prefers-reduced-motion: reduce) {
   html[data-vt="split"]::view-transition-group(*),
   html[data-vt="split"]::view-transition-old(*),
   html[data-vt="split"]::view-transition-new(*) { animation: none !important; }
-  html[data-vt="expand"]::view-transition-group(*),
-  html[data-vt="expand"]::view-transition-old(*),
-  html[data-vt="expand"]::view-transition-new(*) { animation: none !important; }
 }
 
 /* ---------- Rival Harness components (matching the reference demo) ---------- */
 
-/* Titles: Hubot Sans, condensed; weight via --title-wght (e.g. [--title-wght:450]) */
+/* Titles: Hubot Sans, condensed; weight via --title-wght (e.g. [--title-wght:450]), width via --title-wdth (75–125) */
 .font-title {
   font-family: var(--font-title);
-  font-variation-settings: "wdth" 85, "wght" var(--title-wght, 700);
+  font-variation-settings: "wdth" var(--title-wdth, 85), "wght" var(--title-wght, 700);
   font-stretch: 85%;
 }
 
