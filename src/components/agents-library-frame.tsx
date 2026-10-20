@@ -498,8 +498,8 @@ const categoryIcon: Record<string, React.ReactNode> = {
 }
 function CategoryTag({ category }: { category: string }) {
   return (
-    <span title={category} aria-label={category} className="grid size-6 place-items-center rounded-full bg-[#f4f4f3] text-[#6c6a68] ring-2 ring-white">
-      <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="size-3.5">
+    <span title={category} aria-label={category} className="grid size-7 place-items-center rounded-full bg-[#f4f4f3] text-[#6c6a68] ring-2 ring-white">
+      <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="size-5">
         {categoryIcon[category]}
       </svg>
     </span>
@@ -589,7 +589,7 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
           </span>
           {mine && <StatusChip status={mine.status} />}
         </span>
-        <span className={cn("flex items-center -space-x-1 transition-opacity", off && "opacity-50")}>
+        <span className={cn("flex items-center -space-x-1.5 transition-opacity", off && "opacity-50")}>
           {m.categories.map((c) => (
             <CategoryTag key={c} category={c} />
           ))}
