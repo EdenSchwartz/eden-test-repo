@@ -1,13 +1,20 @@
 import { useEffect, useRef, useState } from "react"
 import { Activity, AppWindow, Bandage, Box, Brain, Cloud, Combine, Crosshair, FileSearch, FileText, Fingerprint, FolderSearch, GitBranch, GitPullRequest, KeyRound, Network, Radar, Search, ShieldCheck, Swords, UsersRound, X, type LucideIcon } from "lucide-react"
 import { agentOutcomes, subOutcomes, type Outcome } from "@/data/outcomes"
-import { getSuperAgent } from "@/data/super-agents"
+import { getSuperAgent, type SuperAgent } from "@/data/super-agents"
 import { RivalMark } from "@/components/nav-icons"
 import { useNav } from "@/lib/nav"
 import { agents, type AgentKind } from "@/components/chat/agents"
 import { SubAgentDetail, subName, usedBy } from "@/components/tasks/sub-agent-card"
 import { TemplateDetail } from "@/components/tasks/template-detail"
 import { withTransition } from "@/lib/view-transition"
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
+import { ColorTile, colorFor, flatColors } from "@/components/tasks/color-tile"
+import { StatusChip } from "@/components/tasks/status-chip"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useEnabled } from "@/lib/enabled"
+import type { TaskStatus } from "@/lib/task-status"
+import { TitleWidthKnob } from "@/components/title-width-knob"
 import { cn } from "@/lib/utils"
 
 /*
@@ -227,25 +234,27 @@ function FluidGrid() {
  */
 export function AgentsLibraryFrame() {
   const { navigate } = useNav()
-  // The picked card's side panel (the Hex version's docked panel): an agent's, or a sub agent's. Esc or ✕ closes it
+  // The picked card's details in a drawer (shadcn Sheet): an agent's, or a sub agent's. Esc, ✕ or clicking outside closes it.
+  // `picked` stays set while it slides out, so the drawer doesn't empty mid-animation; `open` drives the slide
   const [picked, setPicked] = useState<{ agent?: string; kind?: AgentKind; name: string } | null>(null)
+  const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<"agents" | "subs">("agents")
-  const switchTab = (t: typeof tab) => withTransition(() => { setTab(t); setPicked(null) })
+  const switchTab = (t: typeof tab) => withTransition(() => { setTab(t); setOpen(false); setStackedOpen(false) })
   const [query, setQuery] = useState("")
   const q = query.trim().toLowerCase()
   const list = (tab === "agents" ? library : subLibrary).filter((a) => !q || [a.name, a.tagline, ...a.outcomes.map((o) => o.label), ...a.runsOn].some((f) => f.toLowerCase().includes(q)))
-  const pick = (a: LibraryAgent) => withTransition(() => setPicked(a.templateId ? { agent: a.templateId, name: a.name } : { kind: a.kind, name: a.name }))
-  const close = () => withTransition(() => setPicked(null))
-  useEffect(() => {
-    if (!picked) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close() }
-    window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
-  }, [picked])
+  const pick = (a: LibraryAgent) => { setPicked(a.templateId ? { agent: a.templateId, name: a.name } : { kind: a.kind, name: a.name }); setOpen(true) }
+  const close = () => setOpen(false)
+  // An agent opened from a sub agent's "Part of" list: a second drawer stacked on the first, so closing it lands you back
+  const [stacked, setStacked] = useState<string | null>(null)
+  const [stackedOpen, setStackedOpen] = useState(false)
+  const stackedAgent = stacked ? getSuperAgent(stacked) : undefined
   const agent = picked?.agent ? getSuperAgent(picked.agent) : undefined
+  // The drawer's icon tile keeps the picked card's colour
+  const pickedLib = [...library, ...subLibrary].find((a) => a.name === picked?.name)
+  const pickedColor = pickedLib ? colorOf(pickedLib) : undefined
   return (
-    // With a panel open, the page makes room for it (the panel takes the whole right side, under the top bar)
-    <div className={cn("flex flex-1 flex-col items-start bg-white whitespace-nowrap", picked && "mr-[35rem]")}>
+    <div className="flex flex-1 flex-col items-start bg-white whitespace-nowrap">
       <div className="alive-box relative isolate flex w-full flex-col items-start justify-center gap-3 overflow-hidden border-b border-[#ecebe9] bg-white p-10">
         <span aria-hidden className="alive-noise" />
         <span aria-hidden className="alive-base" />
@@ -267,11 +276,9 @@ export function AgentsLibraryFrame() {
       {/* The cards area: plain white space around the cards, nothing in the margins */}
       <div className="relative flex w-full flex-1">
         {/* Smaller screens (under 1800px): centered, 3 to a row (68rem at most). Big screens: in line with the title and
-            the tabs, filling the width between the strips (4 or more to a row). Beside the panel: as many as fit */}
-        <div className={cn("grid min-w-0 flex-1 content-start gap-4 pt-6 pb-10", picked
-          ? "mx-8 grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] px-2"
-          : "mx-auto max-w-[68rem] grid-cols-[repeat(3,minmax(0,1fr))] px-10 min-[1800px]:mx-8 min-[1800px]:max-w-none min-[1800px]:grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] min-[1800px]:px-2")}>
-          {list.map((a) => <AgentCard key={a.name} a={a} selected={picked?.name === a.name} onSelect={() => pick(a)} />)}
+            the tabs, filling the width between the strips (4 or more to a row). The drawer slides over them, nothing reflows */}
+        <div className="mx-auto grid max-w-[68rem] min-w-0 flex-1 content-start gap-4 px-10 pt-6 pb-10 grid-cols-[repeat(3,minmax(0,1fr))] min-[1800px]:mx-8 min-[1800px]:max-w-none min-[1800px]:grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] min-[1800px]:px-2">
+          {list.map((a) => <AgentCard key={a.name} a={a} selected={open && picked?.name === a.name} onSelect={() => pick(a)} />)}
           {list.length === 0 && (
             <p className="col-span-full py-10 text-center text-[0.875rem] leading-5 whitespace-normal text-[#6c6a68]">
               Nothing matches “{query.trim()}”. <button onClick={() => setQuery("")} className="cursor-pointer text-[#2e4eca] hover:underline">Clear search</button>
@@ -279,14 +286,23 @@ export function AgentsLibraryFrame() {
           )}
         </div>
       </div>
-      {picked && (
-        // The whole right side, from the top bar down, and stays put while the cards scroll
-        <section aria-label={picked.name} className="fixed top-12 right-0 bottom-0 z-30 w-[35rem] overflow-hidden border-l border-[#ecebe9] bg-background whitespace-normal" style={{ viewTransitionName: "template-detail" }}>
-            {agent
-              ? <TemplateDetail key={agent.id} sa={agent} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={close} />
-              : picked.kind && <SubAgentDetail key={picked.name} kind={picked.kind} template onClose={close} onOpenAgent={(sa) => withTransition(() => setPicked({ agent: sa.id, name: sa.name }))} />}
-        </section>
-      )}
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent showCloseButton={false} aria-describedby={undefined} className="w-full gap-0 overflow-hidden border-[#ecebe9] p-0 whitespace-normal sm:max-w-[35rem]">
+          <SheetTitle className="sr-only">{picked?.name}</SheetTitle>
+          <TitleWidthKnob />
+          {agent
+            ? <TemplateDetail key={agent.id} sa={agent} color={pickedColor} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={close} />
+            : picked?.kind && <SubAgentDetail key={picked.name} kind={picked.kind} color={pickedColor} template onClose={close} onOpenAgent={(sa) => { setStacked(sa.id); setStackedOpen(true) }} />}
+        </SheetContent>
+      </Sheet>
+      {/* Narrower than the first, so the first drawer's edge stays in sight underneath; its overlay only adds a light dim */}
+      <Sheet open={stackedOpen} onOpenChange={setStackedOpen}>
+        <SheetContent showCloseButton={false} aria-describedby={undefined} overlayClassName="bg-white/40 dark:bg-black/15" className="w-full gap-0 overflow-hidden border-[#ecebe9] p-0 whitespace-normal sm:max-w-[32rem]">
+          <SheetTitle className="sr-only">{stackedAgent?.name}</SheetTitle>
+          <TitleWidthKnob />
+          {stackedAgent && <TemplateDetail key={stackedAgent.id} sa={stackedAgent} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={() => setStackedOpen(false)} />}
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }
@@ -339,7 +355,7 @@ function LibrarySearch({ value, onChange }: { value: string; onChange: (v: strin
 
 // The four squares, on the top bar's line and the header's line, at both ends (as in the frame).
 // The right pair goes while the side panel covers that side. Not shown for now (felt like noise);
-// to bring them back, render <FrameCorners right={!picked} /> in AgentsLibraryFrame.
+// to bring them back, render <FrameCorners right={!open} /> in AgentsLibraryFrame.
 export function FrameCorners({ right }: { right: boolean }) {
   const sq = "absolute size-3 border border-[#dddcda] bg-white"
   return (
@@ -385,29 +401,14 @@ const hues = new Map([...library, ...subLibrary].map((a, i) => [a, (255 + i * 13
 const hueOf = (a: LibraryAgent) => hues.get(a) ?? 255
 
 /*
- * Trying a second look: one flat colour per agent (no gradient, no grain), with the white circle. The colours
- * grow from a warm, muted four (sage, slate blue, ochre, brick) into a family of 21, one per agent, in order.
+ * Trying a second look: one colour per agent as an accent (ColorTile, components/tasks/color-tile.tsx, also in the
+ * drawers), one of the 21 per agent, in order.
  * Switch TILE_STYLE back to "gradient" for the grainy gradients.
  */
 const TILE_STYLE: "flat" | "gradient" = "flat"
-const flatColors = [
-  "#4f8a5f", "#3e6f8e", "#cf9f45", "#b85a55", // sage, slate blue, ochre, brick (the reference)
-  "#6a7f4a", "#2f7a78", "#c47a4a", "#8a6aa0", // olive, teal, terracotta, dusty violet
-  "#5a6f9e", "#a3835a", "#9a4f6a", "#6e9a8a", // denim, camel, mulberry, eucalyptus
-  "#d08a5e", "#4a5d7a", "#8f9a4f", "#b86a7a", // apricot, navy slate, moss, rose
-  "#5f8fae", "#a35d3e", "#7a8f6a", "#c2a35e", // steel, rust, lichen, soft mustard
-  "#6a5a8a", // plum
-]
 const colors = new Map([...library, ...subLibrary].map((a, i) => [a, flatColors[i % flatColors.length]]))
 const colorOf = (a: LibraryAgent) => colors.get(a) ?? flatColors[0]
 
-function FlatTile({ color }: { color: string }) {
-  return (
-    <span aria-hidden className="grid size-10 shrink-0 place-items-center rounded-[0.375rem]" style={{ background: color }}>
-      <span className="size-3.5 rounded-[0.1875rem] bg-white" />
-    </span>
-  )
-}
 
 /*
  * An agent's tile: a soft gradient under heavy film grain in the agent's own colour, with a white circle in the middle.
@@ -495,27 +496,42 @@ function ToolMark({ tool }: { tool: Tool }) {
   return <svg viewBox="0 0 16 16" className="size-[1.125rem] shrink-0" role="img" aria-label={toolNames[tool]}><title>{toolNames[tool]}</title>{art[tool]}</svg>
 }
 
-function AgentCard({ a, selected, onSelect }: { a: LibraryAgent; selected: boolean; onSelect: () => void }) {
-  const m = metaOf(a)
+// mine: on My Agents: its status chip top right, you (IB) as Created by on your own agents, and switched off
+// (Enabled, in the drawer's header) everything but the chip fades back. Look-up keys: `from` = the library card it's
+// a copy of (same colour, category, capabilities), else its own name.
+function AgentCard({ a, from = a, selected, onSelect, mine }: {
+  a: LibraryAgent; from?: LibraryAgent; selected: boolean; onSelect: () => void
+  mine?: { status: TaskStatus; enabledKey: string; you?: boolean }
+}) {
+  const m = metaOf(from)
   const Cap = m.cap[1]
+  const { isEnabled } = useEnabled()
+  const off = !!mine && !isEnabled(mine.enabledKey)
   return (
     <button
       onClick={onSelect}
       aria-pressed={selected}
-      className="group flex cursor-pointer flex-col items-stretch rounded-[0.375rem] border border-[#ecebe9] bg-white text-left shadow-[0px_1px_1px_rgba(0,0,0,0.04)] transition-[border-color,translate] duration-200 hover:-translate-y-px hover:border-[#dddcda] aria-pressed:border-[#2e4eca]/40"
+      className="group flex cursor-pointer flex-col items-stretch rounded-[0.375rem] border border-[#ecebe9] bg-white text-left whitespace-nowrap shadow-[0px_1px_1px_rgba(0,0,0,0.04)] transition-[border-color,translate] duration-200 hover:-translate-y-px hover:border-[#dddcda] aria-pressed:border-[#2e4eca]/40"
     >
       <span className="flex flex-col items-start gap-3.5 p-5">
         <span className="flex w-full min-w-0 items-center gap-2.5">
-          {TILE_STYLE === "flat" ? <FlatTile color={colorOf(a)} /> : <AgentTile seed={a.name} hue={hueOf(a)} />}
-          <span className="min-w-0 flex-1 truncate text-[1rem] leading-5 font-medium text-[#121212]">{a.name}</span>
+          <span className={cn("flex min-w-0 flex-1 items-center gap-2.5 transition-opacity", off && "opacity-50")}>
+            {TILE_STYLE === "flat" ? <ColorTile color={colors.has(from) ? colorOf(from) : colorFor(a.name)} icon={a.icon} /> : <AgentTile seed={a.name} hue={hueOf(from)} />}
+            <span className="min-w-0 flex-1 truncate text-[1rem] leading-5 font-medium text-[#121212]">{a.name}</span>
+          </span>
+          {mine && <StatusChip status={mine.status} />}
         </span>
-        <span className="rounded-[0.25rem] bg-[#f2f2f1] px-2 py-0.5 font-[IBM_Plex_Mono,ui-monospace,monospace] text-[0.75rem] leading-5 whitespace-nowrap text-[#6c6a68]">{m.category}</span>
-        <span className="line-clamp-2 text-[0.875rem] leading-5 text-pretty text-[#6c6a68]">{a.tagline}</span>
+        <span className={cn("rounded-[0.25rem] bg-[#f2f2f1] px-2 py-0.5 transition-opacity", off && "opacity-50")}><span className=" font-[IBM_Plex_Mono,ui-monospace,monospace] text-[0.75rem] leading-5 whitespace-nowrap text-[#6c6a68]">{m.category}</span></span>
+        <span className={cn("line-clamp-2 text-[0.875rem] leading-5 whitespace-normal text-pretty text-[#6c6a68] transition-opacity", off && "opacity-50")}>{a.tagline}</span>
       </span>
-      <span className="mt-auto grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-4 border-t border-[#ecebe9] px-5 pt-5 pb-5 whitespace-nowrap">
+      <span className={cn("mt-auto grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-4 border-t border-[#ecebe9] px-5 pt-5 pb-5 whitespace-nowrap transition-opacity", off && "opacity-50")}>
         <span className="flex flex-col gap-3">
           <span className="text-[0.875rem] leading-4 text-[#6c6a68]">Created by</span>
-          <span className="flex h-5 items-center"><RivalMark className="size-4 text-[#0350d0]" /></span>
+          <span className="flex h-5 items-center">
+            {mine?.you
+              ? <Avatar className="size-5" title="Created by you"><AvatarFallback className="text-[9px] font-semibold">IB</AvatarFallback></Avatar>
+              : <RivalMark className="size-4 text-[#0350d0]" />}
+          </span>
         </span>
         <span className="flex min-w-0 flex-col gap-3">
           <span className="truncate text-[0.875rem] leading-4 text-[#6c6a68]">Capabilities</span>
@@ -531,4 +547,15 @@ function AgentCard({ a, selected, onSelect }: { a: LibraryAgent; selected: boole
       </span>
     </button>
   )
+}
+
+// The same card on My Agents (pages/gallery.tsx), so an agent looks the same everywhere in the demo
+export function MyAgentCard({ sa, status, selected, onSelect }: { sa: SuperAgent; status: TaskStatus; selected: boolean; onSelect: () => void }) {
+  const from = library.find((l) => l.templateId === (sa.clonedFrom ?? sa.id))
+  const a: LibraryAgent = { name: sa.name, tagline: sa.tagline, icon: sa.icon, outcomes: from?.outcomes ?? [], runsOn: from?.runsOn ?? [], templateId: sa.id }
+  return <AgentCard a={a} from={from} selected={selected} onSelect={onSelect} mine={{ status, enabledKey: sa.id, you: true }} />
+}
+export function MySubAgentCard({ kind, status, selected, onSelect }: { kind: AgentKind; status: TaskStatus; selected: boolean; onSelect: () => void }) {
+  const a = subLibrary.find((l) => l.kind === kind)!
+  return <AgentCard a={a} selected={selected} onSelect={onSelect} mine={{ status, enabledKey: `sub:${kind}` }} />
 }

@@ -397,7 +397,8 @@ export function runState(c: Conversation): RunState {
 // Only on your own (customized) super agents: Rival's are templates and never run.
 // The Activity tab: its triggers (components/tasks/triggers.tsx), then every run. No Run now here: the panel's one
 // button at the bottom is the only action.
-export function ScheduleTab({ sa }: { sa: SuperAgent }) {
+// noTriggers: the agent drawer (template-detail.tsx) shows Triggers as its own tab instead
+export function ScheduleTab({ sa, noTriggers }: { sa: SuperAgent; noTriggers?: boolean }) {
   const { convs } = useConversations()
   const { navigate } = useNav()
   // Runs = its conversations you (or its schedule) actually asked something in; a Start chat greeting alone isn't one
@@ -405,7 +406,7 @@ export function ScheduleTab({ sa }: { sa: SuperAgent }) {
 
   return (
     <div className="space-y-6">
-      <TriggersSection sa={sa} />
+      {!noTriggers && <TriggersSection sa={sa} />}
 
       <section className="space-y-2.5">
         {/* Show all runs: a tertiary link to the Activity page, filtered to this agent (pages/agents.tsx) */}

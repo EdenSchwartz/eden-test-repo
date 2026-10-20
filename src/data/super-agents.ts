@@ -694,6 +694,13 @@ export function cloneSuperAgent(sa: SuperAgent, patch: Partial<SuperAgent> = {})
   return copy
 }
 
+// The demo always starts with one agent of yours in My Agents (a Triage Hunter, as the setup chat would make it),
+// so there's no need to create one after every reload
+cloneSuperAgent(superAgents.find((sa) => sa.id === "triage")!, {
+  id: "triage-demo", name: "Triage Hunter", trigger: { kind: "manual", label: "When you start it" },
+  scope: { label: "321 assets", assets: 321 }, createdAt: new Date(Date.now() - 3 * 864e5),
+})
+
 // Naive intent match: the super agent whose keywords appear most in the text, if any
 export function matchSuperAgent(text: string): SuperAgent | undefined {
   const t = text.toLowerCase()
