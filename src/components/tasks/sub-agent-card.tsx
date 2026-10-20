@@ -1,10 +1,11 @@
-import { ChevronRight, FileText, Flag, Layers, X } from "lucide-react"
+import { ChevronRight, FileText, Flag, Layers } from "lucide-react"
 import { agents, type AgentKind } from "@/components/chat/agents"
 import { StatusChip } from "@/components/tasks/status-chip"
 import { CardShell } from "@/components/tasks/template-card"
 import { Outcomes } from "@/components/tasks/outcomes"
 import { subOutcomes } from "@/data/outcomes"
-import { EnabledToggle, Prop, Section } from "@/components/tasks/template-detail"
+import { DrawerTopBar, EnabledToggle, Prop, Section } from "@/components/tasks/template-detail"
+import { RivalMark } from "@/components/nav-icons"
 import { superAgents, type SuperAgent } from "@/data/super-agents"
 import { useConversations } from "@/lib/conversations"
 import { subAgentStatus, type TaskStatus } from "@/lib/task-status"
@@ -60,25 +61,16 @@ export function SubAgentDetail({ kind, color, template, onClose, onOpenAgent }: 
   const used = usedBy(kind)
   return (
     <div className="flex h-full min-h-0 flex-col bg-popover">
-      <div className="shrink-0 space-y-4 px-5 pt-5 pb-4">
-        <div className="flex items-start gap-3">
+      <DrawerTopBar crumbs={["Agents Library", subName(kind)]} onClose={onClose}>
+        {!template && <EnabledToggle id={`sub:${kind}`} name={subName(kind)} />}
+      </DrawerTopBar>
+      <div className="shrink-0 space-y-5 px-5 pt-5 pb-5">
+        <div className="flex items-center gap-3">
           <ColorTile color={color ?? colorFor(`sub:${kind}`)} icon={Icon} />
-          <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <h2 className="font-title text-2xl leading-[1.1] font-medium tracking-[-0.015em] [--title-wght:450]">{subName(kind)}</h2>
-            <p className="text-sm text-muted-foreground">Sub agent by Rival</p>
-          </div>
-          {!template && <EnabledToggle id={`sub:${kind}`} name={subName(kind)} />}
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            title="Close"
-            className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-          >
-            <X className="size-4" />
-          </button>
+          <h2 className="min-w-0 font-title text-2xl leading-[1.1] font-medium tracking-[-0.015em] [--title-wght:450]">{subName(kind)}</h2>
         </div>
-        <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
-          {template ? <Prop label="Created by">Rival</Prop> : <Prop label="Status"><StatusChip status={status} className="mt-0.5" /></Prop>}
+        <dl className="flex flex-wrap gap-x-10 gap-y-3">
+          {template ? <Prop label="Created by"><span className="flex items-center gap-1.5"><RivalMark className="size-3.5 text-[#0350d0]" />Rival</span></Prop> : <Prop label="Status"><StatusChip status={status} className="mt-0.5" /></Prop>}
           <Prop label="Used in">{used.length} {used.length === 1 ? "agent" : "agents"}</Prop>
         </dl>
       </div>

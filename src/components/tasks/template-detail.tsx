@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { ArrowUp, Bot, ChevronRight, FileText, Flag, GitFork, Hand, MessageSquareText, Workflow, X } from "lucide-react"
+import { Activity, ArrowUp, BookOpen, Bot, Check, ChevronRight, FileText, Flag, GitFork, Hand, Link2, ListTree, MessageSquareText, Workflow, X, Zap, type LucideIcon } from "lucide-react"
+import { RivalMark } from "@/components/nav-icons"
 import { MessageResponse } from "@/components/ai-elements/message"
 import { agents, type AgentKind } from "@/components/chat/agents"
 import { Outcomes } from "@/components/tasks/outcomes"
@@ -17,27 +18,33 @@ import { cn } from "@/lib/utils"
 
 /*
  * One task template, in a panel on the right of the Task templates page (pages/gallery.tsx), styled like the
- * Rival Harness agent sheet: a blue-washed icon and a Geist title, hairline dividers, blue line tabs,
- * small icon-led section labels, the prompt as a blue-ruled quote. Kept light for someone opening it the first time:
- *   Name, its properties (created by, agents, capabilities, time per run; scope and trigger on your own; sources as an
- *   icon stack), Use template at the bottom.
+ * Rival Harness agent sheet: a top bar (breadcrumbs, actions, close), the agent's colour tile and a Geist title,
+ * hairline dividers, ink tabs with icons, section headers with their icon in a soft square. Kept light:
+ *   Name, its properties (created by, capabilities, context as on its card; scope and trigger on your own),
+ *   Use Agent at the bottom.
  *   Tabs: Overview (description, outcomes a run ends in, the prompt it runs with, how it works) · Skills (n), plus Schedule on your own tasks.
  * wide: the workflow as the zoomable flow chart (workflow-canvas.tsx) instead of the timeline.
  */
 
 type Tab = "overview" | "skills" | "triggers" | "schedule"
 
-export function TemplateDetail({ sa, color, onUse, onClose, wide }: { sa: SuperAgent; color?: string; onUse: (sa: SuperAgent) => void; onClose: () => void; wide?: boolean }) {
+export function TemplateDetail({ sa, color, crumb = "Agents Library", capability, context, onUse, onClose, wide }: {
+  sa: SuperAgent; color?: string; onUse: (sa: SuperAgent) => void; onClose: () => void; wide?: boolean
+  crumb?: string // where it was opened from, the first crumb in the top bar
+  capability?: { label: string; icon: LucideIcon } // as on its card; else "Read only"
+  context?: React.ReactNode // its sources as on its card (the tool marks); else the source stack
+}) {
   const [tab, setTab] = useState<Tab>("overview")
   const [openSkill, setOpenSkill] = useState<SuperAgent["skills"][number] | null>(null)
   const Icon = sa.icon
   const accent = color ?? colorFor(sa.name) // the agent's colour (its tile, the prompt card)
   const setup = blockers(sa).length > 0
-  const tabs: { id: Tab; label: string; count?: number }[] = [
-    { id: "overview", label: "Overview" },
-    { id: "skills", label: "Skills", count: sa.skills.length },
-    ...(sa.custom ? [{ id: "triggers" as const, label: "Triggers" }, { id: "schedule" as const, label: "Activity" }] : []),
+  const tabs: { id: Tab; label: string; icon: LucideIcon; count?: number }[] = [
+    { id: "overview", label: "Overview", icon: ListTree },
+    { id: "skills", label: "Skills", icon: BookOpen, count: sa.skills.length },
+    ...(sa.custom ? [{ id: "triggers" as const, label: "Triggers", icon: Zap }, { id: "schedule" as const, label: "Activity", icon: Activity }] : []),
   ]
+  const Cap = capability?.icon
   const pad = wide ? "px-6" : "px-5"
   const scope = scopeOf(sa)
   const outcomes = agentOutcomes[sa.clonedFrom ?? sa.id]
@@ -46,67 +53,39 @@ export function TemplateDetail({ sa, color, onUse, onClose, wide }: { sa: SuperA
   return (
     // ⌘⏎ / Ctrl+⏎ anywhere in the panel uses it (on the panel, not the window, so only the focused drawer reacts)
     <div className="flex h-full min-h-0 flex-col bg-popover" onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); onUse(sa) } }}>
-      {/* ---------- Name + metadata ---------- */}
-      <div className={cn("shrink-0 space-y-4 pt-5 pb-4", pad)}>
-        {/* Icon + name only (no subtitle: who made it is in Created by below) */}
+      {/* ---------- Top bar: where you are, and the actions ---------- */}
+      <DrawerTopBar crumbs={[crumb, sa.name]} onClose={onClose} pad={pad}>
+        {sa.custom && <EnabledToggle id={sa.id} name={sa.name} />}
+      </DrawerTopBar>
+
+      {/* ---------- Name + properties ---------- */}
+      <div className={cn("shrink-0 space-y-5 pt-5 pb-5", pad)}>
         <div className="flex items-center gap-3">
           <ColorTile color={accent} icon={Icon} />
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="font-title text-2xl leading-[1.1] font-medium tracking-[-0.015em] [--title-wght:450]">{sa.name}</h2>
-              {setup && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-wash px-2 py-px text-xs font-semibold whitespace-nowrap text-warning">
-                  <span aria-hidden className="size-1.5 rounded-full bg-warning" />
-                  Needs setup
-                </span>
-              )}
-            </div>
-          </div>
-          {sa.custom && <EnabledToggle id={sa.id} name={sa.name} />}
-          <button
-            onClick={onClose}
-            aria-label="Close and show all templates"
-            title="Close"
-            className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-          >
-            <X className="size-4" />
-          </button>
+          <h2 className="min-w-0 font-title text-2xl leading-[1.1] font-medium tracking-[-0.015em] [--title-wght:450]">{sa.name}</h2>
+          {setup && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-wash px-2 py-px text-xs font-semibold whitespace-nowrap text-warning">
+              <span aria-hidden className="size-1.5 rounded-full bg-warning" />
+              Needs setup
+            </span>
+          )}
         </div>
-        {/* Properties in one row, spread across the panel, each on one line (never wraps; the panel is 35rem for this, the widest that keeps two cards beside it at 1440).
-            ponytail: capabilities are the same for every template in the demo. "from <template>" shows on Created by's hover */}
-        <dl className="flex justify-between gap-x-4">
-          {/* Your own: everything in My Agents is yours (the card shows your avatar), so no Created by; it makes room for Scope and Trigger */}
-          {!sa.custom && <Prop label="Created by">Rival</Prop>}
-          <Prop label="Agents">{sa.pattern.flat().length}</Prop>
-          <Prop label="Capabilities">Read only</Prop>
-          <Prop label="Time per run">~{sa.runtime}</Prop>
-          {/* Scope and Trigger exist once you've made it yours (set while cloning and configuring it): not on a template */}
+        {/* Only what tells it apart: who made it, what it may do, what it reads from (scope and trigger on your own) */}
+        <dl className="flex flex-wrap gap-x-10 gap-y-3">
+          {!sa.custom && <Prop label="Created by"><span className="flex items-center gap-1.5"><RivalMark className="size-3.5 text-[#0350d0]" />Rival</span></Prop>}
+          <Prop label="Capabilities">
+            {Cap ? <span className="flex items-center gap-1.5"><Cap className="size-3.5 text-muted-foreground" strokeWidth={1.75} />{capability.label}</span> : "Read only"}
+          </Prop>
           {sa.custom && <Prop label="Scope" title={scope.full}>{scope.short}</Prop>}
           {sa.custom && <Prop label="Trigger" title={trigger.full}>{trigger.short}</Prop>}
-          <Prop label="Sources" title={sa.tools.map((t) => `${t.name}${t.connected ? "" : t.required ? " (required, not connected)" : " (not connected)"}`).join(", ")}>
-            <SourceStack tools={sa.tools} />
+          <Prop label="Context" title={sa.tools.map((t) => `${t.name}${t.connected ? "" : t.required ? " (required, not connected)" : " (not connected)"}`).join(", ")}>
+            {context ?? <SourceStack tools={sa.tools} />}
           </Prop>
         </dl>
       </div>
 
-      {/* ---------- Tabs: blue line under the active one ---------- */}
-      <div role="tablist" className={cn("flex shrink-0 gap-5 border-b border-hairline", pad)}>
-        {tabs.map((t) => (
-          <button
-            key={t.id}
-            role="tab"
-            aria-selected={tab === t.id}
-            onClick={() => setTab(t.id)}
-            className={cn(
-              "-mb-px flex shrink-0 cursor-pointer items-center gap-1.5 border-b-2 py-2.5 text-sm font-medium transition-colors",
-              tab === t.id ? "border-blue text-blue" : "border-transparent text-foreground/60 hover:text-foreground",
-            )}
-          >
-            {t.label}
-            {t.count !== undefined && <span className="text-xs tabular-nums opacity-70">{t.count}</span>}
-          </button>
-        ))}
-      </div>
+      {/* ---------- Tabs: an icon with each; the active one in ink with an ink line under it ---------- */}
+      <DrawerTabs tabs={tabs} active={tab} onChange={setTab} pad={pad} />
 
       <div role="tabpanel" className={cn("min-h-0 flex-1 overflow-y-auto py-5 text-sm", wide ? "flex flex-col" : "", pad)}>
         {tab === "overview" && (
@@ -278,16 +257,69 @@ export function EnabledToggle({ id, name }: { id: string; name: string }) {
   )
 }
 
-// A section with the reference sheet's label: small icon + 13px semibold, muted
+// A section header: its icon in a soft square (a light fill and hairline edge), then the title in ink
 export function Section({ icon: Icon, title, grow, children }: { icon: typeof Bot; title: string; grow?: boolean; children: React.ReactNode }) {
   return (
-    <section className={cn("flex flex-col gap-2.5", grow && "min-h-0 flex-1")}>
-      <h3 className="flex items-center gap-1.5 text-[13px] leading-[1.4] font-semibold text-foreground/70">
-        <Icon className="size-3.5" />
+    <section className={cn("flex flex-col gap-3", grow && "min-h-0 flex-1")}>
+      <h3 className="flex items-center gap-2 text-sm leading-5 font-medium text-foreground">
+        <span aria-hidden className="grid size-5 shrink-0 place-items-center rounded-[0.25rem] border border-hairline bg-foreground/[0.035] text-foreground/60">
+          <Icon className="size-3" strokeWidth={2} />
+        </span>
         {title}
       </h3>
       {children}
     </section>
+  )
+}
+
+// The drawer's top bar: where you are (breadcrumbs, the last one in ink) on the left, actions and close on the right
+export function DrawerTopBar({ crumbs, onClose, pad = "px-5", children }: { crumbs: string[]; onClose: () => void; pad?: string; children?: React.ReactNode }) {
+  const [copied, setCopied] = useState(false)
+  const copy = () => {
+    try { navigator.clipboard.writeText(window.location.href).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1400) }, () => {}) } catch { /* ok */ }
+  }
+  return (
+    <div className={cn("flex h-12 shrink-0 items-center gap-3 border-b border-hairline", pad)}>
+      <nav aria-label="Breadcrumb" className="flex min-w-0 flex-1 items-center gap-1.5 text-sm">
+        {crumbs.map((c, i) => (
+          <span key={i} className="flex min-w-0 items-center gap-1.5">
+            {i > 0 && <ChevronRight aria-hidden className="size-3.5 shrink-0 text-muted-foreground/60" />}
+            <span className={cn("truncate", i === crumbs.length - 1 ? "text-foreground" : "text-muted-foreground")}>{c}</span>
+          </span>
+        ))}
+      </nav>
+      {children}
+      <button onClick={copy} aria-label="Copy link" title={copied ? "Copied" : "Copy link"} className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+        {copied ? <Check className="size-4" /> : <Link2 className="size-4" />}
+      </button>
+      <button onClick={onClose} aria-label="Close" title="Close" className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+        <X className="size-4" />
+      </button>
+    </div>
+  )
+}
+
+// Tabs with an icon each; the active one in ink with an ink line under it, the rest muted
+export function DrawerTabs<T extends string>({ tabs, active, onChange, pad = "px-5" }: { tabs: { id: T; label: string; icon: LucideIcon; count?: number }[]; active: T; onChange: (t: T) => void; pad?: string }) {
+  return (
+    <div role="tablist" className={cn("flex shrink-0 gap-6 border-b border-hairline", pad)}>
+      {tabs.map((t) => (
+        <button
+          key={t.id}
+          role="tab"
+          aria-selected={active === t.id}
+          onClick={() => onChange(t.id)}
+          className={cn(
+            "-mb-px flex shrink-0 cursor-pointer items-center gap-1.5 border-b-2 py-2.5 text-sm font-medium transition-colors",
+            active === t.id ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground",
+          )}
+        >
+          <t.icon className="size-4" strokeWidth={1.75} />
+          {t.label}
+          {t.count !== undefined && <span className="rounded-[0.1875rem] bg-foreground/[0.06] px-1.5 text-xs leading-4 tabular-nums">{t.count}</span>}
+        </button>
+      ))}
+    </div>
   )
 }
 

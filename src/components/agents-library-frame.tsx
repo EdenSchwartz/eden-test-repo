@@ -286,18 +286,18 @@ export function AgentsLibraryFrame() {
         </div>
       </div>
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent showCloseButton={false} aria-describedby={undefined} className="w-full gap-0 overflow-hidden border-[#ecebe9] p-0 whitespace-normal sm:max-w-[35rem]">
+        <SheetContent showCloseButton={false} aria-describedby={undefined} onOpenAutoFocus={(e) => e.preventDefault()} className="w-full gap-0 overflow-hidden border-[#ecebe9] p-0 whitespace-normal sm:max-w-[35rem]">
           <SheetTitle className="sr-only">{picked?.name}</SheetTitle>
           {agent
-            ? <TemplateDetail key={agent.id} sa={agent} color={pickedColor} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={close} />
+            ? <TemplateDetail key={agent.id} sa={agent} color={pickedColor} {...drawerProps(pickedLib)} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={close} />
             : picked?.kind && <SubAgentDetail key={picked.name} kind={picked.kind} color={pickedColor} template onClose={close} onOpenAgent={(sa) => { setStacked(sa.id); setStackedOpen(true) }} />}
         </SheetContent>
       </Sheet>
       {/* Narrower than the first, so the first drawer's edge stays in sight underneath; its overlay only adds a light dim */}
       <Sheet open={stackedOpen} onOpenChange={setStackedOpen}>
-        <SheetContent showCloseButton={false} aria-describedby={undefined} overlayClassName="bg-white/40 dark:bg-black/15" className="w-full gap-0 overflow-hidden border-[#ecebe9] p-0 whitespace-normal sm:max-w-[32rem]">
+        <SheetContent showCloseButton={false} aria-describedby={undefined} onOpenAutoFocus={(e) => e.preventDefault()} overlayClassName="bg-white/40 dark:bg-black/15" className="w-full gap-0 overflow-hidden border-[#ecebe9] p-0 whitespace-normal sm:max-w-[32rem]">
           <SheetTitle className="sr-only">{stackedAgent?.name}</SheetTitle>
-          {stackedAgent && <TemplateDetail key={stackedAgent.id} sa={stackedAgent} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={() => setStackedOpen(false)} />}
+          {stackedAgent && <TemplateDetail key={stackedAgent.id} sa={stackedAgent} {...drawerProps(library.find((l) => l.templateId === stackedAgent.id))} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={() => setStackedOpen(false)} />}
         </SheetContent>
       </Sheet>
     </div>
@@ -490,6 +490,16 @@ const subMeta: Partial<Record<AgentKind, Meta>> = {
 }
 const metaOf = (a: LibraryAgent): Meta =>
   meta[a.name] ?? ((a.partOf !== undefined && a.kind && subMeta[a.kind]) || { categories: [VM], cap: ["Memory Usage", Brain], ctx: ["github"] })
+
+// What an agent's drawer shows as Capabilities and Context: the same as its card
+const drawerProps = (a?: LibraryAgent) => {
+  if (!a) return {}
+  const m = metaOf(a)
+  return {
+    capability: { label: m.cap[0], icon: m.cap[1] },
+    context: <span className="flex items-center gap-1">{m.ctx.map((t) => <ToolMark key={t} tool={t} />)}</span>,
+  }
+}
 
 // Small marks for the tools an agent reads from, in each tool's colours (simplified, not the official logos)
 const toolNames: Record<Tool, string> = { wiz: "Wiz", snyk: "Snyk", github: "GitHub", defender: "Microsoft Defender", paloalto: "Palo Alto Prisma", semgrep: "Semgrep" }
