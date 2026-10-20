@@ -14,7 +14,6 @@ import { StatusChip } from "@/components/tasks/status-chip"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useEnabled } from "@/lib/enabled"
 import type { TaskStatus } from "@/lib/task-status"
-import { TitleWidthKnob } from "@/components/title-width-knob"
 import { cn } from "@/lib/utils"
 
 /*
@@ -289,7 +288,6 @@ export function AgentsLibraryFrame() {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent showCloseButton={false} aria-describedby={undefined} className="w-full gap-0 overflow-hidden border-[#ecebe9] p-0 whitespace-normal sm:max-w-[35rem]">
           <SheetTitle className="sr-only">{picked?.name}</SheetTitle>
-          <TitleWidthKnob />
           {agent
             ? <TemplateDetail key={agent.id} sa={agent} color={pickedColor} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={close} />
             : picked?.kind && <SubAgentDetail key={picked.name} kind={picked.kind} color={pickedColor} template onClose={close} onOpenAgent={(sa) => { setStacked(sa.id); setStackedOpen(true) }} />}
@@ -299,7 +297,6 @@ export function AgentsLibraryFrame() {
       <Sheet open={stackedOpen} onOpenChange={setStackedOpen}>
         <SheetContent showCloseButton={false} aria-describedby={undefined} overlayClassName="bg-white/40 dark:bg-black/15" className="w-full gap-0 overflow-hidden border-[#ecebe9] p-0 whitespace-normal sm:max-w-[32rem]">
           <SheetTitle className="sr-only">{stackedAgent?.name}</SheetTitle>
-          <TitleWidthKnob />
           {stackedAgent && <TemplateDetail key={stackedAgent.id} sa={stackedAgent} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={() => setStackedOpen(false)} />}
         </SheetContent>
       </Sheet>

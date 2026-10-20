@@ -64,7 +64,7 @@ export function SubAgentDetail({ kind, color, template, onClose, onOpenAgent }: 
         <div className="flex items-start gap-3">
           <ColorTile color={color ?? colorFor(`sub:${kind}`)} icon={Icon} />
           <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <h2 className="font-title text-2xl leading-[1.1] font-medium tracking-[-0.015em] [--title-wght:450] [--title-wdth:var(--drawer-title-wdth,100)]">{subName(kind)}</h2>
+            <h2 className="font-title text-2xl leading-[1.1] font-medium tracking-[-0.015em] [--title-wght:450]">{subName(kind)}</h2>
             <p className="text-sm text-muted-foreground">Sub agent by Rival</p>
           </div>
           {!template && <EnabledToggle id={`sub:${kind}`} name={subName(kind)} />}

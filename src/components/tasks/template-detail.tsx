@@ -53,7 +53,7 @@ export function TemplateDetail({ sa, color, onUse, onClose, wide }: { sa: SuperA
           <ColorTile color={accent} icon={Icon} />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="font-title text-2xl leading-[1.1] font-medium tracking-[-0.015em] [--title-wght:450] [--title-wdth:var(--drawer-title-wdth,100)]">{sa.name}</h2>
+              <h2 className="font-title text-2xl leading-[1.1] font-medium tracking-[-0.015em] [--title-wght:450]">{sa.name}</h2>
               {setup && (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-wash px-2 py-px text-xs font-semibold whitespace-nowrap text-warning">
                   <span aria-hidden className="size-1.5 rounded-full bg-warning" />
