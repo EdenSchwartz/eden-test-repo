@@ -2,8 +2,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 
 /*
  * The agent capabilities, in this order: Memory · Context graph · Sandbox · Internet Access. The only four.
- * Each shows as its icon in a soft grey circle (the design: 20px #F7F7F8 circle, 1px white ring = 22px, 2px apart),
- * its name in a tooltip on hover. Icons: 16px, drawn on a 32 grid (half pixels), ~12px drawings, 1.2px #68696C
+ * Each shows as its icon in a soft grey circle (24px #F7F7F8 circle, 1px white ring, 2px apart), its name in a
+ * tooltip on hover. Icons: 20px, drawn on a 32 grid, ~14px drawings, 1.5px #68696C
  * strokes, the closed shapes filled with the same grey at 10% (the globe's middle, filled twice, reads darker).
  */
 export type Capability = "memory" | "graph" | "sandbox" | "internet"
@@ -48,8 +48,8 @@ export function CapabilityMark({ cap }: { cap: Capability }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span aria-label={capabilityNames[cap]} className="grid size-5 shrink-0 place-items-center rounded-full bg-[#f7f7f8] text-[#68696c] ring-1 ring-white">
-          <CapabilityIcon cap={cap} />
+        <span aria-label={capabilityNames[cap]} className="grid size-6 shrink-0 place-items-center rounded-full bg-[#f7f7f8] text-[#68696c] ring-1 ring-white">
+          <CapabilityIcon cap={cap} className="size-5" />
         </span>
       </TooltipTrigger>
       <TooltipContent side="top" sideOffset={6}>{capabilityNames[cap]}</TooltipContent>

@@ -462,7 +462,7 @@ function AgentTile({ seed, hue }: { seed: string; hue: number }) {
  *   Top:    the agent's colour tile (44px, a 12px white square in the middle); beside it the name (Geist 16 medium,
  *           #121212) over its categories (soft grey tags, name only), then the description (14/20, #6C6A68)
  *   Footer: under a hairline, three columns spread edge to edge: Created by (Rival mark + "Rival") · Capabilities
- *           (their icons in grey circles, names on hover; components/capability.tsx) · Context (the tools it reads from, logos in overlapping grey circles; names on hover).
+ *           (their icons in grey circles, names on hover; components/capability.tsx) · Context (the tools it reads from, their logos alone, 16px; names on hover).
  *           Labels Geist 11 uppercase #A2A4A8, values 14 #121212. One line, never wraps.
  * Click: opens its side panel.
  */
@@ -504,7 +504,7 @@ const drawerProps = (a?: LibraryAgent) => {
   return {
     categories: m.categories,
     capabilities: <CapabilityMarks caps={m.cap} />,
-    context: <span className="flex items-center gap-1">{m.ctx.map((t) => <ToolMark key={t} tool={t} />)}</span>,
+    context: <span className="flex items-center gap-1.5">{m.ctx.map((t) => <ToolMark key={t} tool={t} />)}</span>,
   }
 }
 
@@ -520,7 +520,7 @@ function ToolMark({ tool }: { tool: Tool }) {
     github: <><circle cx="8" cy="8" r="6.6" fill="#24292f" /><path d="M6.2 11.6v-1.4c-1.6.3-2-.7-2-.7-.3-.7-.7-.9-.7-.9-.6-.4 0-.4 0-.4.6 0 1 .7 1 .7.5.9 1.4.7 1.7.5 0-.4.2-.7.4-.8-1.3-.1-2.6-.6-2.6-2.8 0-.6.2-1.1.6-1.5-.1-.2-.3-.8 0-1.5 0 0 .5-.2 1.6.6a5.4 5.4 0 0 1 2.9 0c1.1-.8 1.6-.6 1.6-.6.3.7.1 1.3 0 1.5.4.4.6.9.6 1.5 0 2.2-1.3 2.7-2.6 2.8.2.2.4.5.4 1v1.9" fill="#fff" /></>,
   }
   return (
-    <span title={toolNames[tool]} className="grid size-6 shrink-0 place-items-center rounded-full bg-[#f7f7f8] ring-1 ring-white">
+    <span title={toolNames[tool]} className="grid size-4 shrink-0 place-items-center">
       <svg viewBox="0 0 16 16" className="size-4" role="img" aria-label={toolNames[tool]}>{art[tool]}</svg>
     </span>
   )
@@ -599,11 +599,11 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
         </span>
         <span className="flex min-w-0 flex-col gap-2">
           <span className="truncate text-[0.6875rem] leading-4 text-[#a2a4a8] [text-transform:uppercase]">Capabilities</span>
-          <span className="flex h-5 items-center"><CapabilityMarks caps={m.cap} /></span>
+          <span className="-my-0.5 flex h-6 items-center"><CapabilityMarks caps={m.cap} /></span>
         </span>
         <span className="flex flex-col items-end gap-2">
           <span className="text-[0.6875rem] leading-4 text-[#a2a4a8] [text-transform:uppercase]">Context</span>
-          <span className="-my-0.5 flex h-6 items-center -space-x-1">{m.ctx.map((t) => <ToolMark key={t} tool={t} />)}</span>
+          <span className="flex h-5 items-center gap-1.5">{m.ctx.map((t) => <ToolMark key={t} tool={t} />)}</span>
         </span>
       </span>
     </button>
