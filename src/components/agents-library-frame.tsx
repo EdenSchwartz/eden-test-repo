@@ -253,6 +253,9 @@ export function AgentsLibraryFrame() {
   // The drawer's icon tile keeps the picked card's colour
   const pickedLib = [...library, ...subLibrary].find((a) => a.name === picked?.name)
   const pickedColor = pickedLib ? colorOf(pickedLib) : undefined
+  // The drawer's ↓ 1 / 9 ↑: steps through the cards on screen (this tab, after the search), in their order
+  const at = list.findIndex((a) => a.name === picked?.name)
+  const nav = { index: at, total: list.length, onPrev: () => at > 0 && pick(list[at - 1]), onNext: () => at < list.length - 1 && pick(list[at + 1]) }
   return (
     <div className="flex flex-1 flex-col items-start bg-white whitespace-nowrap">
       <div className="alive-box relative isolate flex w-full flex-col items-start justify-center gap-3 overflow-hidden border-b border-[#ecebe9] bg-white p-10">
@@ -290,8 +293,8 @@ export function AgentsLibraryFrame() {
         <SheetContent showCloseButton={false} aria-describedby={undefined} onOpenAutoFocus={(e) => e.preventDefault()} className="w-full gap-0 overflow-hidden border-[#ecebe9] p-0 whitespace-normal sm:max-w-[35rem]">
           <SheetTitle className="sr-only">{picked?.name}</SheetTitle>
           {agent
-            ? <TemplateDetail key={agent.id} sa={agent} color={pickedColor} {...drawerProps(pickedLib)} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={close} />
-            : picked?.kind && <SubAgentDetail key={picked.name} kind={picked.kind} color={pickedColor} categories={pickedLib && metaOf(pickedLib).categories} template onClose={close} onOpenAgent={(sa) => { setStacked(sa.id); setStackedOpen(true) }} />}
+            ? <TemplateDetail key={agent.id} sa={agent} color={pickedColor} nav={nav} {...drawerProps(pickedLib)} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={close} />
+            : picked?.kind && <SubAgentDetail key={picked.name} kind={picked.kind} color={pickedColor} categories={pickedLib && metaOf(pickedLib).categories} nav={nav} template onClose={close} onOpenAgent={(sa) => { setStacked(sa.id); setStackedOpen(true) }} />}
         </SheetContent>
       </Sheet>
       {/* Narrower than the first, so the first drawer's edge stays in sight underneath; its overlay only adds a light dim */}

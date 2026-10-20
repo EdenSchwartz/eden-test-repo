@@ -5,7 +5,7 @@ import { StatusChip } from "@/components/tasks/status-chip"
 import { CardShell } from "@/components/tasks/template-card"
 import { Outcomes } from "@/components/tasks/outcomes"
 import { subOutcomes } from "@/data/outcomes"
-import { DrawerTopBar, EnabledToggle, Prop, Section } from "@/components/tasks/template-detail"
+import { DrawerTopBar, EnabledToggle, Prop, Section, type DrawerNav } from "@/components/tasks/template-detail"
 import { RivalMark } from "@/components/nav-icons"
 import { superAgents, type SuperAgent } from "@/data/super-agents"
 import { useConversations } from "@/lib/conversations"
@@ -54,7 +54,7 @@ export function SubAgentCard({ kind, status, template, selected, delay, onSelect
   )
 }
 
-export function SubAgentDetail({ kind, color, categories, template, onClose, onOpenAgent }: { kind: AgentKind; color?: string; categories?: string[]; template?: boolean; onClose: () => void; onOpenAgent: (sa: SuperAgent) => void }) {
+export function SubAgentDetail({ kind, color, categories, nav, template, onClose, onOpenAgent }: { kind: AgentKind; color?: string; categories?: string[]; nav?: DrawerNav; template?: boolean; onClose: () => void; onOpenAgent: (sa: SuperAgent) => void }) {
   const { convs } = useConversations()
   const a = agents[kind]
   const Icon = a.icon
@@ -62,7 +62,7 @@ export function SubAgentDetail({ kind, color, categories, template, onClose, onO
   const used = usedBy(kind)
   return (
     <div className="flex h-full min-h-0 flex-col bg-popover">
-      <DrawerTopBar crumbs={["Agents Library", subName(kind)]} onClose={onClose}>
+      <DrawerTopBar nav={nav} onClose={onClose}>
         {!template && <EnabledToggle id={`sub:${kind}`} name={subName(kind)} />}
       </DrawerTopBar>
       <div className="shrink-0 space-y-5 px-5 pt-5 pb-5">

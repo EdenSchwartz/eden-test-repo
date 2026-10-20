@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Activity, ArrowUp, BookOpen, Bot, Check, ChevronRight, FileText, Flag, GitFork, Hand, Link2, ListTree, MessageSquareText, Workflow, X, Zap, type LucideIcon } from "lucide-react"
+import { Activity, ArrowUp, BookOpen, Bot, Check, ChevronDown, ChevronRight, ChevronUp, Copy, FileText, Flag, GitFork, Hand, ListTree, MessageSquareText, Workflow, X, Zap, type LucideIcon } from "lucide-react"
 import { RivalMark } from "@/components/nav-icons"
 import { MessageResponse } from "@/components/ai-elements/message"
 import { agents, type AgentKind } from "@/components/chat/agents"
@@ -19,7 +19,7 @@ import { CategoryList } from "@/components/category-tag"
 
 /*
  * One task template, in a panel on the right of the Task templates page (pages/gallery.tsx), styled like the
- * Rival Harness agent sheet: a top bar (breadcrumbs, actions, close), the agent's colour tile and a Geist title,
+ * Rival Harness agent sheet: a top bar (step through the cards: down / 1 of n / up; copy link, close), the agent's colour tile and a Geist title,
  * hairline dividers, ink tabs with icons, section headers with their icon in a soft square. Kept light:
  *   Name, its properties (created by, capabilities, context as on its card; scope and trigger on your own),
  *   Use Agent at the bottom.
@@ -29,9 +29,9 @@ import { CategoryList } from "@/components/category-tag"
 
 type Tab = "overview" | "skills" | "triggers" | "schedule"
 
-export function TemplateDetail({ sa, color, crumb = "Agents Library", categories, capability, context, onUse, onClose, wide }: {
+export function TemplateDetail({ sa, color, nav, categories, capability, context, onUse, onClose, wide }: {
   sa: SuperAgent; color?: string; onUse: (sa: SuperAgent) => void; onClose: () => void; wide?: boolean
-  crumb?: string // where it was opened from, the first crumb in the top bar
+  nav?: DrawerNav // step through the cards it was opened from
   categories?: string[] // as on its card
   capability?: { label: string; icon: LucideIcon } // as on its card; else "Read only"
   context?: React.ReactNode // its sources as on its card (the tool marks); else the source stack
@@ -56,7 +56,7 @@ export function TemplateDetail({ sa, color, crumb = "Agents Library", categories
     // ⌘⏎ / Ctrl+⏎ anywhere in the panel uses it (on the panel, not the window, so only the focused drawer reacts)
     <div className="flex h-full min-h-0 flex-col bg-popover" onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); onUse(sa) } }}>
       {/* ---------- Top bar: where you are, and the actions ---------- */}
-      <DrawerTopBar crumbs={[crumb, sa.name]} onClose={onClose} pad={pad}>
+      <DrawerTopBar nav={nav} onClose={onClose} pad={pad}>
         {sa.custom && <EnabledToggle id={sa.id} name={sa.name} />}
       </DrawerTopBar>
 
@@ -275,27 +275,37 @@ export function Section({ icon: Icon, title, grow, children }: { icon: typeof Bo
   )
 }
 
-// The drawer's top bar: where you are (breadcrumbs, the last one in ink) on the left, actions and close on the right
-export function DrawerTopBar({ crumbs, onClose, pad = "px-5", children }: { crumbs: string[]; onClose: () => void; pad?: string; children?: React.ReactNode }) {
+// The drawer's top bar. Left: down / "1 / 9" / up, to step through the cards it was opened from (down = next,
+// up = previous; off at either end). Right: actions, copy link, close. No breadcrumbs.
+export type DrawerNav = { index: number; total: number; onPrev: () => void; onNext: () => void }
+const barBtn = "flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-35"
+export function DrawerTopBar({ nav, onClose, pad = "px-5", children }: { nav?: DrawerNav; onClose: () => void; pad?: string; children?: React.ReactNode }) {
   const [copied, setCopied] = useState(false)
   const copy = () => {
     try { navigator.clipboard.writeText(window.location.href).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1400) }, () => {}) } catch { /* ok */ }
   }
   return (
     <div className={cn("flex h-12 shrink-0 items-center gap-3 border-b border-hairline", pad)}>
-      <nav aria-label="Breadcrumb" className="flex min-w-0 flex-1 items-center gap-1.5 text-sm">
-        {crumbs.map((c, i) => (
-          <span key={i} className="flex min-w-0 items-center gap-1.5">
-            {i > 0 && <ChevronRight aria-hidden className="size-3.5 shrink-0 text-muted-foreground/60" />}
-            <span className={cn("truncate", i === crumbs.length - 1 ? "text-foreground" : "text-muted-foreground")}>{c}</span>
-          </span>
-        ))}
-      </nav>
+      <div className="flex min-w-0 flex-1 items-center gap-1">
+        {nav && nav.index >= 0 && (
+          <>
+            <button onClick={nav.onNext} disabled={nav.index >= nav.total - 1} aria-label="Next agent" title="Next" className={cn(barBtn, "-ml-1.5")}>
+              <ChevronDown className="size-4" />
+            </button>
+            <span className="text-sm tabular-nums text-muted-foreground" aria-live="polite">
+              <span className="text-foreground">{nav.index + 1}</span> / {nav.total}
+            </span>
+            <button onClick={nav.onPrev} disabled={nav.index <= 0} aria-label="Previous agent" title="Previous" className={barBtn}>
+              <ChevronUp className="size-4" />
+            </button>
+          </>
+        )}
+      </div>
       {children}
-      <button onClick={copy} aria-label="Copy link" title={copied ? "Copied" : "Copy link"} className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-        {copied ? <Check className="size-4" /> : <Link2 className="size-4" />}
+      <button onClick={copy} aria-label="Copy link" title={copied ? "Copied" : "Copy link"} className={barBtn}>
+        {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
       </button>
-      <button onClick={onClose} aria-label="Close" title="Close" className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+      <button onClick={onClose} aria-label="Close" title="Close" className={barBtn}>
         <X className="size-4" />
       </button>
     </div>
