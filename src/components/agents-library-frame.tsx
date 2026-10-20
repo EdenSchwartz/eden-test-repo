@@ -279,9 +279,8 @@ export function AgentsLibraryFrame() {
       </div>
       {/* The cards area: plain white space around the cards, nothing in the margins */}
       <div className="relative flex w-full flex-1">
-        {/* Smaller screens (under 1800px): centered, 3 to a row (342px cards, 71.125rem at most). Big screens: in line with the title and
-            the tabs, filling the width between the strips (4 or more to a row). The drawer slides over them, nothing reflows */}
-        <div className="mx-auto grid max-w-[71.125rem] min-w-0 flex-1 content-start gap-4 px-10 pt-6 pb-10 grid-cols-[repeat(3,minmax(0,1fr))] min-[1800px]:mx-8 min-[1800px]:max-w-none min-[1800px]:grid-cols-[repeat(auto-fill,minmax(21.375rem,1fr))] min-[1800px]:px-2">
+        {/* Always 3 to a row, centered, the cards 342px at most (71.125rem), on any screen size. The drawer slides over them, nothing reflows */}
+        <div className="mx-auto grid max-w-[71.125rem] min-w-0 flex-1 content-start gap-4 px-10 pt-6 pb-10 grid-cols-[repeat(3,minmax(0,1fr))]">
           {list.map((a) => <AgentCard key={a.name} a={a} selected={open && picked?.name === a.name} onSelect={() => pick(a)} />)}
           {list.length === 0 && (
             <p className="col-span-full py-10 text-center text-[0.875rem] leading-5 whitespace-normal text-[#6c6a68]">
