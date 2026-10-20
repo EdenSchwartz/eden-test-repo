@@ -1,4 +1,5 @@
-import { ArrowRight, MessageSquare } from "lucide-react"
+import { ArrowRight, MessageSquare, type LucideIcon } from "lucide-react"
+import { ColorTile, colorFor } from "@/components/tasks/color-tile"
 import type { Conversation, Part } from "@/data/conversations"
 import { superAgents } from "@/data/super-agents"
 import { useConversations } from "@/lib/conversations"
@@ -8,7 +9,7 @@ import { cn } from "@/lib/utils"
 
 /*
  * Home in the Hex look (components/home/concept-home.tsx shows it under the composer when <html data-look="hex">):
- * a tight, ruled grid in three columns, like Hex's home. Each column has a mono label and short rows:
+ * three quiet columns, borderless (no rules or cell lines; rows show a soft fill on hover). Each has a mono label and short rows:
  *   Needs you   conversations waiting on an approval
  *   Recent      the latest conversations
  *   Start from  a few of Rival's templates (opens Agent Library)
@@ -26,10 +27,10 @@ export function HexHomeGrid() {
   const open = (id: string) => navigate("chat", { conversationId: id })
 
   return (
-    <div className="rise-in grid w-full max-w-5xl grid-cols-1 border-y bg-background md:grid-cols-3 md:divide-x" style={{ "--delay": "160ms" } as React.CSSProperties}>
+    <div className="rise-in grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-6 md:grid-cols-3" style={{ "--delay": "160ms" } as React.CSSProperties}>
       <Column label="Needs you" count={needs.length}>
         {needs.length === 0
-          ? <p className="px-4 py-3 text-sm text-muted-foreground">Nothing waiting on you.</p>
+          ? <p className="px-3 py-2 text-sm text-muted-foreground">Nothing waiting on you.</p>
           : needs.map((c) => <Row key={c.id} onClick={() => open(c.id)} title={c.title} sub="Waiting on your approval" dot="bg-warning" />)}
       </Column>
       <Column label="Recent" count={recent.length}>
@@ -47,7 +48,7 @@ export function HexHomeGrid() {
 function Column({ label, count, action, children }: { label: string; count: number; action?: { label: string; onClick: () => void }; children: React.ReactNode }) {
   return (
     <section className="min-w-0">
-      <header className="flex h-9 items-center justify-between border-b px-4">
+      <header className="flex h-8 items-center justify-between px-3">
         <h3 className="text-[10.5px] font-medium tracking-[0.08em] text-muted-foreground uppercase">
           {label} <span className="ml-1 tabular-nums opacity-70">{count}</span>
         </h3>
@@ -57,20 +58,20 @@ function Column({ label, count, action, children }: { label: string; count: numb
           </button>
         )}
       </header>
-      <ul className="divide-y">{children}</ul>
+      <ul className="space-y-0.5">{children}</ul>
     </section>
   )
 }
 
 function Row({ title, sub, onClick, dot, icon, agentIcon: AgentIcon }: {
-  title: string; sub: string; onClick: () => void; dot?: string; icon?: boolean; agentIcon?: React.ComponentType<{ className?: string }>
+  title: string; sub: string; onClick: () => void; dot?: string; icon?: boolean; agentIcon?: LucideIcon
 }) {
   return (
     <li>
-      <button onClick={onClick} className="group flex w-full cursor-pointer items-center gap-2.5 px-4 py-2.5 text-left transition-colors hover:bg-frost">
+      <button onClick={onClick} className="group flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted/60">
         {dot && <span className={cn("size-1.5 shrink-0 rounded-full", dot)} />}
         {icon && <MessageSquare className="size-3.5 shrink-0 text-muted-foreground" />}
-        {AgentIcon && <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-wash text-blue"><AgentIcon className="size-3.5" /></span>}
+        {AgentIcon && <ColorTile color={colorFor(title)} icon={AgentIcon} size="xs" />}
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm">{title}</span>
           <span className="block truncate text-xs text-muted-foreground">{sub}</span>

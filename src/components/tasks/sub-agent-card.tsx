@@ -62,7 +62,7 @@ export function SubAgentDetail({ kind, color, template, onClose, onOpenAgent }: 
     <div className="flex h-full min-h-0 flex-col bg-popover">
       <div className="shrink-0 space-y-4 px-5 pt-5 pb-4">
         <div className="flex items-start gap-3">
-          <ColorTile color={color ?? colorFor(subName(kind))} icon={Icon} />
+          <ColorTile color={color ?? colorFor(`sub:${kind}`)} icon={Icon} />
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <h2 className="font-title text-2xl leading-[1.1] font-medium tracking-[-0.015em] [--title-wght:450] [--title-wdth:var(--drawer-title-wdth,100)]">{subName(kind)}</h2>
             <p className="text-sm text-muted-foreground">Sub agent by Rival</p>
@@ -101,7 +101,7 @@ export function SubAgentDetail({ kind, color, template, onClose, onOpenAgent }: 
                 return (
                   <li key={sa.id}>
                     <button onClick={() => onOpenAgent(sa)} className="flex w-full cursor-pointer items-center gap-3 px-3.5 py-2.5 text-left transition-colors hover:bg-wash/45">
-                      <span aria-hidden className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-wash text-blue [&_svg]:size-3.5"><SaIcon /></span>
+                      <ColorTile color={colorFor(sa.name)} icon={SaIcon} size="sm" />
                       <span className="min-w-0 flex-1">
                         <span className="block font-medium">{sa.name}</span>
                         <span className="block text-xs text-muted-foreground">{sa.custom ? "Your agent" : "Rival template"}</span>

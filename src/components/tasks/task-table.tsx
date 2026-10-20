@@ -4,6 +4,7 @@ import type { Conversation } from "@/data/conversations"
 import { getSuperAgent, type SuperAgent } from "@/data/super-agents"
 import { runsOf, statusDot, taskStatus } from "@/lib/task-status"
 import { cn } from "@/lib/utils"
+import { ColorTile, colorFor } from "@/components/tasks/color-tile"
 
 /*
  * Your tasks as a list, grouped Linear-style by the template ("mother") they were made from (pages/gallery.tsx, List view).
@@ -55,9 +56,7 @@ export function TaskTable({ tasks, convs, selectedId, onSelect }: {
               className="flex w-full cursor-pointer items-center gap-2.5 border-b border-hairline bg-frost px-4 py-2 text-left transition-colors hover:bg-wash/60"
             >
               <ChevronRight className={cn("size-3.5 shrink-0 text-muted-foreground transition-transform duration-150", open && "rotate-90")} />
-              <span aria-hidden className="flex size-5 shrink-0 items-center justify-center rounded-md bg-wash text-blue [&_svg]:size-3">
-                <Icon />
-              </span>
+              <ColorTile color={colorFor(t.name)} icon={Icon} size="xs" />
               <span className="text-sm font-semibold">{t.name}</span>
               <span className="text-sm text-muted-foreground tabular-nums">{rows.length}</span>
             </button>

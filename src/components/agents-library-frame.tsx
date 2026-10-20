@@ -9,7 +9,7 @@ import { SubAgentDetail, subName, usedBy } from "@/components/tasks/sub-agent-ca
 import { TemplateDetail } from "@/components/tasks/template-detail"
 import { withTransition } from "@/lib/view-transition"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
-import { ColorTile, colorFor, flatColors } from "@/components/tasks/color-tile"
+import { ColorTile, colorFor, flatColors, registerColor } from "@/components/tasks/color-tile"
 import { StatusChip } from "@/components/tasks/status-chip"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useEnabled } from "@/lib/enabled"
@@ -408,6 +408,8 @@ const hueOf = (a: LibraryAgent) => hues.get(a) ?? 255
 const TILE_STYLE: "flat" | "gradient" = "flat"
 const colors = new Map([...library, ...subLibrary].map((a, i) => [a, flatColors[i % flatColors.length]]))
 const colorOf = (a: LibraryAgent) => colors.get(a) ?? flatColors[0]
+// Shared with every other place an agent's icon shows (color-tile.tsx), so an agent keeps its colour across the demo
+for (const [a, c] of colors) { registerColor(a.name, c); if (a.partOf !== undefined && a.kind) registerColor(`sub:${a.kind}`, c) }
 
 
 /*

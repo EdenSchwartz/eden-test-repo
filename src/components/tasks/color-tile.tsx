@@ -15,25 +15,33 @@ export const flatColors = [
   "#6a5a8a", // plum
 ]
 
-// ponytail: agents without a library card (opened from "Part of", My Agents) get a colour from their name
-export const colorFor = (name: string) => {
+// One colour per agent everywhere: Agents Library registers its cards' colours (by name, and sub agents also by
+// `sub:<kind>`); anything else (e.g. a template with no card) gets one from its key, so it's at least stable.
+const registered = new Map<string, string>()
+export const registerColor = (key: string, color: string) => { registered.set(key, color) }
+export const colorFor = (key: string) => {
+  const known = registered.get(key)
+  if (known) return known
   let h = 0
-  for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0
+  for (const c of key) h = (h * 31 + c.charCodeAt(0)) >>> 0
   return flatColors[h % flatColors.length]
 }
 
-export function ColorTile({ color, icon: Icon }: { color: string; icon: LucideIcon }) {
+// md: cards and drawer headers (40px) · sm: lists and timelines (28px) · xs: table rows (20px)
+const sizes = { md: "size-10 rounded-[0.375rem] [&_svg]:size-[1.125rem]", sm: "size-7 rounded-[0.3125rem] [&_svg]:size-3.5", xs: "size-5 rounded-[0.25rem] [&_svg]:size-3" }
+
+export function ColorTile({ color, icon: Icon, size = "md" }: { color: string; icon: LucideIcon; size?: keyof typeof sizes }) {
   return (
     <span
       aria-hidden
-      className="grid size-10 shrink-0 place-items-center rounded-[0.375rem] border"
+      className={`grid shrink-0 place-items-center border ${sizes[size]}`}
       style={{
         background: `color-mix(in oklch, ${color} 7%, white)`,
         borderColor: `color-mix(in oklch, ${color} 22%, white)`,
         color: `color-mix(in oklch, ${color} 82%, #9a9893)`,
       }}
     >
-      <Icon className="size-[1.125rem]" strokeWidth={1.75} />
+      <Icon strokeWidth={1.75} />
     </span>
   )
 }

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Bot, ChevronRight, FileText, Flag, GitFork, Hand, MessageSquareText, Workflow, X } from "lucide-react"
+import { ArrowUp, Bot, ChevronRight, FileText, Flag, GitFork, Hand, MessageSquareText, Workflow, X } from "lucide-react"
 import { MessageResponse } from "@/components/ai-elements/message"
 import { agents, type AgentKind } from "@/components/chat/agents"
 import { Outcomes } from "@/components/tasks/outcomes"
@@ -31,6 +31,7 @@ export function TemplateDetail({ sa, color, onUse, onClose, wide }: { sa: SuperA
   const [tab, setTab] = useState<Tab>("overview")
   const [openSkill, setOpenSkill] = useState<SuperAgent["skills"][number] | null>(null)
   const Icon = sa.icon
+  const accent = color ?? colorFor(sa.name) // the agent's colour (its tile, the prompt card)
   const setup = blockers(sa).length > 0
   const tabs: { id: Tab; label: string; count?: number }[] = [
     { id: "overview", label: "Overview" },
@@ -49,7 +50,7 @@ export function TemplateDetail({ sa, color, onUse, onClose, wide }: { sa: SuperA
       <div className={cn("shrink-0 space-y-4 pt-5 pb-4", pad)}>
         {/* Icon + name only (no subtitle: who made it is in Created by below) */}
         <div className="flex items-center gap-3">
-          <ColorTile color={color ?? colorFor(sa.name)} icon={Icon} />
+          <ColorTile color={accent} icon={Icon} />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="font-title text-2xl leading-[1.1] font-medium tracking-[-0.015em] [--title-wght:450] [--title-wdth:var(--drawer-title-wdth,100)]">{sa.name}</h2>
@@ -119,9 +120,12 @@ export function TemplateDetail({ sa, color, onUse, onClose, wide }: { sa: SuperA
               </Section>
             )}
             <Section icon={MessageSquareText} title="Prompt">
-              <blockquote className="rounded-lg border-l-2 border-blue bg-frost px-3.5 py-2.5 leading-normal text-pretty text-foreground/85">
-                {sa.prompt ?? sa.briefs[0]}
-              </blockquote>
+              {/* The prompt as what it is: a message ready to send. A white card like the chat
+                  composer, with a small send mark in the corner (decorative; Use Agent starts it) */}
+              <div className="flex items-end gap-3 rounded-xl border bg-card py-3 pr-3 pl-4">
+                <p className="min-w-0 flex-1 self-center text-[0.9375rem] leading-normal text-pretty text-foreground">{sa.prompt ?? sa.briefs[0]}</p>
+                <span aria-hidden className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"><ArrowUp className="size-3.5" /></span>
+              </div>
             </Section>
             <Section icon={Workflow} title="How it works" grow={wide}>
               {wide ? (
@@ -214,9 +218,8 @@ function Step({ kind, approval }: { kind: AgentKind; approval?: boolean }) {
   const { name, icon: Icon, short } = agents[kind]
   return (
     <div className="flex items-center gap-3">
-      <span className="relative flex size-7 shrink-0 items-center justify-center rounded-lg bg-wash text-blue">
-        <Icon className="size-3.5" />
-      </span>
+      {/* bg-popover under the tile: the timeline's rail must not show through its light wash */}
+      <span className="relative rounded-[0.3125rem] bg-popover"><ColorTile color={colorFor(`sub:${kind}`)} icon={Icon} size="sm" /></span>
       <span className="min-w-0">
         <span className="block leading-tight font-medium">{name.replace(/ agent$/, "")}</span>
         <span className="block text-xs text-muted-foreground">{short}</span>

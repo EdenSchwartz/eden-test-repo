@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react"
-import { ArrowUp, Moon, Sun, Sunrise, X } from "lucide-react"
+import { ArrowUp, X } from "lucide-react"
 import { SuperAgentOrb } from "@/components/super-agents"
 import type { SuperAgent } from "@/data/super-agents"
 import { useNav } from "@/lib/nav"
@@ -14,10 +14,9 @@ export function useLaunch() {
 // ponytail: user name is hardcoded for the demo
 export function Greeting({ className, delay = 0 }: { className?: string; delay?: number }) {
   const h = new Date().getHours()
-  const [word, Icon] = h < 12 ? ["morning", Sunrise] : h < 18 ? ["afternoon", Sun] : ["evening", Moon]
+  const word = h < 12 ? "morning" : h < 18 ? "afternoon" : "evening"
   return (
     <div className={cn("rise-in flex flex-col items-center gap-3 text-center", className)} style={{ "--delay": `${delay}ms` } as React.CSSProperties}>
-      <Icon className="size-7 text-muted-foreground" strokeWidth={1.5} />
       <h2 className="text-3xl font-semibold tracking-tight">Good {word}, Eden</h2>
     </div>
   )
@@ -68,7 +67,7 @@ export function Composer({
     <div
       onClick={() => ref.current?.focus()}
       className={cn(
-        "relative w-full cursor-text rounded-2xl border bg-card shadow-xl shadow-black/15 transition-[border-color,box-shadow] focus-within:border-foreground/25",
+        "relative w-full cursor-text rounded-2xl border bg-card transition-[border-color,box-shadow] focus-within:border-foreground/25",
         className,
       )}
     >
