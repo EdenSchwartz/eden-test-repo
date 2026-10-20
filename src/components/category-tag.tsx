@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 /*
  * The agent categories. These five are the only ones, spelled exactly so; don't add, rename or merge.
  * Each has a Central Icons style icon (24 grid, 1.5 stroke). The drawings fill about 14px of a 20px icon.
- *   CategoryTag:  a soft grey tag, icon + name (the cards)
+ *   CategoryTag:  a soft grey tag, the name only, regular weight (the cards)
  *   CategoryList: icon + name, side by side (the drawers' properties)
  */
 export const VM = "Vuln Management", APP = "Appsec", CLOUD = "CloudSec", THREATS = "Threats", GRC = "GRC"
@@ -26,8 +26,7 @@ export function CategoryIcon({ category, className }: { category: string; classN
 
 export function CategoryTag({ category }: { category: string }) {
   return (
-    <span className="flex h-5 items-center gap-0.5 rounded-[0.25rem] bg-[#f7f7f8] pr-1 pl-0.5 text-[0.8125rem] leading-4 whitespace-nowrap text-[#a2a4a8]">
-      <CategoryIcon category={category} />
+    <span className="flex h-5 items-center rounded-[0.25rem] bg-[#f7f7f8] px-1.5 text-[0.8125rem] leading-4 font-normal whitespace-nowrap text-[#a2a4a8]">
       {category}
     </span>
   )
