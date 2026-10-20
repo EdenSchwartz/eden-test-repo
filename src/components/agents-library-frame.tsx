@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useEnabled } from "@/lib/enabled"
 import type { TaskStatus } from "@/lib/task-status"
 import { cn } from "@/lib/utils"
+import { APP, CLOUD, GRC, THREATS, VM, CategoryTag } from "@/components/category-tag"
 
 /*
  * The header box's grid lit by a fluid. A small Navier-Stokes simulation (Jos Stam's "stable fluids":
@@ -290,7 +291,7 @@ export function AgentsLibraryFrame() {
           <SheetTitle className="sr-only">{picked?.name}</SheetTitle>
           {agent
             ? <TemplateDetail key={agent.id} sa={agent} color={pickedColor} {...drawerProps(pickedLib)} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={close} />
-            : picked?.kind && <SubAgentDetail key={picked.name} kind={picked.kind} color={pickedColor} template onClose={close} onOpenAgent={(sa) => { setStacked(sa.id); setStackedOpen(true) }} />}
+            : picked?.kind && <SubAgentDetail key={picked.name} kind={picked.kind} color={pickedColor} categories={pickedLib && metaOf(pickedLib).categories} template onClose={close} onOpenAgent={(sa) => { setStacked(sa.id); setStackedOpen(true) }} />}
         </SheetContent>
       </Sheet>
       {/* Narrower than the first, so the first drawer's edge stays in sight underneath; its overlay only adds a light dim */}
@@ -461,7 +462,7 @@ function AgentTile({ seed, hue }: { seed: string; hue: number }) {
  *           Labels Geist 12 uppercase #A2A4A8, values 14 #121212. One line, never wraps.
  * Click: opens its side panel.
  */
-type Tool = "wiz" | "snyk" | "github" | "defender" | "paloalto" | "semgrep" | "ring"
+type Tool = "wiz" | "snyk" | "github" | "defender" | "paloalto" | "semgrep"
 // category: one or two; ctx: the integrations it pulls its data from (sources only)
 type Meta = { categories: string[]; cap: [string, LucideIcon]; ctx: Tool[] }
 // Memory Usage's icon: the Central Icons brain (round, a line down the middle, a branch either side)
@@ -472,9 +473,8 @@ const BrainIcon = (({ className, strokeWidth = 1.5 }: { className?: string; stro
   </svg>
 )) as unknown as LucideIcon
 
-const VM = "Vuln Management", APP = "Appsec", CLOUD = "CloudSec", THREATS = "Threats", GRC = "GRC"
 const meta: Record<string, Meta> = {
-  "Triage Hunter": { categories: [APP, VM], cap: ["Memory Usage", BrainIcon], ctx: ["defender", "ring", "paloalto"] },
+  "Triage Hunter": { categories: [APP, VM], cap: ["Memory Usage", BrainIcon], ctx: ["defender", "paloalto"] },
   "Code CVE Exploitability": { categories: [VM, APP], cap: ["Code Search", FileSearch], ctx: ["snyk", "github"] },
   "Cloud Exploitability": { categories: [CLOUD, VM], cap: ["Cloud Graph", Network], ctx: ["wiz", "defender", "paloalto"] },
   "Code SAST Exploitability": { categories: [APP], cap: ["Code Search", FileSearch], ctx: ["semgrep", "github"] },
@@ -498,52 +498,34 @@ const subMeta: Partial<Record<AgentKind, Meta>> = {
   correlation: { categories: [VM], cap: ["Dedup", Combine], ctx: ["wiz", "snyk", "semgrep"] },
   prioritization: { categories: [VM], cap: ["Memory Usage", BrainIcon], ctx: ["wiz", "defender"] },
 }
-// A category tag: the category's icon (Central Icons style, 1.5 stroke) in a soft grey circle; overlapping, its name on hover
-const categoryIcon: Record<string, React.ReactNode> = {
-  [APP]: <><rect x="3.75" y="3.75" width="16.5" height="16.5" rx="2.5" /><path d="M10 9.5 7.5 12l2.5 2.5M14 9.5l2.5 2.5-2.5 2.5" /></>,
-  [VM]: <><path d="M9 8.25a3 3 0 0 1 6 0" /><rect x="7" y="8.25" width="10" height="12" rx="5" /><path d="M12 11.5v8.5M7 11.5 4.5 10.5M7 14.75H4.25M7 18l-2.5 1M17 11.5l2.5-1M17 14.75h2.75M17 18l2.5 1" /></>,
-  [THREATS]: <><circle cx="12" cy="12" r="8.25" /><path d="M9 9.25a4.25 4.25 0 1 0 6 0" /><path d="M12 8v4" /></>,
-  [CLOUD]: <path d="M7.25 18.25h9.5a4 4 0 0 0 .6-7.95 5.75 5.75 0 0 0-11.05 1.1 3.45 3.45 0 0 0 .95 6.85Z" />,
-  [GRC]: <><path d="M12 20.25H7a2 2 0 0 1-2-2V5.75a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2V13" /><path d="m14.25 17.75 2 2 3.5-3.5" /></>,
-}
-function CategoryTag({ category }: { category: string }) {
-  return (
-    <span title={category} aria-label={category} className="grid size-5 place-items-center rounded-full bg-[#f7f7f8] text-[#68696c] ring-1 ring-white">
-      <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="size-3.5">
-        {categoryIcon[category]}
-      </svg>
-    </span>
-  )
-}
-
 const metaOf = (a: LibraryAgent): Meta =>
   meta[a.name] ?? ((a.partOf !== undefined && a.kind && subMeta[a.kind]) || { categories: [VM], cap: ["Memory Usage", BrainIcon], ctx: ["github"] })
 
-// What an agent's drawer shows as Capabilities and Context: the same as its card
+// What an agent's drawer shows as Category, Capabilities and Context: the same as its card
 const drawerProps = (a?: LibraryAgent) => {
   if (!a) return {}
   const m = metaOf(a)
   return {
+    categories: m.categories,
     capability: { label: m.cap[0], icon: m.cap[1] },
     context: <span className="flex items-center gap-1">{m.ctx.map((t) => <ToolMark key={t} tool={t} />)}</span>,
   }
 }
 
 // Small marks for the tools an agent reads from, in each tool's colours (simplified, not the official logos)
-const toolNames: Record<Tool, string> = { wiz: "Wiz", snyk: "Snyk", github: "GitHub", defender: "Microsoft Defender", paloalto: "Palo Alto Prisma", semgrep: "Semgrep", ring: "Context source" }
+const toolNames: Record<Tool, string> = { wiz: "Wiz", snyk: "Snyk", github: "GitHub", defender: "Microsoft Defender", paloalto: "Palo Alto Prisma", semgrep: "Semgrep" }
 function ToolMark({ tool }: { tool: Tool }) {
   const art: Record<Tool, React.ReactNode> = {
     defender: <path d="M8 1.2 2.6 3.1v4.3c0 3.4 2.3 6.1 5.4 7.4 3.1-1.3 5.4-4 5.4-7.4V3.1L8 1.2Zm-.6 2.1v4.4H3.8V4.1l3.6-.8Zm1.2 0 3.6.8v3.6H8.6V3.3ZM3.9 8.9h3.5v4.2C5.5 12.1 4.2 10.6 3.9 8.9Zm4.7 0h3.5c-.3 1.7-1.6 3.2-3.5 4.2V8.9Z" fill="#0078d4" />,
     paloalto: <g fill="#fa582d"><path d="m6.2 2.4 3 3-5.3 5.3-3-3z" /><path d="m11.1 5.3 3 3-5.3 5.3-3-3z" /></g>,
     wiz: <><rect x="1" y="1" width="14" height="14" rx="3.5" fill="#1b4dff" /><text x="8" y="11.6" textAnchor="middle" fontSize="9.5" fontWeight="800" fontFamily="Geist, sans-serif" fill="#fff">W</text></>,
     snyk: <><rect x="1" y="1" width="14" height="14" rx="3.5" fill="#4c4a73" /><text x="8" y="11.6" textAnchor="middle" fontSize="9.5" fontWeight="800" fontFamily="Geist, sans-serif" fill="#fff">S</text></>,
-    ring: <g stroke="#121212" strokeWidth="0.8" strokeLinecap="round">{Array.from({ length: 20 }, (_, i) => { const t = (i / 20) * Math.PI * 2; return <line key={i} x1={8 + Math.cos(t) * 4} y1={8 + Math.sin(t) * 4} x2={8 + Math.cos(t) * 7.2} y2={8 + Math.sin(t) * 7.2} /> })}</g>,
     semgrep: <><circle cx="8" cy="8" r="7" fill="#2bc28a" /><circle cx="8" cy="8" r="2.6" fill="#fff" /></>,
     github: <><circle cx="8" cy="8" r="6.6" fill="#24292f" /><path d="M6.2 11.6v-1.4c-1.6.3-2-.7-2-.7-.3-.7-.7-.9-.7-.9-.6-.4 0-.4 0-.4.6 0 1 .7 1 .7.5.9 1.4.7 1.7.5 0-.4.2-.7.4-.8-1.3-.1-2.6-.6-2.6-2.8 0-.6.2-1.1.6-1.5-.1-.2-.3-.8 0-1.5 0 0 .5-.2 1.6.6a5.4 5.4 0 0 1 2.9 0c1.1-.8 1.6-.6 1.6-.6.3.7.1 1.3 0 1.5.4.4.6.9.6 1.5 0 2.2-1.3 2.7-2.6 2.8.2.2.4.5.4 1v1.9" fill="#fff" /></>,
   }
   return (
-    <span title={toolNames[tool]} className="grid size-5 shrink-0 place-items-center rounded-full bg-[#f7f7f8] ring-1 ring-white">
-      <svg viewBox="0 0 16 16" className="size-3" role="img" aria-label={toolNames[tool]}>{art[tool]}</svg>
+    <span title={toolNames[tool]} className="grid size-6 shrink-0 place-items-center rounded-full bg-[#f7f7f8] ring-1 ring-white">
+      <svg viewBox="0 0 16 16" className="size-4" role="img" aria-label={toolNames[tool]}>{art[tool]}</svg>
     </span>
   )
 }
@@ -623,18 +605,22 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
         <span className="flex min-w-0 flex-col gap-2">
           <span className="truncate text-[0.75rem] leading-4 text-[#a2a4a8] [text-transform:uppercase]">Capabilities</span>
           <span className="flex h-5 min-w-0 items-center gap-1.5 text-[0.875rem] leading-5 text-[#121212]">
-            <Cap className="size-[1.0625rem] shrink-0 text-[#68696c]" strokeWidth={1.5} />
+            <Cap className="size-[1.125rem] shrink-0 text-[#68696c]" strokeWidth={1.5} />
             <span className="truncate">{m.cap[0]}</span>
           </span>
         </span>
         <span className="flex flex-col items-end gap-2">
           <span className="text-[0.75rem] leading-4 text-[#a2a4a8] [text-transform:uppercase]">Context</span>
-          <span className="flex h-5 items-center -space-x-1">{m.ctx.map((t) => <ToolMark key={t} tool={t} />)}</span>
+          <span className="-my-0.5 flex h-6 items-center -space-x-1">{m.ctx.map((t) => <ToolMark key={t} tool={t} />)}</span>
         </span>
       </span>
     </button>
   )
 }
+
+// The drawers on My Agents (pages/gallery.tsx) show the same as the library's: by the agent it's a copy of
+export const agentDrawerProps = (sa: SuperAgent) => drawerProps(library.find((l) => l.templateId === (sa.clonedFrom ?? sa.id)))
+export const subCategories = (kind: AgentKind) => { const a = subLibrary.find((l) => l.kind === kind); return a ? metaOf(a).categories : undefined }
 
 // The same card on My Agents (pages/gallery.tsx), so an agent looks the same everywhere in the demo
 export function MyAgentCard({ sa, status, selected, onSelect }: { sa: SuperAgent; status: TaskStatus; selected: boolean; onSelect: () => void }) {

@@ -15,6 +15,7 @@ import { days, ordinal, useTriggers, when, type Schedule } from "@/lib/triggers"
 import { EnableSwitch } from "@/components/tasks/enable-switch"
 import { useEnabled } from "@/lib/enabled"
 import { cn } from "@/lib/utils"
+import { CategoryList } from "@/components/category-tag"
 
 /*
  * One task template, in a panel on the right of the Task templates page (pages/gallery.tsx), styled like the
@@ -28,9 +29,10 @@ import { cn } from "@/lib/utils"
 
 type Tab = "overview" | "skills" | "triggers" | "schedule"
 
-export function TemplateDetail({ sa, color, crumb = "Agents Library", capability, context, onUse, onClose, wide }: {
+export function TemplateDetail({ sa, color, crumb = "Agents Library", categories, capability, context, onUse, onClose, wide }: {
   sa: SuperAgent; color?: string; onUse: (sa: SuperAgent) => void; onClose: () => void; wide?: boolean
   crumb?: string // where it was opened from, the first crumb in the top bar
+  categories?: string[] // as on its card
   capability?: { label: string; icon: LucideIcon } // as on its card; else "Read only"
   context?: React.ReactNode // its sources as on its card (the tool marks); else the source stack
 }) {
@@ -70,9 +72,10 @@ export function TemplateDetail({ sa, color, crumb = "Agents Library", capability
             </span>
           )}
         </div>
-        {/* Only what tells it apart: who made it, what it may do, what it reads from (scope and trigger on your own) */}
+        {/* Only what tells it apart: who made it, its category, what it may do, what it reads from (scope and trigger on your own) */}
         <dl className="flex flex-wrap gap-x-10 gap-y-3">
           {!sa.custom && <Prop label="Created by"><span className="flex items-center gap-1.5"><RivalMark className="size-3.5 text-[#0350d0]" />Rival</span></Prop>}
+          {categories && <Prop label="Category"><CategoryList categories={categories} /></Prop>}
           <Prop label="Capabilities">
             {Cap ? <span className="flex items-center gap-1.5"><Cap className="size-3.5 text-muted-foreground" strokeWidth={1.75} />{capability.label}</span> : "Read only"}
           </Prop>

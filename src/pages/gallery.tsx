@@ -5,7 +5,7 @@ import { StepsLine } from "@/components/tasks/empty-state"
 import { SubAgentCard, SubAgentDetail, subName } from "@/components/tasks/sub-agent-card"
 import { TaskTable } from "@/components/tasks/task-table"
 import { TemplateCard } from "@/components/tasks/template-card"
-import { MyAgentCard, MySubAgentCard } from "@/components/agents-library-frame"
+import { MyAgentCard, MySubAgentCard, agentDrawerProps, subCategories } from "@/components/agents-library-frame"
 import { TemplateDetail } from "@/components/tasks/template-detail"
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger,
@@ -181,11 +181,11 @@ function Gallery({ mode }: { mode: "explore" | "mine" }) {
             <div className="flex h-full min-h-0 flex-col bg-popover">
               <Crumbs sub={subId} agent={nested.name} onBack={backToSub} />
               <div className="min-h-0 flex-1">
-                <TemplateDetail key={nested.id} sa={nested} onUse={use} onClose={close} />
+                <TemplateDetail key={nested.id} sa={nested} {...agentDrawerProps(nested)} onUse={use} onClose={close} />
               </div>
             </div>
-          ) : <SubAgentDetail key={subId} kind={subId} template={explore} onClose={close} onOpenAgent={openAgent} />)
-          : selected && <TemplateDetail key={selected.id} sa={selected} onUse={use} onClose={close} />}
+          ) : <SubAgentDetail key={subId} kind={subId} categories={subCategories(subId)} template={explore} onClose={close} onOpenAgent={openAgent} />)
+          : selected && <TemplateDetail key={selected.id} sa={selected} {...agentDrawerProps(selected)} onUse={use} onClose={close} />}
       >
         <header className="space-y-1" style={{ viewTransitionName: "templates-head" }}>
           <h1 className="font-title text-[28px] leading-[1.08] tracking-[-0.01em] [--title-wght:450]">{explore ? "Agent Library" : "My Agents"}</h1>

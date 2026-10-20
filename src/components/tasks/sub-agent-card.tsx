@@ -1,3 +1,4 @@
+import { CategoryList } from "@/components/category-tag"
 import { ChevronRight, FileText, Flag, Layers } from "lucide-react"
 import { agents, type AgentKind } from "@/components/chat/agents"
 import { StatusChip } from "@/components/tasks/status-chip"
@@ -53,7 +54,7 @@ export function SubAgentCard({ kind, status, template, selected, delay, onSelect
   )
 }
 
-export function SubAgentDetail({ kind, color, template, onClose, onOpenAgent }: { kind: AgentKind; color?: string; template?: boolean; onClose: () => void; onOpenAgent: (sa: SuperAgent) => void }) {
+export function SubAgentDetail({ kind, color, categories, template, onClose, onOpenAgent }: { kind: AgentKind; color?: string; categories?: string[]; template?: boolean; onClose: () => void; onOpenAgent: (sa: SuperAgent) => void }) {
   const { convs } = useConversations()
   const a = agents[kind]
   const Icon = a.icon
@@ -71,6 +72,7 @@ export function SubAgentDetail({ kind, color, template, onClose, onOpenAgent }: 
         </div>
         <dl className="flex flex-wrap gap-x-10 gap-y-3">
           {template ? <Prop label="Created by"><span className="flex items-center gap-1.5"><RivalMark className="size-3.5 text-[#0350d0]" />Rival</span></Prop> : <Prop label="Status"><StatusChip status={status} className="mt-0.5" /></Prop>}
+          {categories && <Prop label="Category"><CategoryList categories={categories} /></Prop>}
           <Prop label="Used in">{used.length} {used.length === 1 ? "agent" : "agents"}</Prop>
         </dl>
       </div>
