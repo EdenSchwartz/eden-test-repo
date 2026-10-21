@@ -301,7 +301,7 @@ export function DrawerTopBar({ nav, onClose, children }: { nav?: DrawerNav; onCl
 export function DrawerTabs<T extends string>({ tabs, active, onChange }: { tabs: { id: T; label: string; icon: LucideIcon; count?: number }[]; active: T; onChange: (t: T) => void; pad?: string }) {
   return (
     // Figma 72:18210: 24px sides, a #ECECEC line under; tabs 12 apart, 6px top, 12 bottom, 6 sides, icon 16 + label
-    // Geist 14, 4 apart; the selected one #121212 with a 1px #121212 line, the rest #6C6A68; the count on #FAFAFA
+    // Geist 14, 4 apart; the selected one (label and icon) in primary with a 1px line, the rest secondary; the count on #FAFAFA
     <div role="tablist" className="flex shrink-0 gap-3 border-b border-solid border-[#ececec] bg-white px-6">
       {tabs.map((t) => (
         <button
@@ -314,7 +314,7 @@ export function DrawerTabs<T extends string>({ tabs, active, onChange }: { tabs:
             active === t.id ? "border-[#121212] text-fg-primary" : "border-transparent text-fg-secondary hover:text-fg-primary",
           )}
         >
-          <t.icon className="size-4 shrink-0 text-fg-secondary" strokeWidth={1.25} />
+          <t.icon className={cn("size-4 shrink-0", active === t.id ? "text-fg-primary" : "text-fg-secondary")} strokeWidth={1.25} />
           {t.label}
           {t.count !== undefined && <span className="flex h-4 items-center rounded-[2px] bg-[#fafafa] px-1 text-small leading-4 text-fg-secondary tabular-nums">{t.count}</span>}
         </button>
