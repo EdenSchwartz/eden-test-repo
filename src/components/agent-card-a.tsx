@@ -80,7 +80,7 @@ function GridMark({ rows, color = "#fff" }: { rows: string[]; color?: string }) 
   const n = GRID
   const cell = 30 / n
   return (
-    <svg aria-hidden width="30" height="30" viewBox="0 0 30 30" className="shrink-0">
+    <svg aria-hidden viewBox="0 0 30 30" className="size-[1.875rem] shrink-0">
       {rows.flatMap((r, y) => [...r].map((c, x) => c === "#" && (
         <rect key={`${x}-${y}`} x={(x + (n - r.length) / 2) * cell} y={(y + (n - rows.length) / 2) * cell} width={cell} height={cell} fill={color} />
       )))}
@@ -94,7 +94,7 @@ export function IdeaAMark({ index, size = 50 }: { index: number; size?: number }
   const m = markFor(index)
   const scale = size / 50
   return (
-    <span aria-hidden className="grid shrink-0 place-items-center rounded-full border-[1.5px] border-solid drop-shadow-[0px_2px_0px_#efeff0]" style={{ width: size, height: size, background: fill, borderColor: edge }}>
+    <span aria-hidden className="grid shrink-0 place-items-center rounded-full border-[1.5px] border-solid drop-shadow-[0px_2px_0px_#efeff0]" style={{ width: `${size / 16}rem`, height: `${size / 16}rem`, background: fill, borderColor: edge }}>
       <span className="grid place-items-center" style={{ transform: scale === 1 ? undefined : `scale(${scale})` }}>
         <GridMark rows={gridMarks[m]} />
       </span>
@@ -111,19 +111,20 @@ export function IdeaBMark({ index, size = 64 }: { index: number; size?: number }
   const [fill] = ideaAColors[index % ideaAColors.length]
   const m = markFor(index)
   return (
-    <span aria-hidden className="relative grid shrink-0 place-items-center" style={{ width: size, height: size }}>
+    <span aria-hidden className="relative grid shrink-0 place-items-center" style={{ width: `${size / 16}rem`, height: `${size / 16}rem` }}>
     <span className="absolute top-1/2 left-1/2 grid place-items-center" style={{ transform: `translate(-50%, -50%) scale(${size / 64})` }}>
     <span className="ideab-wheel relative grid size-16 shrink-0 place-items-center rounded-full border-[3px] border-solid border-black drop-shadow-[0px_3px_0px_#efeff0]" style={{ background: fill }}>
       <span className="grid place-items-center" style={{ transform: "scale(1.17)" }}>
         <GridMark rows={gridMarks[m]} />
       </span>
-      <img alt="" src="/agent-marks/ring-dashed.png" width={60} height={60} className="ideab-tyre absolute top-1/2 left-1/2 block size-[60px] max-w-none" style={{ transform: "translate(-50%, -50%)" }} />
+      <img alt="" src="/agent-marks/ring-dashed.png" width={60} height={60} className="ideab-tyre absolute top-1/2 left-1/2 block size-[3.75rem] max-w-none" style={{ transform: "translate(-50%, -50%)" }} />
     </span>
     </span>
     </span>
   )
 }
 
+// Sizes are given in px at the 16px base and drawn in rem, so the marks grow with the text on big screens.
 // The square mark (side panel, Figma node 68:17737; idea A cards): tinted, not filled — a very light wash of the
 // agent's colour (10%) with a hairline in it (22%), flat (no shadow), and the pixel shape in the colour's deep tone
 // (the shapes are the hero, the colour only a quiet cue). 42px with 4px corners in the panel; `size` scales it for
@@ -132,7 +133,7 @@ export function IdeaASquareMark({ index, size = 42 }: { index: number; size?: nu
   const [fill, edge] = ideaAColors[index % ideaAColors.length]
   const m = markFor(index)
   return (
-    <span aria-hidden className="relative block shrink-0 overflow-hidden border border-solid" style={{ width: size, height: size, borderRadius: size > 42 ? 6 : 4, background: `color-mix(in oklch, ${fill} 10%, white)`, borderColor: `color-mix(in oklch, ${fill} 22%, white)` }}>
+    <span aria-hidden className="relative block shrink-0 overflow-hidden border border-solid" style={{ width: `${size / 16}rem`, height: `${size / 16}rem`, borderRadius: size > 42 ? 6 : 4, background: `color-mix(in oklch, ${fill} 10%, white)`, borderColor: `color-mix(in oklch, ${fill} 22%, white)` }}>
       {/* dead centre of the square (the 30px shape box scaled to ~24px), in the deep tone */}
       <span className="absolute top-1/2 left-1/2 block" style={{ transform: `translate(-50%, -50%) scale(${(0.8 * size) / 42})` }}>
         <GridMark rows={gridMarks[m]} color={edge} />
