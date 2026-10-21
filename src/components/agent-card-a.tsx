@@ -103,7 +103,7 @@ export function IdeaAMark({ index, size = 50 }: { index: number; size?: number }
 // white dashed ring (Figma's own image, /agent-marks/ring-dashed.png, 60px), a 3px #EFEFF0 shadow under it, and the
 // same pixel shape at 36px. Same colour and shape per agent as idea A. Drawn at 64 and scaled to `size` as a whole
 // (52 on the card, a little smaller than the design so it sits in balance with the card; 48 in the side panel).
-// The circle itself is the "wheel" (.ideab-wheel): on the card's hover it spins, see index.css.
+// The dashed ring is the tyre (.ideab-tyre): on the card's hover it rolls while the pixel shape stays put, see index.css.
 export function IdeaBMark({ index, size = 64 }: { index: number; size?: number }) {
   const [fill] = ideaAColors[index % ideaAColors.length]
   const m = markFor(index)
@@ -116,7 +116,7 @@ export function IdeaBMark({ index, size = 64 }: { index: number; size?: number }
           ? <img alt="" src={figmaMarks[m].src} width={figmaMarks[m].w} height={figmaMarks[m].h} className="block max-w-none" />
           : <GridMark rows={gridMarks[m - figmaMarks.length]} />}
       </span>
-      <img alt="" src="/agent-marks/ring-dashed.png" width={60} height={60} className="absolute top-1/2 left-1/2 block size-[60px] max-w-none -translate-x-1/2 -translate-y-1/2" />
+      <img alt="" src="/agent-marks/ring-dashed.png" width={60} height={60} className="ideab-tyre absolute top-1/2 left-1/2 block size-[60px] max-w-none" style={{ transform: "translate(-50%, -50%)" }} />
     </span>
     </span>
     </span>

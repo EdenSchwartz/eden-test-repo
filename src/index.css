@@ -603,30 +603,30 @@ html[data-vt="split"]::view-transition-group(*) {
 @media (prefers-reduced-motion: reduce) { .tilt-card, .tilt-card:hover { transform: none; transition: none; } }
 .tilt-card > :not(.tilt-light) { position: relative; } /* content above the light */
 
-/* Card idea B's hover (components/agents-library-frame.tsx): the mark is a wheel on a car revving at the line. The
-   engine idles — a fine, fast shudder — then the wheel rolls forward a quarter turn and settles, while two small
-   exhaust puffs drift out from behind it (low left), grow and fade. The card itself only firms its edge and shadow. */
+/* Card idea B's hover (components/agents-library-frame.tsx): the mark is a wheel. Only the tyre turns — the dashed
+   ring rolls forward a quarter turn and settles — while the pixel shape stays still in the middle. Behind it (left),
+   three soft wisps of gas stream out the way the speed lines did: they stretch from the tyre, drift back and fade.
+   The card itself only firms its edge and shadow. */
 .ideab-card { transition: border-color 200ms ease, box-shadow 200ms ease; }
 .ideab-card:hover { border-color: #d6d6d6; box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.06), 0 10px 24px -14px rgba(18, 18, 18, 0.25); }
-.ideab-card:hover .ideab-wheel { animation: ideab-rev 900ms cubic-bezier(.3,.8,.3,1) both; }
-@keyframes ideab-rev {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  5% { transform: translate(0.5px, -0.5px) rotate(1deg); }
-  10% { transform: translate(-0.5px, 0.5px) rotate(-1deg); }
-  15% { transform: translate(0.5px, 0) rotate(1deg); }
-  20% { transform: translate(-0.5px, -0.5px) rotate(-1deg); }
-  25% { transform: translate(0.5px, 0.5px) rotate(0.5deg); }
-  30% { transform: translate(0, 0) rotate(-2deg); }
-  100% { transform: translate(0, 0) rotate(90deg); }
+.ideab-card:hover .ideab-tyre { animation: ideab-roll 750ms cubic-bezier(.3,.8,.3,1) both; }
+@keyframes ideab-roll {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  18% { transform: translate(-50%, -50%) rotate(-6deg); }
+  100% { transform: translate(-50%, -50%) rotate(90deg); }
 }
-.ideab-exhaust { position: absolute; right: calc(100% - 6px); bottom: 2px; width: 14px; height: 10px; pointer-events: none; }
-.ideab-exhaust i { position: absolute; right: 0; bottom: 0; width: 5px; height: 5px; border-radius: 999px; background: #8a8c90; opacity: 0; }
-.ideab-card:hover .ideab-exhaust i { animation: ideab-puff 800ms ease-out both; }
-.ideab-card:hover .ideab-exhaust i:nth-child(1) { animation-delay: 120ms; }
-.ideab-card:hover .ideab-exhaust i:nth-child(2) { animation-delay: 260ms; }
-@keyframes ideab-puff {
-  0% { opacity: 0; transform: translate(0, 0) scale(0.4); }
-  25% { opacity: 0.28; }
-  100% { opacity: 0; transform: translate(-9px, -4px) scale(1.5); }
+.ideab-gas { position: absolute; right: calc(100% - 3px); top: 50%; width: 16px; height: 14px; margin-top: -7px; pointer-events: none; }
+.ideab-gas i { position: absolute; right: 0; height: 4px; border-radius: 999px; opacity: 0; transform-origin: right center; filter: blur(0.6px);
+  background: linear-gradient(to left, rgb(138 140 144 / 0.9), rgb(138 140 144 / 0)); }
+.ideab-gas i:nth-child(1) { top: 1px; width: 9px; }
+.ideab-gas i:nth-child(2) { top: 5px; width: 14px; height: 5px; }
+.ideab-gas i:nth-child(3) { top: 10px; width: 7px; }
+.ideab-card:hover .ideab-gas i { animation: ideab-gas 650ms ease-out both; }
+.ideab-card:hover .ideab-gas i:nth-child(2) { animation-delay: 50ms; }
+.ideab-card:hover .ideab-gas i:nth-child(3) { animation-delay: 100ms; }
+@keyframes ideab-gas {
+  0% { opacity: 0; transform: translateX(2px) scaleX(0.3) scaleY(0.6); }
+  35% { opacity: 0.35; transform: translateX(0) scaleX(1) scaleY(1); }
+  100% { opacity: 0; transform: translateX(-6px) scaleX(1.25) scaleY(1.5); }
 }
-@media (prefers-reduced-motion: reduce) { .ideab-card:hover .ideab-wheel, .ideab-card:hover .ideab-exhaust i { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .ideab-card:hover .ideab-tyre, .ideab-card:hover .ideab-gas i { animation: none; } }
