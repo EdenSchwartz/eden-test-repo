@@ -310,8 +310,11 @@ export function DrawerTabs<T extends string>({ tabs, active, onChange }: { tabs:
           aria-selected={active === t.id}
           onClick={() => onChange(t.id)}
           className={cn(
-            "-mb-px flex shrink-0 cursor-pointer items-center justify-center gap-1 border-b border-solid px-1.5 pt-1.5 pb-3 text-body leading-5 transition-colors",
-            active === t.id ? "border-[#121212] text-fg-primary" : "border-transparent text-fg-secondary hover:text-fg-primary",
+            // the selected tab's line: 1.5px, centred under it and shorter than the label (12px in from the tab's
+            // edges, so 6px inside the text), sitting on the row's bottom line
+            "relative flex shrink-0 cursor-pointer items-center justify-center gap-1 px-1.5 pt-1.5 pb-3 text-body leading-5 transition-colors",
+            "after:absolute after:inset-x-3 after:-bottom-px after:h-[1.5px] after:rounded-full after:bg-fg-primary after:opacity-0 after:transition-opacity",
+            active === t.id ? "text-fg-primary after:opacity-100" : "text-fg-secondary hover:text-fg-primary",
           )}
         >
           <t.icon className={cn("size-4 shrink-0", active === t.id ? "text-fg-primary" : "text-fg-secondary")} strokeWidth={1.25} />
