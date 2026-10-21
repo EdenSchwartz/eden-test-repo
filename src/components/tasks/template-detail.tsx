@@ -319,7 +319,8 @@ export function DrawerTabs<T extends string>({ tabs, active, onChange }: { tabs:
         >
           <t.icon className={cn("size-4 shrink-0", active === t.id ? "text-fg-primary" : "text-fg-secondary")} strokeWidth={1.25} />
           {t.label}
-          {t.count !== undefined && <span className="flex h-4 items-center rounded-[2px] bg-[#fafafa] px-1 text-small leading-4 text-fg-secondary tabular-nums">{t.count}</span>}
+          {/* the count: grey on #FAFAFA; on the selected tab, the Parallel chip's blue (#0350D0 on #ECF3FF), same small square shape */}
+          {t.count !== undefined && <span className={cn("flex h-4 items-center rounded-[2px] px-1 text-small leading-4 tabular-nums transition-colors", active === t.id ? "bg-[#ecf3ff] text-[#0350d0]" : "bg-[#fafafa] text-fg-secondary")}>{t.count}</span>}
         </button>
       ))}
     </div>
