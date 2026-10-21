@@ -1,12 +1,10 @@
-import { CategoryList } from "@/components/category-tag"
-import { ChevronRight, FileText, Flag, Layers } from "lucide-react"
+import { PanelOutcomes, PanelProp, PanelRival, PanelSection, PanelTags } from "@/components/tasks/panel-ui"
+import { ChevronRight, Layers } from "lucide-react"
 import { agents, type AgentKind } from "@/components/chat/agents"
 import { StatusChip } from "@/components/tasks/status-chip"
 import { CardShell } from "@/components/tasks/template-card"
-import { Outcomes } from "@/components/tasks/outcomes"
 import { subOutcomes } from "@/data/outcomes"
-import { DrawerTopBar, EnabledToggle, Prop, Section, type DrawerNav } from "@/components/tasks/template-detail"
-import { RivalMark } from "@/components/nav-icons"
+import { DrawerTopBar, EnabledToggle, type DrawerNav } from "@/components/tasks/template-detail"
 import { superAgents, type SuperAgent } from "@/data/super-agents"
 import { useConversations } from "@/lib/conversations"
 import { subAgentStatus, type TaskStatus } from "@/lib/task-status"
@@ -61,31 +59,32 @@ export function SubAgentDetail({ kind, color, mark, categories, nav, template, o
   const status = subAgentStatus(kind, convs)
   const used = usedBy(kind)
   return (
-    <div className="flex h-full min-h-0 flex-col bg-popover">
+    <div className="flex h-full min-h-0 flex-col bg-white">
       <DrawerTopBar nav={nav} onClose={onClose}>
         {!template && <EnabledToggle id={`sub:${kind}`} name={subName(kind)} />}
       </DrawerTopBar>
-      <div className="shrink-0 space-y-5 px-5 pt-5 pb-5">
+      {/* Same header as an agent's panel (template-detail.tsx, after the Figma side panel) */}
+      <div className="flex shrink-0 flex-col items-start gap-5 px-5 pt-5 pb-5">
         <div className="flex items-center gap-3">
           {mark ?? <ColorTile color={color ?? colorFor(`sub:${kind}`)} icon={Icon} />}
-          <h2 className="min-w-0 font-title text-2xl leading-[1.1] font-medium tracking-[-0.015em] [--title-wght:450]">{subName(kind)}</h2>
+          <h2 className="min-w-0 font-sans text-[1.5rem] leading-[26.4px] font-medium tracking-[-0.36px] whitespace-nowrap text-[#101112]">{subName(kind)}</h2>
         </div>
-        <dl className="flex flex-nowrap gap-x-8 overflow-hidden">
-          {template ? <Prop label="Created by"><span className="flex items-center gap-2"><RivalMark className="-mx-1.5 -my-1 size-6 shrink-0 text-[#0350d0]" />Rival</span></Prop> : <Prop label="Status"><StatusChip status={status} className="mt-0.5" /></Prop>}
-          {categories && <Prop label="Category"><CategoryList categories={categories} /></Prop>}
-          <Prop label="Used in">{used.length} {used.length === 1 ? "agent" : "agents"}</Prop>
+        <dl className="flex flex-nowrap items-center gap-x-10 overflow-hidden">
+          {template ? <PanelProp label="Created by"><PanelRival /></PanelProp> : <PanelProp label="Status"><StatusChip status={status} /></PanelProp>}
+          {categories && <PanelProp label="Category"><PanelTags items={categories} /></PanelProp>}
+          <PanelProp label="Used in"><span className="text-[0.875rem] leading-5 text-[#101112]">{used.length} {used.length === 1 ? "agent" : "agents"}</span></PanelProp>
         </dl>
       </div>
-      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto border-t border-hairline px-5 py-5 text-sm">
-        <Section icon={FileText} title="What it does">
-          <p className="leading-normal text-pretty">{a.role}.</p>
-        </Section>
+      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto border-t border-solid border-[#ececec] px-5 py-5 text-sm">
+        <PanelSection title="What it does">
+          <p className="text-[0.875rem] leading-[21px] text-pretty text-[#101112]">{a.role}.</p>
+        </PanelSection>
         {subOutcomes[kind] && (
-          <Section icon={Flag} title="Outcomes">
-            <Outcomes items={subOutcomes[kind]} />
-          </Section>
+          <PanelSection title="Outcomes">
+            <PanelOutcomes items={subOutcomes[kind]} />
+          </PanelSection>
         )}
-        <Section icon={Layers} title="Part of">
+        <PanelSection title="Part of" gap="md">
           {used.length === 0 ? (
             <p className="text-muted-foreground">No agent uses it yet.</p>
           ) : (
@@ -107,7 +106,7 @@ export function SubAgentDetail({ kind, color, mark, categories, nav, template, o
               })}
             </ul>
           )}
-        </Section>
+        </PanelSection>
       </div>
     </div>
   )

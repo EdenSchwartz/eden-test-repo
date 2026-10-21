@@ -123,10 +123,28 @@ export function IdeaBMark({ index, size = 64 }: { index: number; size?: number }
   )
 }
 
-// A context logo in its little white circle (overlapping the next by 4px)
-export function IdeaALogoChip({ name, children, last }: { name: string; children: React.ReactNode; last?: boolean }) {
+// The side panel's mark (Figma "20.10 - Side Panel", node 68:17737): a 42px rounded square (4px corners) in the
+// agent's colour, a 1.5px darker edge, a 2px #EFEFF0 shadow under it, the pixel shape at 24px
+export function IdeaASquareMark({ index }: { index: number }) {
+  const [fill, edge] = ideaAColors[index % ideaAColors.length]
+  const m = markFor(index)
   return (
-    <span title={name} className={`relative grid size-5 shrink-0 place-items-center rounded-[26px] border border-solid border-[#f7f7f8] bg-white drop-shadow-[0px_1px_0.5px_rgba(56,61,69,0.07)] ${last ? "" : "-mr-1"}`}>
+    <span aria-hidden className="grid size-[2.625rem] shrink-0 place-items-center overflow-hidden rounded-[4px] border-[1.5px] border-solid shadow-[0px_2px_0px_0px_#efeff0]" style={{ background: fill, borderColor: edge }}>
+      <span className="grid size-6 place-items-center">
+        <span className="grid place-items-center" style={{ transform: "scale(0.8)" }}>
+          {m < figmaMarks.length
+            ? <img alt="" src={figmaMarks[m].src} width={figmaMarks[m].w} height={figmaMarks[m].h} className="block max-w-none" />
+            : <GridMark rows={gridMarks[m - figmaMarks.length]} />}
+        </span>
+      </span>
+    </span>
+  )
+}
+
+// A context logo in its little white circle (overlapping the next by 4px)
+export function IdeaALogoChip({ name, children, last, edge = "#f7f7f8" }: { name: string; children: React.ReactNode; last?: boolean; edge?: string }) {
+  return (
+    <span title={name} style={{ borderColor: edge }} className={`relative grid size-5 shrink-0 place-items-center rounded-[26px] border border-solid bg-white ${edge === "#f7f7f8" ? "drop-shadow-[0px_1px_0.5px_rgba(56,61,69,0.07)]" : "drop-shadow-[0px_1px_0.5px_rgba(56,61,69,0.08)]"} ${last ? "" : "-mr-1"}`}>
       <span className="relative size-3.5 shrink-0 overflow-hidden">{children}</span>
     </span>
   )

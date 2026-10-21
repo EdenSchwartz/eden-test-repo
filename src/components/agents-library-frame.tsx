@@ -16,8 +16,8 @@ import { useEnabled } from "@/lib/enabled"
 import type { TaskStatus } from "@/lib/task-status"
 import { cn } from "@/lib/utils"
 import { APP, CLOUD, GRC, THREATS, VM, CategoryTag } from "@/components/category-tag"
-import { CapabilityMarks, type Capability } from "@/components/capability"
-import { IdeaALogoChip, IdeaAMark, IdeaBMark, IdeaATag, figmaLogos, ideaAColors } from "@/components/agent-card-a"
+import { CapabilityLabels, CapabilityMarks, type Capability } from "@/components/capability"
+import { IdeaALogoChip, IdeaAMark, IdeaASquareMark, IdeaBMark, IdeaATag, figmaLogos, ideaAColors } from "@/components/agent-card-a"
 import { getCardLook, setCardLook, useCardLook, type CardLook } from "@/lib/card-look"
 
 /*
@@ -520,10 +520,9 @@ const metaOf = (a: LibraryAgent): Meta =>
   meta[a.name] ?? ((a.partOf !== undefined && a.kind && subMeta[a.kind]) || { categories: [VM], cap: ["memory"], ctx: ["github"] })
 
 // The side panel's mark under the card ideas: the same round mark as the card (48px), else the colour tile
+// (Figma side panel: the 42px rounded square; idea B keeps its round dashed wheel, at the same 42px)
 const drawerMark = (a: LibraryAgent, look: CardLook) =>
-  look === "a" ? <IdeaAMark index={ideaIndex(a)} size={48} />
-  : look === "b" ? <IdeaBMark index={ideaIndex(a)} size={48} />
-  : undefined
+  look === "b" ? <IdeaBMark index={ideaIndex(a)} size={42} /> : <IdeaASquareMark index={ideaIndex(a)} />
 
 // What an agent's drawer shows as Category, Capabilities and Context: the same as its card
 const drawerProps = (a?: LibraryAgent) => {
@@ -532,8 +531,9 @@ const drawerProps = (a?: LibraryAgent) => {
   return {
     mark: drawerMark(a, getCardLook()),
     categories: m.categories,
-    capabilities: <CapabilityMarks caps={m.cap} />,
-    context: <span className="flex items-center gap-1.5">{m.ctx.map((t) => <ToolMark key={t} tool={t} />)}</span>,
+    capabilities: <CapabilityLabels caps={m.cap} />,
+    // the logos in small white overlapping circles (Figma 72:18175: #E5E3E3 edge, a soft shadow)
+    context: <span className="flex h-5 items-center">{m.ctx.map((t, i) => <IdeaALogoChip key={t} name={toolNames[t]} last={i === m.ctx.length - 1} edge="#e5e3e3"><IdeaALogo tool={t} /></IdeaALogoChip>)}</span>,
   }
 }
 

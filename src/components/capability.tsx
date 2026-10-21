@@ -57,6 +57,21 @@ export function CapabilityMark({ cap }: { cap: Capability }) {
   )
 }
 
+// The side panel's capabilities (Figma 72:18153): the 14px icon and its short name (Geist 14/20, #101112), 4 apart,
+// 8 between them
+const shortNames: Record<Capability, string> = { memory: "Memory", graph: "Graph", sandbox: "Sandbox", internet: "Internet" }
+export function CapabilityLabels({ caps }: { caps: Capability[] }) {
+  return (
+    <span className="flex items-start gap-2">
+      {order.filter((c) => caps.includes(c)).map((c) => (
+        <span key={c} title={capabilityNames[c]} className="flex items-center gap-1 text-[0.875rem] leading-5 text-[#101112]">
+          <CapabilityIcon cap={c} className="size-3.5" />{shortNames[c]}
+        </span>
+      ))}
+    </span>
+  )
+}
+
 // An agent's capabilities, always in the fixed order, side by side (2px between the white rings)
 export function CapabilityMarks({ caps }: { caps: Capability[] }) {
   return (

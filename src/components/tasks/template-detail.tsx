@@ -1,9 +1,9 @@
 import { useState } from "react"
-import { Activity, ArrowUp, BookOpen, Bot, ChevronDown, ChevronRight, ChevronUp, FileText, Flag, GitFork, Hand, ListTree, MessageSquareText, Workflow, X, Zap, type LucideIcon } from "lucide-react"
-import { RivalMark } from "@/components/nav-icons"
+import { Activity, Bot, ChevronRight, FileText, GitFork, Hand, Zap, type LucideIcon } from "lucide-react"
+
 import { MessageResponse } from "@/components/ai-elements/message"
 import { agents, type AgentKind } from "@/components/chat/agents"
-import { Outcomes } from "@/components/tasks/outcomes"
+
 import { WorkflowCanvas } from "@/components/tasks/workflow-canvas"
 import { agentOutcomes } from "@/data/outcomes"
 import { ScheduleTab, skillMd, slug } from "@/components/super-agent-panel"
@@ -15,7 +15,7 @@ import { days, ordinal, useTriggers, when, type Schedule } from "@/lib/triggers"
 import { EnableSwitch } from "@/components/tasks/enable-switch"
 import { useEnabled } from "@/lib/enabled"
 import { cn } from "@/lib/utils"
-import { CategoryList } from "@/components/category-tag"
+import { ChevronDownIcon, ChevronUpIcon, OverviewIcon, PanelOutcomes, PanelPrompt, PanelProp, PanelRival, PanelSection, PanelSteps, PanelTags, PanelUseButton, SkillsIcon } from "@/components/tasks/panel-ui"
 
 /*
  * One task template, in a panel on the right of the Task templates page (pages/gallery.tsx), styled like the
@@ -43,8 +43,8 @@ export function TemplateDetail({ sa, color, mark, nav, categories, capabilities,
   const accent = color ?? colorFor(sa.name) // the agent's colour (its tile, the prompt card)
   const setup = blockers(sa).length > 0
   const tabs: { id: Tab; label: string; icon: LucideIcon; count?: number }[] = [
-    { id: "overview", label: "Overview", icon: ListTree },
-    { id: "skills", label: "Skills", icon: BookOpen, count: sa.skills.length },
+    { id: "overview", label: "Overview", icon: OverviewIcon },
+    { id: "skills", label: "Skills", icon: SkillsIcon, count: sa.skills.length },
     ...(sa.custom ? [{ id: "triggers" as const, label: "Triggers", icon: Zap }, { id: "schedule" as const, label: "Activity", icon: Activity }] : []),
   ]
   const pad = wide ? "px-6" : "px-5"
@@ -54,17 +54,17 @@ export function TemplateDetail({ sa, color, mark, nav, categories, capabilities,
 
   return (
     // ⌘⏎ / Ctrl+⏎ anywhere in the panel uses it (on the panel, not the window, so only the focused drawer reacts)
-    <div className="flex h-full min-h-0 flex-col bg-popover" onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); onUse(sa) } }}>
+    <div className="flex h-full min-h-0 flex-col bg-white" onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); onUse(sa) } }}>
       {/* ---------- Top bar: where you are, and the actions ---------- */}
       <DrawerTopBar nav={nav} onClose={onClose} pad={pad}>
         {sa.custom && <EnabledToggle id={sa.id} name={sa.name} />}
       </DrawerTopBar>
 
       {/* ---------- Name + properties ---------- */}
-      <div className={cn("shrink-0 space-y-5 pt-5 pb-5", pad)}>
+      <div className={cn("flex shrink-0 flex-col items-start gap-5 py-5", pad)}>
         <div className="flex items-center gap-3">
           {mark ?? <ColorTile color={accent} icon={Icon} />}
-          <h2 className="min-w-0 font-title text-2xl leading-[1.1] font-medium tracking-[-0.015em] [--title-wght:450]">{sa.name}</h2>
+          <h2 className="min-w-0 font-sans text-[1.5rem] leading-[26.4px] font-medium tracking-[-0.36px] whitespace-nowrap text-[#101112]">{sa.name}</h2>
           {setup && (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-wash px-2 py-px text-xs font-semibold whitespace-nowrap text-warning">
               <span aria-hidden className="size-1.5 rounded-full bg-warning" />
@@ -73,17 +73,17 @@ export function TemplateDetail({ sa, color, mark, nav, categories, capabilities,
           )}
         </div>
         {/* Only what tells it apart: who made it, its category, what it may do, what it reads from (scope and trigger on your own) */}
-        <dl className="flex flex-nowrap gap-x-8 overflow-hidden">
-          {!sa.custom && <Prop label="Created by"><span className="flex items-center gap-2"><RivalMark className="-mx-1.5 -my-1 size-6 shrink-0 text-[#0350d0]" />Rival</span></Prop>}
-          {categories && <Prop label="Category"><CategoryList categories={categories} /></Prop>}
-          <Prop label="Capabilities">
-            {capabilities ?? "Read only"}
-          </Prop>
-          {sa.custom && <Prop label="Scope" title={scope.full}>{scope.short}</Prop>}
-          {sa.custom && <Prop label="Trigger" title={trigger.full}>{trigger.short}</Prop>}
-          <Prop label="Context" title={sa.tools.map((t) => `${t.name}${t.connected ? "" : t.required ? " (required, not connected)" : " (not connected)"}`).join(", ")}>
+        <dl className="flex w-[30.9375rem] max-w-full flex-nowrap items-center justify-between gap-x-4 overflow-hidden">
+          {!sa.custom && <PanelProp label="Created by"><PanelRival /></PanelProp>}
+          {categories && <PanelProp label="Category"><PanelTags items={categories} /></PanelProp>}
+          <PanelProp label="Capabilities">
+            {capabilities ?? <span className="text-[0.875rem] leading-5 text-[#101112]">Read only</span>}
+          </PanelProp>
+          {sa.custom && <PanelProp label="Scope" title={scope.full}><span className="text-[0.875rem] leading-5 text-[#101112]">{scope.short}</span></PanelProp>}
+          {sa.custom && <PanelProp label="Trigger" title={trigger.full}><span className="text-[0.875rem] leading-5 text-[#101112]">{trigger.short}</span></PanelProp>}
+          <PanelProp label="Context" title={sa.tools.map((t) => `${t.name}${t.connected ? "" : t.required ? " (required, not connected)" : " (not connected)"}`).join(", ")}>
             {context ?? <SourceStack tools={sa.tools} />}
-          </Prop>
+          </PanelProp>
         </dl>
       </div>
 
@@ -92,33 +92,28 @@ export function TemplateDetail({ sa, color, mark, nav, categories, capabilities,
 
       <div role="tabpanel" className={cn("min-h-0 flex-1 overflow-y-auto py-5 text-sm", wide ? "flex flex-col" : "", pad)}>
         {tab === "overview" && (
-          <div className={wide ? "flex min-h-0 flex-1 flex-col gap-6" : "space-y-6"}>
-            <Section icon={FileText} title="Description">
-              <p className="leading-normal text-pretty">{sa.tagline}</p>
-            </Section>
+          <div className={cn("flex flex-col gap-6", wide && "min-h-0 flex-1")}>
+            <PanelSection title="Description">
+              <p className="text-[0.875rem] leading-[21px] text-pretty text-[#101112]">{sa.tagline}</p>
+            </PanelSection>
             {outcomes && (
-              <Section icon={Flag} title="Outcomes">
-                <Outcomes items={outcomes} />
-              </Section>
+              <PanelSection title="Outcomes">
+                <PanelOutcomes items={outcomes} />
+              </PanelSection>
             )}
-            <Section icon={MessageSquareText} title="Prompt">
-              {/* The prompt as what it is: a message ready to send. A white card like the chat
-                  composer, with a small send mark in the corner (decorative; Use Agent starts it) */}
-              <div className="flex items-end gap-3 rounded-xl border bg-card py-3 pr-3 pl-4">
-                <p className="min-w-0 flex-1 self-center text-[0.9375rem] leading-normal text-pretty text-foreground">{sa.prompt ?? sa.briefs[0]}</p>
-                <span aria-hidden className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"><ArrowUp className="size-3.5" /></span>
-              </div>
-            </Section>
-            <Section icon={Workflow} title="How it works" grow={wide}>
+            <PanelSection title="Prompt" gap="md">
+              <PanelPrompt text={sa.prompt ?? sa.briefs[0]} />
+            </PanelSection>
+            <PanelSection title="How it works" gap="md" grow={wide}>
               {wide ? (
                 // The zoomable flow chart, minimal; fills the rest of the panel (drag pans, pinch or ⌘ + scroll zooms)
                 <div className="min-h-64 flex-1 overflow-hidden rounded-xl border">
                   <WorkflowCanvas sa={sa} noRoles scrollPage />
                 </div>
               ) : (
-                <Steps pattern={sa.pattern} />
+                <PanelSteps pattern={sa.pattern} />
               )}
-            </Section>
+            </PanelSection>
           </div>
         )}
 
@@ -145,14 +140,8 @@ export function TemplateDetail({ sa, color, mark, nav, categories, capabilities,
       </div>
 
       {/* ---------- Use it: always at the bottom ---------- */}
-      <div className={cn("flex shrink-0 justify-end border-t border-hairline py-3", pad)}>
-        <button
-          onClick={() => onUse(sa)}
-          className={cn("flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80", !wide && "w-full")}
-        >
-          Use Agent
-          <kbd className="rounded bg-white/15 px-1.5 py-px font-sans text-xs text-primary-foreground/85">⌘⏎</kbd>
-        </button>
+      <div className={cn("flex shrink-0 justify-end border-t border-solid border-[#ebeced] py-3", pad)}>
+        <PanelUseButton onClick={() => onUse(sa)} wide={wide} />
       </div>
 
       <Dialog open={!!openSkill} onOpenChange={(o) => !o && setOpenSkill(null)}>
@@ -278,37 +267,42 @@ export function Section({ icon: Icon, title, grow, children }: { icon: typeof Bo
 // The drawer's top bar. Left: down / "1 / 9" / up, to step through the cards it was opened from (up = the next
 // number, down = the one before; off at either end). Right: actions, close. No breadcrumbs.
 export type DrawerNav = { index: number; total: number; onPrev: () => void; onNext: () => void }
-const barBtn = "flex shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-35"
-export function DrawerTopBar({ nav, onClose, pad = "px-5", children }: { nav?: DrawerNav; onClose: () => void; pad?: string; children?: React.ReactNode }) {
+export function DrawerTopBar({ nav, onClose, children }: { nav?: DrawerNav; onClose: () => void; pad?: string; children?: React.ReactNode }) {
   return (
-    <div className={cn("flex h-12 shrink-0 items-center gap-3 border-b border-hairline", pad)}>
-      <div className="flex min-w-0 flex-1 items-center gap-0.5">
+    // Figma 72:17972: 8px top and bottom, 16px sides, a #F0F0F0 line under it. Chevrons 12px in 4px-padded buttons
+    // (#525252, #BDBDBD at either end); "1" Geist Medium 12 #101112, "/ 9" 12 #7C7C7C; ✕ 14px in a 24px button
+    <div className="flex shrink-0 items-center justify-between gap-3 border-b border-solid border-[#f0f0f0] px-4 py-2">
+      <div className="flex min-h-6 min-w-0 flex-1 items-center gap-1">
         {nav && nav.index >= 0 && (
           <>
-            <button onClick={nav.onPrev} disabled={nav.index <= 0} aria-label="Previous agent" title="Previous" className={cn(barBtn, "-ml-1 size-6")}>
-              <ChevronDown className="size-3.5" />
+            <button onClick={nav.onPrev} disabled={nav.index <= 0} aria-label="Previous agent" title="Previous" className="flex cursor-pointer items-center justify-center rounded-[4px] p-1 text-[#525252] transition-colors hover:bg-[#f5f5f5] disabled:cursor-default disabled:text-[#bdbdbd] disabled:hover:bg-transparent">
+              <ChevronDownIcon className="size-3" />
             </button>
-            <span className="px-0.5 text-xs tabular-nums text-muted-foreground" aria-live="polite">
-              <span className="text-foreground">{nav.index + 1}</span> / {nav.total}
+            <span className="flex items-center gap-1 tabular-nums whitespace-nowrap" aria-live="polite">
+              <span className="text-[0.75rem] leading-4 font-medium text-[#101112]">{nav.index + 1}</span>
+              <span className="text-[0.75rem] leading-5 text-[#7c7c7c]">/</span>
+              <span className="text-[0.75rem] leading-5 text-[#7c7c7c]">{nav.total}</span>
             </span>
-            <button onClick={nav.onNext} disabled={nav.index >= nav.total - 1} aria-label="Next agent" title="Next" className={cn(barBtn, "size-6")}>
-              <ChevronUp className="size-3.5" />
+            <button onClick={nav.onNext} disabled={nav.index >= nav.total - 1} aria-label="Next agent" title="Next" className="flex cursor-pointer items-center justify-center rounded-[4px] p-1 text-[#525252] transition-colors hover:bg-[#f5f5f5] disabled:cursor-default disabled:text-[#bdbdbd] disabled:hover:bg-transparent">
+              <ChevronUpIcon className="size-3" />
             </button>
           </>
         )}
       </div>
       {children}
-      <button onClick={onClose} aria-label="Close" title="Close" className={cn(barBtn, "size-7")}>
-        <X className="size-4" />
+      <button onClick={onClose} aria-label="Close" title="Close" className="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-[4px] transition-colors hover:bg-[#f5f5f5]">
+        <img alt="" src="/panel/close.svg" width={14} height={14} className="block" />
       </button>
     </div>
   )
 }
 
 // Tabs with an icon each; the active one in ink with an ink line under it, the rest muted
-export function DrawerTabs<T extends string>({ tabs, active, onChange, pad = "px-5" }: { tabs: { id: T; label: string; icon: LucideIcon; count?: number }[]; active: T; onChange: (t: T) => void; pad?: string }) {
+export function DrawerTabs<T extends string>({ tabs, active, onChange }: { tabs: { id: T; label: string; icon: LucideIcon; count?: number }[]; active: T; onChange: (t: T) => void; pad?: string }) {
   return (
-    <div role="tablist" className={cn("flex shrink-0 gap-6 border-b border-hairline", pad)}>
+    // Figma 72:18210: 24px sides, a #ECECEC line under; tabs 12 apart, 6px top, 12 bottom, 6 sides, icon 16 + label
+    // Geist 12, 4 apart; the selected one #121212 with a 1px #121212 line, the rest #6C6A68; the count on #FAFAFA
+    <div role="tablist" className="flex shrink-0 gap-3 border-b border-solid border-[#ececec] bg-white px-6">
       {tabs.map((t) => (
         <button
           key={t.id}
@@ -316,13 +310,13 @@ export function DrawerTabs<T extends string>({ tabs, active, onChange, pad = "px
           aria-selected={active === t.id}
           onClick={() => onChange(t.id)}
           className={cn(
-            "-mb-px flex shrink-0 cursor-pointer items-center gap-1.5 border-b-2 py-2.5 text-sm font-medium transition-colors",
-            active === t.id ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground",
+            "-mb-px flex shrink-0 cursor-pointer items-center justify-center gap-1 border-b border-solid px-1.5 pt-1.5 pb-3 text-[0.75rem] leading-4 transition-colors",
+            active === t.id ? "border-[#121212] text-[#121212]" : "border-transparent text-[#6c6a68] hover:text-[#121212]",
           )}
         >
-          <t.icon className="size-4" strokeWidth={1.75} />
+          <t.icon className="size-4 shrink-0" strokeWidth={1.25} />
           {t.label}
-          {t.count !== undefined && <span className="rounded-[0.1875rem] bg-foreground/[0.06] px-1.5 text-xs leading-4 tabular-nums">{t.count}</span>}
+          {t.count !== undefined && <span className="flex h-4 items-center rounded-[2px] bg-[#fafafa] px-1 text-[0.75rem] leading-4 text-[#7c7c7c] tabular-nums">{t.count}</span>}
         </button>
       ))}
     </div>
