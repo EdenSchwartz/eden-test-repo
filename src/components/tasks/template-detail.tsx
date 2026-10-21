@@ -66,15 +66,21 @@ export function TemplateDetail({ sa, color, mark, nav, categories, capabilities,
 
       {/* ---------- Name + properties ---------- */}
       <div className={cn("flex shrink-0 flex-col items-start gap-5 py-5", pad)}>
-        <div className="flex items-center gap-3">
+        {/* the mark, then the name with its one-line description under it (a subtitle, secondary, 4px under) */}
+        <div className="flex w-full min-w-0 items-center gap-3">
           {mark ?? <ColorTile color={accent} icon={Icon} />}
-          <h2 className="min-w-0 font-sans text-title font-medium tracking-[-0.3px] whitespace-nowrap text-fg-primary">{sa.name}</h2>
-          {setup && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-wash px-2 py-px text-small font-semibold whitespace-nowrap text-warning">
-              <span aria-hidden className="size-1.5 rounded-full bg-warning" />
-              Needs setup
-            </span>
-          )}
+          <div className="flex min-w-0 flex-col gap-1">
+            <div className="flex items-center gap-3">
+              <h2 className="min-w-0 font-sans text-title font-medium tracking-[-0.3px] whitespace-nowrap text-fg-primary">{sa.name}</h2>
+              {setup && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-wash px-2 py-px text-small font-semibold whitespace-nowrap text-warning">
+                  <span aria-hidden className="size-1.5 rounded-full bg-warning" />
+                  Needs setup
+                </span>
+              )}
+            </div>
+            <p className="text-body text-pretty text-fg-secondary">{sa.tagline}</p>
+          </div>
         </div>
         {/* Only what tells it apart: who made it, its category, what it may do, what it reads from (scope and trigger on your own) */}
         <dl className="flex w-[30.9375rem] max-w-full flex-nowrap items-center justify-between gap-x-4 overflow-hidden">
@@ -97,9 +103,6 @@ export function TemplateDetail({ sa, color, mark, nav, categories, capabilities,
       <div role="tabpanel" className={cn("min-h-0 flex-1 overflow-y-auto py-5 text-body", wide ? "flex flex-col" : "", pad)}>
         {tab === "overview" && (
           <div className={cn("flex flex-col gap-6", wide && "min-h-0 flex-1")}>
-            <PanelSection title="Description">
-              <p className="text-body leading-[21px] text-pretty text-fg-primary">{sa.tagline}</p>
-            </PanelSection>
             {outcomes && (
               <PanelSection title="Outcomes">
                 <PanelOutcomes items={outcomes} />
