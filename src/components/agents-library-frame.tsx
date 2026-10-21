@@ -636,7 +636,7 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
     </button>
   )
   // Idea B (Figma 64:16242): centred; the mark (52px) sits half above the card's top edge, name, tags, one-line
-  // description. Hover: no 3D tilt; the tyre (dashed ring) rolls a quarter turn, the pixel shape stays still, wisps of gas behind (index.css)
+  // description. Hover: no 3D tilt; the tyre (dashed ring) rolls a quarter turn, the pixel shape stays still, a race car's wake of gas behind (index.css)
   if (look === "b") return (
     <button
       onClick={onSelect}
@@ -644,7 +644,7 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
       className="ideab-card group relative mt-[1.6875rem] flex cursor-pointer flex-col items-stretch rounded-[4px] border border-solid border-[#e5e5e5] bg-white text-center whitespace-nowrap [box-shadow:0px_1px_1px_rgba(0,0,0,0.06)] hover:border-[#dcdcdc] aria-pressed:border-[#2e4eca]/40"
     >
       <span className={cn("absolute top-[-1.6875rem] left-1/2 -translate-x-1/2 transition-opacity", off && "opacity-50")}>
-        <span aria-hidden className="ideab-gas"><i /><i /><i /></span>
+        <span aria-hidden className="ideab-gas"><i /></span>
         <IdeaBMark index={ideaIndex(from)} size={52} />
       </span>
       {mine && <span className="absolute top-2 right-2"><StatusChip status={mine.status} /></span>}
