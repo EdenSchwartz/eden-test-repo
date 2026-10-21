@@ -658,3 +658,11 @@ html[data-vt="split"]::view-transition-group(*) {
   --fade-x: linear-gradient(to right, transparent 0, rgb(0 0 0 / 0.5) 1.5rem, #000 3rem, #000 calc(100% - 3rem), rgb(0 0 0 / 0.5) calc(100% - 1.5rem), transparent 100%);
   --fade-y: linear-gradient(#000, #000);
 }
+
+/* The side panel switching in place (a step's sub agent, and back; agents-library-frame.tsx): the new content drifts
+   in 10px from the side it comes from and fades up, quickly and softly */
+@keyframes panel-swap-in { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: none; } }
+@keyframes panel-swap-back { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+.panel-swap-in { animation: panel-swap-in 240ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.panel-swap-back { animation: panel-swap-back 240ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+@media (prefers-reduced-motion: reduce) { .panel-swap-in, .panel-swap-back { animation: none; } }

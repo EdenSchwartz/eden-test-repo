@@ -20,6 +20,7 @@ import { APP, CLOUD, GRC, THREATS, VM, CategoryTag } from "@/components/category
 import { CapabilityLabels, CapabilityMarks, type Capability } from "@/components/capability"
 import { IdeaALogoChip, IdeaASquareMark, IdeaBMark, IdeaATag, figmaLogos, ideaAColors } from "@/components/agent-card-a"
 import { getCardLook, setCardLook, useCardLook, type CardLook } from "@/lib/card-look"
+import { StepMark } from "@/components/tasks/panel-ui"
 import { FluidGrid } from "@/components/fluid-grid"
 
 
@@ -40,7 +41,7 @@ export function AgentsLibraryFrame() {
   const [query, setQuery] = useState("")
   const q = query.trim().toLowerCase()
   const list = (tab === "agents" ? library : subLibrary).filter((a) => !q || [a.name, a.tagline, ...a.outcomes.map((o) => o.label), ...a.runsOn].some((f) => f.toLowerCase().includes(q)))
-  const pick = (a: LibraryAgent) => { setPicked(a.templateId ? { agent: a.templateId, name: a.name } : { kind: a.kind, name: a.name }); setInner(null); setOpen(true) }
+  const pick = (a: LibraryAgent) => { setPicked(a.templateId ? { agent: a.templateId, name: a.name } : { kind: a.kind, name: a.name }); setInner(null); setDir("in"); setOpen(true) }
   const close = () => setOpen(false)
   // Inside the drawer: a step's sub agent (from an agent's How it works) or an agent a sub agent is part of opens in
   // the same drawer, in place, with breadcrumbs back. The picked card's panel stays mounted underneath (hidden), so
@@ -48,7 +49,10 @@ export function AgentsLibraryFrame() {
   const [inner, setInner] = useState<{ sub: AgentKind } | { agent: string } | null>(null)
   const innerSubLib = inner && "sub" in inner ? subLibrary.find((l) => l.kind === inner.sub) : undefined
   const innerAgent = inner && "agent" in inner ? getSuperAgent(inner.agent) : undefined
-  const back = () => setInner(null)
+  // which way the content last moved, for its little slide: in (to a step's sub agent) or back
+  const [dir, setDir] = useState<"in" | "back">("in")
+  const back = () => { setDir("back"); setInner(null) }
+  const into = (next: { sub: AgentKind } | { agent: string }) => { setDir("in"); setInner(next) }
   const agent = picked?.agent ? getSuperAgent(picked.agent) : undefined
   // The drawer's icon tile keeps the picked card's colour
   const pickedLib = [...library, ...subLibrary].find((a) => a.name === picked?.name)
@@ -95,12 +99,14 @@ export function AgentsLibraryFrame() {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent showCloseButton={false} aria-describedby={undefined} onOpenAutoFocus={(e) => e.preventDefault()} className="w-full gap-0 overflow-hidden border-[#ecebe9] p-0 whitespace-normal sm:max-w-[35rem]">
           <SheetTitle className="sr-only">{picked?.name}</SheetTitle>
-          <div className={inner ? "hidden" : "contents"}>
+          {/* kept mounted (hidden) while a step is open, so it keeps its tab and typed prompt; it slides back in on return */}
+          <div className={cn("flex h-full min-h-0 flex-col", inner ? "hidden" : dir === "back" && "panel-swap-back")}>
             {agent
-              ? <TemplateDetail key={agent.id} sa={agent} color={pickedColor} nav={nav} onOpenStep={(k) => setInner({ sub: k })} {...drawerProps(pickedLib)} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={close} />
-              : picked?.kind && <SubAgentDetail key={picked.name} kind={picked.kind} color={pickedColor} categories={pickedLib && metaOf(pickedLib).categories} mark={pickedLib && drawerMark(pickedLib, look)} nav={nav} template onClose={close} onOpenAgent={(sa) => setInner({ agent: sa.id })} />}
+              ? <TemplateDetail key={agent.id} sa={agent} color={pickedColor} nav={nav} onOpenStep={(k) => into({ sub: k })} {...drawerProps(pickedLib)} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={close} />
+              : picked?.kind && <SubAgentDetail key={picked.name} kind={picked.kind} color={pickedColor} categories={pickedLib && metaOf(pickedLib).categories} mark={pickedLib && drawerMark(pickedLib, look)} nav={nav} template onClose={close} onOpenAgent={(sa) => into({ agent: sa.id })} />}
           </div>
           {inner && "sub" in inner && (
+            <div className="panel-swap-in flex h-full min-h-0 flex-col">
             <SubAgentDetail
               key={`inner-${inner.sub}`}
               kind={inner.sub}
@@ -108,13 +114,16 @@ export function AgentsLibraryFrame() {
               crumbs={[{ label: picked?.name ?? "", onClick: back }, { label: subName(inner.sub) }]}
               color={innerSubLib && (look !== "current" ? ideaAColors[ideaIndex(innerSubLib) % ideaAColors.length][0] : colorOf(innerSubLib))}
               categories={innerSubLib && metaOf(innerSubLib).categories}
-              mark={innerSubLib && drawerMark(innerSubLib, look)}
+              mark={<StepMark kind={inner.sub} />}
               onClose={close}
               onOpenAgent={back}
             />
+            </div>
           )}
           {innerAgent && (
+            <div className="panel-swap-in flex h-full min-h-0 flex-col">
             <TemplateDetail key={`inner-${innerAgent.id}`} sa={innerAgent} crumbs={[{ label: picked?.name ?? "", onClick: back }, { label: innerAgent.name }]} {...drawerProps(library.find((l) => l.templateId === innerAgent.id))} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={close} />
+            </div>
           )}
         </SheetContent>
       </Sheet>

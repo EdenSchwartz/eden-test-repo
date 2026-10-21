@@ -113,6 +113,20 @@ function StepIcon({ kind }: { kind: AgentKind }) {
   )
 }
 // onOpen: each pill is a button that opens its sub agent (a panel on top of this one)
+// A step's sub agent at panel-header size: the same icon and tint as its pill in How it works, on a 44px square
+// (4px corners, a faint edge), the icon at 24px — so opening a step shows the picture you clicked
+export function StepMark({ kind, size = 44 }: { kind: AgentKind; size?: number }) {
+  const look = stepLook[kind]
+  const color = colorFor(`sub:${kind}`)
+  const Icon = agents[kind].icon
+  const bg = look?.bg ?? `color-mix(in oklch, ${color} 14%, white)`
+  return (
+    <span aria-hidden className="grid shrink-0 place-items-center rounded-[4px] shadow-[inset_0_0_0_1px_rgb(0_0_0/0.05)]" style={{ width: `${size / 16}rem`, height: `${size / 16}rem`, background: look ? `linear-gradient(${bg}, ${bg}), #fff` : bg }}>
+      {look ? <img alt="" src={look.src} width={24} height={24} className="block size-6" /> : <Icon className="size-6" style={{ color }} strokeWidth={1.75} />}
+    </span>
+  )
+}
+
 export function PanelSteps({ pattern, onOpen }: { pattern: AgentKind[][]; onOpen?: (kind: AgentKind) => void }) {
   const items = pattern.flatMap((group) => group.map((kind, i) => ({ kind, withPrev: i > 0 })))
   return (
