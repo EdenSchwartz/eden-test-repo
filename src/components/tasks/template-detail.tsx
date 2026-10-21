@@ -88,7 +88,8 @@ export function TemplateDetail({ sa, color, mark, nav, crumbs, onOpenStep, categ
         {/* Only what tells it apart: who made it, its category, what it may do, what it reads from (scope and trigger on your own) */}
         <dl className="flex w-[30.9375rem] max-w-full flex-nowrap items-center justify-between gap-x-4 overflow-hidden">
           {!sa.custom && <PanelProp label="Created by"><PanelRival /></PanelProp>}
-          {categories && <PanelProp label="Category"><PanelTags items={categories} /></PanelProp>}
+          {/* your own agents also show Scope and Trigger, so Category (on their card) gives way to keep one row */}
+          {categories && !sa.custom && <PanelProp label="Category"><PanelTags items={categories} /></PanelProp>}
           <PanelProp label="Capabilities">
             {capabilities ?? <span className="text-body leading-5 text-fg-primary">Read only</span>}
           </PanelProp>

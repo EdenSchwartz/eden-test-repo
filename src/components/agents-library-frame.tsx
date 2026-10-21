@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react"
 import { AppWindow, Bandage, Cloud, Crosshair, KeyRound, Search, ShieldCheck, Swords, UsersRound, X, type LucideIcon } from "lucide-react"
 import { agentOutcomes, subOutcomes, type Outcome } from "@/data/outcomes"
-import { getSuperAgent, type SuperAgent } from "@/data/super-agents"
+import { getSuperAgent, superAgents, type SuperAgent } from "@/data/super-agents"
+import { useConversations } from "@/lib/conversations"
+import { subAgentStatus, taskStatus } from "@/lib/task-status"
 import { RivalMark } from "@/components/nav-icons"
 import { useNav } from "@/lib/nav"
 import { agents, type AgentKind } from "@/components/chat/agents"
@@ -30,8 +32,21 @@ import { FluidGrid } from "@/components/fluid-grid"
  * four 12px white squares with a #DDDCDA edge at the frame's own positions, and empty white space below.
  * Positions are relative to the area right of the sidebar, top bar included (the squares sit on the two lines).
  */
-export function AgentsLibraryFrame() {
-  const { navigate } = useNav()
+// mode "mine" is My Agents (pages.tsx): the same page, cards and drawer, with your own agents (made from these
+// templates; status chip, you as Created by, Enabled in the drawer) and every sub agent with its status.
+type Entry = { a: LibraryAgent; from: LibraryAgent; mine?: { status: TaskStatus; enabledKey: string; you?: boolean } }
+export function AgentsLibraryFrame({ mode = "library" }: { mode?: "library" | "mine" }) {
+  const { navigate, params } = useNav()
+  const mineMode = mode === "mine"
+  const { convs } = useConversations()
+  useEnabled() // statuses read the Enabled switches
+  const agentEntries: Entry[] = mineMode
+    ? superAgents.filter((sa) => sa.custom).map((sa) => {
+        const from = library.find((l) => l.templateId === (sa.clonedFrom ?? sa.id)) ?? library[0]
+        return { a: { name: sa.name, tagline: sa.tagline, icon: sa.icon, outcomes: from.outcomes, runsOn: from.runsOn, templateId: sa.id }, from, mine: { status: taskStatus(sa, convs), enabledKey: sa.id, you: true } }
+      })
+    : library.map((a) => ({ a, from: a }))
+  const subEntries: Entry[] = subLibrary.map((a) => ({ a, from: a, mine: mineMode && a.kind ? { status: subAgentStatus(a.kind, convs), enabledKey: `sub:${a.kind}` } : undefined }))
   // The picked card's details in a drawer (shadcn Sheet): an agent's, or a sub agent's. Esc, ✕ or clicking outside closes it.
   // `picked` stays set while it slides out, so the drawer doesn't empty mid-animation; `open` drives the slide
   const [picked, setPicked] = useState<{ agent?: string; kind?: AgentKind; name: string } | null>(null)
@@ -40,7 +55,13 @@ export function AgentsLibraryFrame() {
   const switchTab = (t: typeof tab) => withTransition(() => { setTab(t); setOpen(false) })
   const [query, setQuery] = useState("")
   const q = query.trim().toLowerCase()
-  const list = (tab === "agents" ? library : subLibrary).filter((a) => !q || [a.name, a.tagline, ...a.outcomes.map((o) => o.label), ...a.runsOn].some((f) => f.toLowerCase().includes(q)))
+  const entries = (tab === "agents" ? agentEntries : subEntries).filter(({ a }) => !q || [a.name, a.tagline, ...a.outcomes.map((o) => o.label), ...a.runsOn].some((f) => f.toLowerCase().includes(q)))
+  const list = entries.map((e) => e.a)
+  useEffect(() => {
+    const arrived = params.superAgentId && agentEntries.find((e) => e.a.templateId === params.superAgentId)
+    if (arrived) pick(arrived.a)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.superAgentId])
   const pick = (a: LibraryAgent) => { setPicked(a.templateId ? { agent: a.templateId, name: a.name } : { kind: a.kind, name: a.name }); setInner(null); setDir("in"); setOpen(true) }
   const close = () => setOpen(false)
   // Inside the drawer: a step's sub agent (from an agent's How it works) or an agent a sub agent is part of opens in
@@ -58,8 +79,8 @@ export function AgentsLibraryFrame() {
   const openPartOf = (a: LibraryAgent) => (a.templateId === picked?.agent && a.templateId ? back() : a.templateId ? into({ agent: a.templateId }) : pick(a))
   const startSub = () => navigate("chat", { startChat: true })
   const agent = picked?.agent ? getSuperAgent(picked.agent) : undefined
-  // The drawer's icon tile keeps the picked card's colour
-  const pickedLib = [...library, ...subLibrary].find((a) => a.name === picked?.name)
+  // The drawer's icon tile keeps the picked card's colour (on My Agents: the template it was made from)
+  const pickedLib = [...agentEntries, ...subEntries].find((e) => e.a.name === picked?.name)?.from
   const look = useCardLook()
   const pickedColor = pickedLib ? (look !== "current" ? ideaAColors[ideaIndex(pickedLib) % ideaAColors.length][0] : colorOf(pickedLib)) : undefined
   // The drawer's ↓ 1 / 9 ↑: steps through the cards on screen (this tab, after the search), in their order
@@ -71,9 +92,9 @@ export function AgentsLibraryFrame() {
         <span aria-hidden className="alive-noise" />
         <span aria-hidden className="alive-base" />
         <FluidGrid />
-        <p className="text-title leading-4 font-medium text-fg-primary">Agents Library</p>
+        <p className="text-title leading-4 font-medium text-fg-primary">{mineMode ? "My Agents" : "Agents Library"}</p>
         <p className="max-w-full truncate text-body leading-4 font-normal text-fg-secondary">
-          Ready-made security agents by Rival. Pick one, make it yours in a short chat, and it joins My Agents.
+          {mineMode ? "Security jobs your agents run for you, end to end." : "Ready-made security agents by Rival. Pick one, make it yours in a short chat, and it joins My Agents."}
         </p>
       </div>
       {/* Agents | Sub Agents: a row of tabs under the header, its own line below */}
@@ -92,8 +113,13 @@ export function AgentsLibraryFrame() {
       <div className="relative flex w-full flex-1">
         {/* Always 3 to a row, centered, the cards 342px at most (71.125rem), on any screen size. The drawer slides over them, nothing reflows */}
         <div className="mx-auto grid max-w-[71.125rem] min-w-0 flex-1 content-start gap-4 px-10 pt-6 pb-10 grid-cols-[repeat(3,minmax(0,1fr))]">
-          {list.map((a) => <AgentCard key={a.name} a={a} selected={open && picked?.name === a.name} onSelect={() => pick(a)} />)}
-          {list.length === 0 && (
+          {entries.map((e) => <AgentCard key={e.a.name} a={e.a} from={e.from} mine={e.mine} selected={open && picked?.name === e.a.name} onSelect={() => pick(e.a)} />)}
+          {mineMode && tab === "agents" && agentEntries.length === 0 && (
+            <p className="col-span-full py-10 text-center text-body leading-5 whitespace-normal text-fg-secondary">
+              No agents yet. <button onClick={() => navigate("explorer")} className="cursor-pointer text-[#2e4eca] hover:underline">Pick one in the Agents Library</button> and make it yours in a short chat.
+            </p>
+          )}
+          {list.length === 0 && q && (
             <p className="col-span-full py-10 text-center text-body leading-5 whitespace-normal text-fg-secondary">
               Nothing matches “{query.trim()}”. <button onClick={() => setQuery("")} className="cursor-pointer text-[#2e4eca] hover:underline">Clear search</button>
             </p>
@@ -107,7 +133,7 @@ export function AgentsLibraryFrame() {
           <div className={cn("flex h-full min-h-0 flex-col", inner ? "hidden" : dir === "back" && "panel-swap-back")}>
             {agent
               ? <TemplateDetail key={agent.id} sa={agent} color={pickedColor} nav={nav} onOpenStep={(k) => into({ sub: k })} {...drawerProps(pickedLib)} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={close} />
-              : picked?.kind && <SubAgentDetail key={picked.name} kind={picked.kind} color={pickedColor} nav={nav} template {...subPanelProps(picked.kind, openPartOf)} onUse={startSub} onClose={close} onOpenAgent={(sa) => into({ agent: sa.id })} />}
+              : picked?.kind && <SubAgentDetail key={picked.name} kind={picked.kind} color={pickedColor} nav={nav} template={!mineMode} {...subPanelProps(picked.kind, openPartOf)} onUse={startSub} onClose={close} onOpenAgent={(sa) => into({ agent: sa.id })} />}
           </div>
           {inner && "sub" in inner && (
             <div className="panel-swap-in flex h-full min-h-0 flex-col">
@@ -442,13 +468,14 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
           <span className="flex min-w-0 flex-1 flex-col justify-center gap-2">
             <span className="flex w-full min-w-0 items-center">
               <span className="min-w-0 flex-1 truncate text-body leading-4 font-medium text-fg-primary">{a.name}</span>
-              {mine && <span className="mr-2 shrink-0"><StatusChip status={mine.status} /></span>}
               <span className="flex shrink-0 items-center">
                 {m.ctx.map((t, i) => <IdeaALogoChip key={t} name={toolNames[t]} last={i === m.ctx.length - 1}><IdeaALogo tool={t} /></IdeaALogoChip>)}
               </span>
             </span>
-            <span className="flex min-w-0 items-start gap-1.5 overflow-hidden">
-              {m.categories.map((c) => <IdeaATag key={c}>{c}</IdeaATag>)}
+            <span className="flex min-w-0 items-center gap-1.5">
+              <span className="flex min-w-0 items-start gap-1.5 overflow-hidden">{m.categories.map((c) => <IdeaATag key={c}>{c}</IdeaATag>)}</span>
+              {/* on My Agents: its status, at the end of the tags row so the name keeps its room */}
+              {mine && <span className="ml-auto shrink-0"><StatusChip status={mine.status} /></span>}
             </span>
           </span>
         </span>
