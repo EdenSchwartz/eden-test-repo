@@ -48,7 +48,7 @@ export function CapabilityMark({ cap }: { cap: Capability }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span aria-label={capabilityNames[cap]} className="grid size-6 shrink-0 place-items-center rounded-full bg-[#f7f7f8] text-[#68696c] ring-1 ring-white">
+        <span aria-label={capabilityNames[cap]} className="grid size-6 shrink-0 place-items-center rounded-full bg-[#f7f7f8] text-fg-secondary ring-1 ring-white">
           <CapabilityIcon cap={cap} className="size-[1.125rem]" />
         </span>
       </TooltipTrigger>
@@ -64,7 +64,7 @@ export function CapabilityLabels({ caps }: { caps: Capability[] }) {
   return (
     <span className="flex items-start gap-2">
       {order.filter((c) => caps.includes(c)).map((c) => (
-        <span key={c} title={capabilityNames[c]} className="flex items-center gap-1 text-[0.875rem] leading-5 text-[#101112]">
+        <span key={c} title={capabilityNames[c]} className="flex items-center gap-1 text-body leading-5 text-fg-primary">
           <CapabilityIcon cap={c} className="size-3.5" />{shortNames[c]}
         </span>
       ))}

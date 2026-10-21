@@ -159,5 +159,5 @@ export const figmaLogos = {
 
 // The tag under the name
 export function IdeaATag({ children }: { children: React.ReactNode }) {
-  return <span className="flex h-5 shrink-0 items-center rounded-[2px] bg-[#f7f7f8] px-1 text-[0.75rem] leading-4 font-normal whitespace-nowrap text-[#68696c]">{children}</span>
+  return <span className="flex h-5 shrink-0 items-center rounded-[2px] bg-[#f7f7f8] px-1 text-small leading-4 font-normal whitespace-nowrap text-fg-secondary">{children}</span>
 }

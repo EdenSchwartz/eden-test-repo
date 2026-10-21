@@ -266,8 +266,8 @@ export function AgentsLibraryFrame() {
         <span aria-hidden className="alive-noise" />
         <span aria-hidden className="alive-base" />
         <FluidGrid />
-        <p className="text-[1.25rem] leading-4 font-medium text-[#121212]">Agents Library</p>
-        <p className="max-w-full truncate text-[0.875rem] leading-4 font-normal text-[#6c6a68]">
+        <p className="text-title leading-4 font-medium text-fg-primary">Agents Library</p>
+        <p className="max-w-full truncate text-body leading-4 font-normal text-fg-secondary">
           Ready-made security agents by Rival. Pick one, make it yours in a short chat, and it joins My Agents.
         </p>
       </div>
@@ -289,7 +289,7 @@ export function AgentsLibraryFrame() {
         <div className="mx-auto grid max-w-[71.125rem] min-w-0 flex-1 content-start gap-4 px-10 pt-6 pb-10 grid-cols-[repeat(3,minmax(0,1fr))]">
           {list.map((a) => <AgentCard key={a.name} a={a} selected={open && picked?.name === a.name} onSelect={() => pick(a)} />)}
           {list.length === 0 && (
-            <p className="col-span-full py-10 text-center text-[0.875rem] leading-5 whitespace-normal text-[#6c6a68]">
+            <p className="col-span-full py-10 text-center text-body leading-5 whitespace-normal text-fg-secondary">
               Nothing matches “{query.trim()}”. <button onClick={() => setQuery("")} className="cursor-pointer text-[#2e4eca] hover:underline">Clear search</button>
             </p>
           )}
@@ -320,10 +320,10 @@ function CardLookSwitch() {
   const opts: [CardLook, string][] = [["current", "Current"], ["a", "Idea A"], ["b", "Idea B"]]
   return (
     <div role="tablist" aria-label="Card idea" className="flex items-center gap-1">
-      <span className="mr-1 text-[0.75rem] leading-4 text-[#a2a4a8]">Card</span>
+      <span className="mr-1 text-small leading-4 text-fg-tertiary">Card</span>
       {opts.map(([id, label]) => (
         <button key={id} role="tab" aria-selected={look === id} onClick={() => withTransition(() => setCardLook(id))}
-          className="lib-tab !h-6 !text-[0.75rem] disabled:cursor-default disabled:opacity-40 disabled:hover:border-transparent disabled:hover:bg-transparent">
+          className="lib-tab !h-6 !text-small disabled:cursor-default disabled:opacity-40 disabled:hover:border-transparent disabled:hover:bg-transparent">
           {label}
         </button>
       ))}
@@ -352,12 +352,12 @@ function LibrarySearch({ value, onChange }: { value: string; onChange: (v: strin
   return (
     <div
       className={cn(
-        "ml-auto flex h-6 items-center gap-1.5 overflow-hidden rounded-[0.25rem] border border-[#ecebe9] bg-white pl-1.5 text-[0.75rem] leading-4 text-[#121212] drop-shadow-[0px_1px_0.5px_rgba(119,131,152,0.2)] transition-[width,border-color] duration-300 ease-[cubic-bezier(.3,.7,.15,1)]",
+        "ml-auto flex h-6 items-center gap-1.5 overflow-hidden rounded-[0.25rem] border border-[#ecebe9] bg-white pl-1.5 text-small leading-4 text-fg-primary drop-shadow-[0px_1px_0.5px_rgba(119,131,152,0.2)] transition-[width,border-color] duration-300 ease-[cubic-bezier(.3,.7,.15,1)]",
         open ? "w-64 border-[#dddcda] pr-1" : "w-[4.75rem] cursor-pointer pr-2 hover:border-[#dddcda] hover:bg-[#fcfcfa]",
       )}
       onClick={() => !open && show()}
     >
-      <Search className="size-3.5 shrink-0 text-[#6c6a68]" />
+      <Search className="size-3.5 shrink-0 text-fg-secondary" />
       {open ? <>
         <input
           ref={input}
@@ -367,9 +367,9 @@ function LibrarySearch({ value, onChange }: { value: string; onChange: (v: strin
           onBlur={() => { if (!value.trim()) setOpen(false) }}
           placeholder="Search agents"
           aria-label="Search agents"
-          className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-[#9a9893]"
+          className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-fg-tertiary"
         />
-        <button onMouseDown={(e) => e.preventDefault()} onClick={hide} aria-label="Close search" className="flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-[0.1875rem] text-[#9a9893] hover:bg-[#f4f4f2] hover:text-[#6c6a68]">
+        <button onMouseDown={(e) => e.preventDefault()} onClick={hide} aria-label="Close search" className="flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-[0.1875rem] text-[#9a9893] hover:bg-[#f4f4f2] hover:text-fg-secondary">
           <X className="size-3" />
         </button>
       </> : <span className="whitespace-nowrap">Search</span>}
@@ -620,7 +620,7 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
           <IdeaAMark index={ideaIndex(from)} size={60} />
           <span className="flex min-w-0 flex-1 flex-col justify-center gap-2">
             <span className="flex w-full min-w-0 items-center">
-              <span className="min-w-0 flex-1 truncate text-[1rem] leading-4 font-medium text-[#121212]">{a.name}</span>
+              <span className="min-w-0 flex-1 truncate text-body leading-4 font-medium text-fg-primary">{a.name}</span>
               {mine && <span className="mr-2 shrink-0"><StatusChip status={mine.status} /></span>}
               <span className="flex shrink-0 items-center">
                 {m.ctx.map((t, i) => <IdeaALogoChip key={t} name={toolNames[t]} last={i === m.ctx.length - 1}><IdeaALogo tool={t} /></IdeaALogoChip>)}
@@ -631,7 +631,7 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
             </span>
           </span>
         </span>
-        <span className="line-clamp-2 min-h-10 w-full text-[0.875rem] leading-5 whitespace-normal text-pretty text-[#6c6a68]">{a.tagline}</span>
+        <span className="line-clamp-2 min-h-10 w-full text-body leading-5 whitespace-normal text-pretty text-fg-secondary">{a.tagline}</span>
       </span>
     </button>
   )
@@ -650,10 +650,10 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
       {mine && <span className="absolute top-2 right-2"><StatusChip status={mine.status} /></span>}
       <span className={cn("flex w-full flex-col items-center gap-3 px-[0.9375rem] pt-[2.625rem] pb-4 transition-opacity", off && "opacity-50")}>
         <span className="flex w-full min-w-0 flex-col items-center gap-1.5">
-          <span className="max-w-full truncate text-[1rem] leading-4 font-medium text-[#121212]">{a.name}</span>
+          <span className="max-w-full truncate text-body leading-4 font-medium text-fg-primary">{a.name}</span>
           <span className="flex items-start gap-1.5">{m.categories.map((c) => <IdeaATag key={c}>{c}</IdeaATag>)}</span>
         </span>
-        <span className="w-full truncate text-[0.875rem] leading-4 text-[#6c6a68]">{a.tagline}</span>
+        <span className="w-full truncate text-body leading-4 text-fg-secondary">{a.tagline}</span>
       </span>
     </button>
   )
@@ -671,7 +671,7 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
           <span className={cn("flex min-w-0 flex-1 items-start gap-3 transition-opacity", off && "opacity-50")}>
             {TILE_STYLE === "flat" ? <FlatTile color={tint} /> : <AgentTile seed={a.name} hue={hueOf(from)} />}
             <span className="flex min-w-0 flex-1 flex-col gap-1">
-              <span className="truncate text-[1rem] leading-5 font-medium text-[#121212]">{a.name}</span>
+              <span className="truncate text-body leading-5 font-medium text-fg-primary">{a.name}</span>
               <span className="flex min-w-0 items-center gap-1 overflow-hidden">
                 {m.categories.map((c) => <CategoryTag key={c} category={c} />)}
               </span>
@@ -679,23 +679,23 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
           </span>
           {mine && <StatusChip status={mine.status} />}
         </span>
-        <span className={cn("line-clamp-2 min-h-10 text-[0.875rem] leading-5 whitespace-normal text-pretty text-[#6c6a68] transition-opacity", off && "opacity-50")}>{a.tagline}</span>
+        <span className={cn("line-clamp-2 min-h-10 text-body leading-5 whitespace-normal text-pretty text-fg-secondary transition-opacity", off && "opacity-50")}>{a.tagline}</span>
       </span>
       <span className={cn("mt-auto flex items-start justify-between gap-4 border-t border-[#ecebe9] px-4 pt-4 pb-4 whitespace-nowrap transition-opacity", off && "opacity-50")}>
         <span className="flex flex-col gap-2">
-          <span className="text-[0.6875rem] leading-4 text-[#a2a4a8] [text-transform:uppercase]">Created by</span>
-          <span className="flex h-5 items-center gap-2 text-[0.875rem] leading-5 text-[#121212]">
+          <span className="text-small leading-4 text-fg-tertiary [text-transform:uppercase]">Created by</span>
+          <span className="flex h-5 items-center gap-2 text-body leading-5 text-fg-primary">
             {mine?.you
               ? <><Avatar className="size-4" title="Created by you"><AvatarFallback className="text-[7px] font-semibold">IB</AvatarFallback></Avatar>You</>
               : <><RivalMark className="-mx-1.5 size-6 shrink-0 text-[#0350d0]" />Rival</>}
           </span>
         </span>
         <span className="flex min-w-0 flex-col gap-2">
-          <span className="truncate text-[0.6875rem] leading-4 text-[#a2a4a8] [text-transform:uppercase]">Capabilities</span>
+          <span className="truncate text-small leading-4 text-fg-tertiary [text-transform:uppercase]">Capabilities</span>
           <span className="-my-0.5 flex h-6 items-center"><CapabilityMarks caps={m.cap} /></span>
         </span>
         <span className="flex flex-col items-end gap-2">
-          <span className="text-[0.6875rem] leading-4 text-[#a2a4a8] [text-transform:uppercase]">Context</span>
+          <span className="text-small leading-4 text-fg-tertiary [text-transform:uppercase]">Context</span>
           <span className="flex h-5 items-center gap-1.5">{m.ctx.map((t) => <ToolMark key={t} tool={t} />)}</span>
         </span>
       </span>

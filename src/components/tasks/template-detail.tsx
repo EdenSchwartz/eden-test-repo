@@ -64,9 +64,9 @@ export function TemplateDetail({ sa, color, mark, nav, categories, capabilities,
       <div className={cn("flex shrink-0 flex-col items-start gap-5 py-5", pad)}>
         <div className="flex items-center gap-3">
           {mark ?? <ColorTile color={accent} icon={Icon} />}
-          <h2 className="min-w-0 font-sans text-[1.5rem] leading-[26.4px] font-medium tracking-[-0.36px] whitespace-nowrap text-[#101112]">{sa.name}</h2>
+          <h2 className="min-w-0 font-sans text-title font-medium tracking-[-0.3px] whitespace-nowrap text-fg-primary">{sa.name}</h2>
           {setup && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-wash px-2 py-px text-xs font-semibold whitespace-nowrap text-warning">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-wash px-2 py-px text-small font-semibold whitespace-nowrap text-warning">
               <span aria-hidden className="size-1.5 rounded-full bg-warning" />
               Needs setup
             </span>
@@ -77,10 +77,10 @@ export function TemplateDetail({ sa, color, mark, nav, categories, capabilities,
           {!sa.custom && <PanelProp label="Created by"><PanelRival /></PanelProp>}
           {categories && <PanelProp label="Category"><PanelTags items={categories} /></PanelProp>}
           <PanelProp label="Capabilities">
-            {capabilities ?? <span className="text-[0.875rem] leading-5 text-[#101112]">Read only</span>}
+            {capabilities ?? <span className="text-body leading-5 text-fg-primary">Read only</span>}
           </PanelProp>
-          {sa.custom && <PanelProp label="Scope" title={scope.full}><span className="text-[0.875rem] leading-5 text-[#101112]">{scope.short}</span></PanelProp>}
-          {sa.custom && <PanelProp label="Trigger" title={trigger.full}><span className="text-[0.875rem] leading-5 text-[#101112]">{trigger.short}</span></PanelProp>}
+          {sa.custom && <PanelProp label="Scope" title={scope.full}><span className="text-body leading-5 text-fg-primary">{scope.short}</span></PanelProp>}
+          {sa.custom && <PanelProp label="Trigger" title={trigger.full}><span className="text-body leading-5 text-fg-primary">{trigger.short}</span></PanelProp>}
           <PanelProp label="Context" title={sa.tools.map((t) => `${t.name}${t.connected ? "" : t.required ? " (required, not connected)" : " (not connected)"}`).join(", ")}>
             {context ?? <SourceStack tools={sa.tools} />}
           </PanelProp>
@@ -90,11 +90,11 @@ export function TemplateDetail({ sa, color, mark, nav, categories, capabilities,
       {/* ---------- Tabs: an icon with each; the active one in ink with an ink line under it ---------- */}
       <DrawerTabs tabs={tabs} active={tab} onChange={setTab} pad={pad} />
 
-      <div role="tabpanel" className={cn("min-h-0 flex-1 overflow-y-auto py-5 text-sm", wide ? "flex flex-col" : "", pad)}>
+      <div role="tabpanel" className={cn("min-h-0 flex-1 overflow-y-auto py-5 text-body", wide ? "flex flex-col" : "", pad)}>
         {tab === "overview" && (
           <div className={cn("flex flex-col gap-6", wide && "min-h-0 flex-1")}>
             <PanelSection title="Description">
-              <p className="text-[0.875rem] leading-[21px] text-pretty text-[#101112]">{sa.tagline}</p>
+              <p className="text-body leading-[21px] text-pretty text-fg-primary">{sa.tagline}</p>
             </PanelSection>
             {outcomes && (
               <PanelSection title="Outcomes">
@@ -124,9 +124,9 @@ export function TemplateDetail({ sa, color, mark, nav, categories, capabilities,
                 <button onClick={() => setOpenSkill(s)} className="flex w-full cursor-pointer items-center gap-3 px-3.5 py-3 text-left transition-colors hover:bg-wash/45">
                   <span className="min-w-0 flex-1">
                     <span className="block font-medium">{s.name}</span>
-                    <span className="block text-xs text-muted-foreground">{s.detail}</span>
+                    <span className="block text-small text-fg-secondary">{s.detail}</span>
                   </span>
-                  <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-blue">
+                  <span className="inline-flex shrink-0 items-center gap-1 text-small font-semibold text-blue">
                     <FileText className="size-3.5" /> SKILL.md <ChevronRight className="size-3.5" />
                   </span>
                 </button>
@@ -147,7 +147,7 @@ export function TemplateDetail({ sa, color, mark, nav, categories, capabilities,
       <Dialog open={!!openSkill} onOpenChange={(o) => !o && setOpenSkill(null)}>
         <DialogContent className="max-h-[85svh] gap-3 overflow-y-auto sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="font-mono text-sm">{openSkill && `skills/${slug(openSkill.name)}/SKILL.md`}</DialogTitle>
+            <DialogTitle className="font-mono text-body">{openSkill && `skills/${slug(openSkill.name)}/SKILL.md`}</DialogTitle>
             <DialogDescription>{openSkill?.name} · {sa.name}</DialogDescription>
           </DialogHeader>
           {openSkill && <MessageResponse>{"```markdown\n" + skillMd(sa, openSkill) + "```"}</MessageResponse>}
@@ -171,7 +171,7 @@ export function Steps({ pattern, approval }: { pattern: AgentKind[][]; approval?
             <Step kind={group[0]} approval={approval?.(group[0])} />
           ) : (
             <div className="relative -mx-2 rounded-xl border border-dashed border-line px-2 py-2.5">
-              <span className="absolute top-2 right-2 inline-flex items-center gap-1 text-xs font-semibold text-blue">
+              <span className="absolute top-2 right-2 inline-flex items-center gap-1 text-small font-semibold text-blue">
                 <GitFork className="size-3" /> In parallel
               </span>
               <div className="space-y-3">
@@ -193,7 +193,7 @@ function Step({ kind, approval }: { kind: AgentKind; approval?: boolean }) {
       <span className="relative rounded-[0.3125rem] bg-popover"><ColorTile color={colorFor(`sub:${kind}`)} icon={Icon} size="sm" /></span>
       <span className="min-w-0">
         <span className="block leading-tight font-medium">{name.replace(/ agent$/, "")}</span>
-        <span className="block text-xs text-muted-foreground">{short}</span>
+        <span className="block text-small text-fg-secondary">{short}</span>
       </span>
       {approval && (
         <span className="ml-auto inline-flex h-5 shrink-0 items-center gap-1 rounded-md bg-amber-500/10 px-1.5 text-[11px] font-medium text-amber-600 dark:text-amber-500">
@@ -223,14 +223,14 @@ function SourceStack({ tools }: { tools: SuperAgent["tools"] }) {
           className={cn(
             "relative flex size-5 items-center justify-center rounded-md text-[10px] leading-none font-semibold text-white ring-2 ring-popover",
             i > 0 && "-ml-1.5",
-            !brand[t.name] && "bg-muted text-muted-foreground",
+            !brand[t.name] && "bg-muted text-fg-secondary",
             !t.connected && "opacity-45 outline outline-1 outline-dashed outline-offset-[-1px] outline-muted-foreground",
           )}
         >
           {t.name[0]}
         </span>
       ))}
-      {tools.length > shown.length && <span className="ml-1 text-xs text-muted-foreground tabular-nums">+{tools.length - shown.length}</span>}
+      {tools.length > shown.length && <span className="ml-1 text-small text-fg-secondary tabular-nums">+{tools.length - shown.length}</span>}
       <span className="sr-only">{tools.map((t) => t.name).join(", ")}</span>
     </span>
   )
@@ -242,8 +242,8 @@ export function EnabledToggle({ id, name }: { id: string; name: string }) {
   const { isEnabled } = useEnabled()
   const on = isEnabled(id)
   return (
-    <span className="flex h-7 shrink-0 items-center gap-2 rounded-lg border bg-card pr-2 pl-2.5 text-xs font-medium">
-      <span className={on ? "text-foreground" : "text-muted-foreground"}>{on ? "Enabled" : "Disabled"}</span>
+    <span className="flex h-7 shrink-0 items-center gap-2 rounded-lg border bg-card pr-2 pl-2.5 text-small font-medium">
+      <span className={on ? "text-fg-primary" : "text-fg-secondary"}>{on ? "Enabled" : "Disabled"}</span>
       <EnableSwitch id={id} name={name} />
     </span>
   )
@@ -253,7 +253,7 @@ export function EnabledToggle({ id, name }: { id: string; name: string }) {
 export function Section({ icon: Icon, title, grow, children }: { icon: typeof Bot; title: string; grow?: boolean; children: React.ReactNode }) {
   return (
     <section className={cn("flex flex-col gap-3", grow && "min-h-0 flex-1")}>
-      <h3 className="flex items-center gap-2 text-sm leading-5 font-medium text-foreground">
+      <h3 className="flex items-center gap-2 text-body leading-5 font-medium text-fg-primary">
         <span aria-hidden className="grid size-5 shrink-0 place-items-center rounded-[0.25rem] border border-hairline bg-foreground/[0.035] text-foreground/60">
           <Icon className="size-3" strokeWidth={2} />
         </span>
@@ -275,15 +275,15 @@ export function DrawerTopBar({ nav, onClose, children }: { nav?: DrawerNav; onCl
       <div className="flex min-h-6 min-w-0 flex-1 items-center gap-1">
         {nav && nav.index >= 0 && (
           <>
-            <button onClick={nav.onPrev} disabled={nav.index <= 0} aria-label="Previous agent" title="Previous" className="flex cursor-pointer items-center justify-center rounded-[4px] p-1 text-[#525252] transition-colors hover:bg-[#f5f5f5] disabled:cursor-default disabled:text-[#bdbdbd] disabled:hover:bg-transparent">
+            <button onClick={nav.onPrev} disabled={nav.index <= 0} aria-label="Previous agent" title="Previous" className="flex cursor-pointer items-center justify-center rounded-[4px] p-1 text-fg-secondary transition-colors hover:bg-[#f5f5f5] disabled:cursor-default disabled:text-fg-tertiary disabled:hover:bg-transparent">
               <ChevronDownIcon className="size-3" />
             </button>
             <span className="flex items-center gap-1 tabular-nums whitespace-nowrap" aria-live="polite">
-              <span className="text-[0.75rem] leading-4 font-medium text-[#101112]">{nav.index + 1}</span>
-              <span className="text-[0.75rem] leading-5 text-[#7c7c7c]">/</span>
-              <span className="text-[0.75rem] leading-5 text-[#7c7c7c]">{nav.total}</span>
+              <span className="text-small leading-4 font-medium text-fg-primary">{nav.index + 1}</span>
+              <span className="text-small leading-5 text-fg-secondary">/</span>
+              <span className="text-small leading-5 text-fg-secondary">{nav.total}</span>
             </span>
-            <button onClick={nav.onNext} disabled={nav.index >= nav.total - 1} aria-label="Next agent" title="Next" className="flex cursor-pointer items-center justify-center rounded-[4px] p-1 text-[#525252] transition-colors hover:bg-[#f5f5f5] disabled:cursor-default disabled:text-[#bdbdbd] disabled:hover:bg-transparent">
+            <button onClick={nav.onNext} disabled={nav.index >= nav.total - 1} aria-label="Next agent" title="Next" className="flex cursor-pointer items-center justify-center rounded-[4px] p-1 text-fg-secondary transition-colors hover:bg-[#f5f5f5] disabled:cursor-default disabled:text-fg-tertiary disabled:hover:bg-transparent">
               <ChevronUpIcon className="size-3" />
             </button>
           </>
@@ -291,7 +291,7 @@ export function DrawerTopBar({ nav, onClose, children }: { nav?: DrawerNav; onCl
       </div>
       {children}
       <button onClick={onClose} aria-label="Close" title="Close" className="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-[4px] transition-colors hover:bg-[#f5f5f5]">
-        <img alt="" src="/panel/close.svg" width={14} height={14} className="block" />
+        <svg viewBox="0 0 14 14" fill="none" aria-hidden className="size-3.5 text-fg-secondary"><path d="M3.5 3.5L7 7M7 7L10.5 10.5M7 7L10.5 3.5M7 7L3.5 10.5" stroke="currentColor" strokeLinecap="round" /></svg>
       </button>
     </div>
   )
@@ -310,13 +310,13 @@ export function DrawerTabs<T extends string>({ tabs, active, onChange }: { tabs:
           aria-selected={active === t.id}
           onClick={() => onChange(t.id)}
           className={cn(
-            "-mb-px flex shrink-0 cursor-pointer items-center justify-center gap-1 border-b border-solid px-1.5 pt-1.5 pb-3 text-[0.75rem] leading-4 transition-colors",
-            active === t.id ? "border-[#121212] text-[#121212]" : "border-transparent text-[#6c6a68] hover:text-[#121212]",
+            "-mb-px flex shrink-0 cursor-pointer items-center justify-center gap-1 border-b border-solid px-1.5 pt-1.5 pb-3 text-small leading-4 transition-colors",
+            active === t.id ? "border-[#121212] text-fg-primary" : "border-transparent text-fg-secondary hover:text-fg-primary",
           )}
         >
-          <t.icon className="size-4 shrink-0" strokeWidth={1.25} />
+          <t.icon className="size-4 shrink-0 text-fg-secondary" strokeWidth={1.25} />
           {t.label}
-          {t.count !== undefined && <span className="flex h-4 items-center rounded-[2px] bg-[#fafafa] px-1 text-[0.75rem] leading-4 text-[#7c7c7c] tabular-nums">{t.count}</span>}
+          {t.count !== undefined && <span className="flex h-4 items-center rounded-[2px] bg-[#fafafa] px-1 text-small leading-4 text-fg-secondary tabular-nums">{t.count}</span>}
         </button>
       ))}
     </div>
@@ -325,8 +325,8 @@ export function DrawerTabs<T extends string>({ tabs, active, onChange }: { tabs:
 
 export const Prop = ({ label, title, children }: { label: string; title?: string; children: React.ReactNode }) => (
   <div className="min-w-0 shrink-0 space-y-0.5">
-    <dt className="text-xs whitespace-nowrap text-muted-foreground">{label}</dt>
-    <dd className="truncate text-sm whitespace-nowrap" title={title}>{children}</dd>
+    <dt className="text-small whitespace-nowrap text-fg-secondary">{label}</dt>
+    <dd className="truncate text-body whitespace-nowrap" title={title}>{children}</dd>
   </div>
 )
 

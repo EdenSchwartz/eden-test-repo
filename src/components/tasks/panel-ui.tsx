@@ -29,19 +29,19 @@ export const ChevronUpIcon = ({ className }: { className?: string }) => (
 // A property in the header row: label (12 medium #7C7C7C), 8px, its value
 export const PanelProp = ({ label, title, children }: { label: string; title?: string; children: React.ReactNode }) => (
   <div className="flex min-w-0 shrink-0 flex-col items-start gap-2">
-    <dt className="text-[0.75rem] leading-4 font-medium whitespace-nowrap text-[#7c7c7c]">{label}</dt>
+    <dt className="text-small leading-4 font-medium whitespace-nowrap text-fg-secondary">{label}</dt>
     <dd className="flex min-h-5 items-center whitespace-nowrap" title={title}>{children}</dd>
   </div>
 )
 
 // Created by Rival: the mark (12 × 13) and the name, 8 apart
 export const PanelRival = () => (
-  <span className="flex h-5 items-center gap-2 text-[0.875rem] leading-5 text-[#101112]"><img alt="" src="/panel/rival-mark.svg" width={12} height={13} className="block" />Rival</span>
+  <span className="flex h-5 items-center gap-2 text-body leading-5 text-fg-primary"><img alt="" src="/panel/rival-mark.svg" width={12} height={13} className="block" />Rival</span>
 )
 
 // A tag (category): #FAFAFA, 20 high, 4px sides, 2px corners, Geist 12/16 #424345; 6 apart
 export const PanelTag = ({ children }: { children: React.ReactNode }) => (
-  <span className="flex h-5 shrink-0 items-center rounded-[2px] bg-[#fafafa] px-1 text-[0.75rem] leading-4 whitespace-nowrap text-[#424345]">{children}</span>
+  <span className="flex h-5 shrink-0 items-center rounded-[2px] bg-[#fafafa] px-1 text-small leading-4 whitespace-nowrap text-fg-secondary">{children}</span>
 )
 export const PanelTags = ({ items }: { items: string[] }) => <span className="flex items-start gap-1.5">{items.map((c) => <PanelTag key={c}>{c}</PanelTag>)}</span>
 
@@ -49,7 +49,7 @@ export const PanelTags = ({ items }: { items: string[] }) => <span className="fl
 export function PanelSection({ title, gap = "sm", grow, children }: { title: string; gap?: "sm" | "md"; grow?: boolean; children: React.ReactNode }) {
   return (
     <section className={cn("flex w-full flex-col items-start", gap === "sm" ? "gap-2" : "gap-3", grow && "min-h-0 flex-1")}>
-      <h3 className="text-[0.75rem] leading-4 font-medium whitespace-nowrap text-[#7c7c7c]">{title}</h3>
+      <h3 className="text-small leading-4 font-medium whitespace-nowrap text-fg-secondary">{title}</h3>
       {children}
     </section>
   )
@@ -63,7 +63,7 @@ export function PanelOutcomes({ items }: { items: Outcome[] }) {
   return (
     <ul className="flex flex-wrap items-center gap-1.5">
       {items.map((o) => (
-        <li key={o.label} className="flex h-5 items-center gap-1.5 rounded-[2px] bg-[#fafafa] px-1.5 text-[0.75rem] leading-4 whitespace-nowrap text-[#424345]">
+        <li key={o.label} className="flex h-5 items-center gap-1.5 rounded-[2px] bg-[#fafafa] px-1.5 text-small leading-4 whitespace-nowrap text-fg-secondary">
           <span aria-hidden className="h-2.5 w-0.5 shrink-0" style={{ background: toneBar[o.tone] }} />
           {titleCase(o.label)}
         </li>
@@ -75,7 +75,7 @@ export function PanelOutcomes({ items }: { items: Outcome[] }) {
 // The prompt: #FAFAFA box, #ECECEC edge, 6px corners, 12px padding, Geist Mono 12/18 #7C7C7C
 export const PanelPrompt = ({ text }: { text: string }) => (
   <div className="w-full rounded-[6px] border border-solid border-[#ececec] bg-[#fafafa] p-3">
-    <p className="font-mono text-[0.75rem] leading-[1.125rem] text-[#7c7c7c]">{text}</p>
+    <p className="font-mono text-small leading-[1.125rem] text-fg-secondary">{text}</p>
   </div>
 )
 
@@ -112,13 +112,13 @@ export function PanelSteps({ pattern }: { pattern: AgentKind[][] }) {
           <li key={kind} className={cn("relative flex flex-col items-start gap-2", i > 0 && (withPrev ? "mt-[68px]" : "mt-5"))}>
             <span className="relative flex h-6 items-center gap-1.5 rounded-[6px] border border-solid border-[#e5e3e3] bg-white/80 pr-2 pl-0.5 shadow-[0px_1px_1px_0px_rgba(56,61,69,0.08)]">
               <StepIcon kind={kind} />
-              <span className="text-[0.875rem] leading-5 font-normal whitespace-nowrap text-[#101112]">{agents[kind].name.replace(/ agent$/, "")}</span>
+              <span className="text-body leading-5 font-normal whitespace-nowrap text-fg-primary">{agents[kind].name.replace(/ agent$/, "")}</span>
             </span>
-            <span className="pr-8 pl-7 text-[0.875rem] leading-4 whitespace-nowrap text-[#525252]">{agents[kind].short}</span>
+            <span className="pr-8 pl-7 text-body leading-4 whitespace-nowrap text-fg-secondary">{agents[kind].short}</span>
             {next?.withPrev && (
               <>
                 <span aria-hidden className="absolute top-6 left-3 h-[92px] w-px bg-[#0350d0]" />
-                <span className="absolute top-[72px] left-0 flex h-4 items-center rounded-full border border-solid border-[#c6dbff] bg-[#ecf3ff] px-1.5 text-[0.625rem] whitespace-nowrap text-[#0350d0]">Parallel</span>
+                <span className="absolute top-[72px] left-0 flex h-4 items-center rounded-full border border-solid border-[#c6dbff] bg-[#ecf3ff] px-1.5 text-small whitespace-nowrap text-[#0350d0]">Parallel</span>
               </>
             )}
           </li>
@@ -130,8 +130,8 @@ export function PanelSteps({ pattern }: { pattern: AgentKind[][] }) {
 
 // Use Agent: #0350D0 with a #023FA3 edge, 4px corners, 10px top and bottom, Geist Medium 12 white, then ⌘⏎
 export const PanelUseButton = ({ onClick, wide }: { onClick: () => void; wide?: boolean }) => (
-  <button onClick={onClick} className={cn("flex cursor-pointer items-center justify-center gap-1.5 rounded-[4px] border border-solid border-[#023fa3] bg-[#0350d0] py-2.5 pr-2 pl-1.5 text-[0.75rem] leading-4 font-medium text-white drop-shadow-[0px_1px_0.5px_rgba(0,0,0,0.05)] transition-colors hover:bg-[#0a47b8]", wide ? "px-4" : "w-full")}>
+  <button onClick={onClick} className={cn("flex cursor-pointer items-center justify-center gap-1.5 rounded-[4px] border border-solid border-[#023fa3] bg-[#0350d0] py-2.5 pr-2 pl-1.5 text-small leading-4 font-medium text-white drop-shadow-[0px_1px_0.5px_rgba(0,0,0,0.05)] transition-colors hover:bg-[#0a47b8]", wide ? "px-4" : "w-full")}>
     Use Agent
-    <kbd className="rounded-[4px] bg-white/15 px-[5px] py-px font-sans text-[0.75rem] leading-4 font-medium text-white/85">⌘⏎</kbd>
+    <kbd className="rounded-[4px] bg-white/15 px-[5px] py-px font-sans text-small leading-4 font-medium text-white/85">⌘⏎</kbd>
   </button>
 )

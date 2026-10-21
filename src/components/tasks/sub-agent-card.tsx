@@ -67,17 +67,17 @@ export function SubAgentDetail({ kind, color, mark, categories, nav, template, o
       <div className="flex shrink-0 flex-col items-start gap-5 px-5 pt-5 pb-5">
         <div className="flex items-center gap-3">
           {mark ?? <ColorTile color={color ?? colorFor(`sub:${kind}`)} icon={Icon} />}
-          <h2 className="min-w-0 font-sans text-[1.5rem] leading-[26.4px] font-medium tracking-[-0.36px] whitespace-nowrap text-[#101112]">{subName(kind)}</h2>
+          <h2 className="min-w-0 font-sans text-title font-medium tracking-[-0.3px] whitespace-nowrap text-fg-primary">{subName(kind)}</h2>
         </div>
         <dl className="flex flex-nowrap items-center gap-x-10 overflow-hidden">
           {template ? <PanelProp label="Created by"><PanelRival /></PanelProp> : <PanelProp label="Status"><StatusChip status={status} /></PanelProp>}
           {categories && <PanelProp label="Category"><PanelTags items={categories} /></PanelProp>}
-          <PanelProp label="Used in"><span className="text-[0.875rem] leading-5 text-[#101112]">{used.length} {used.length === 1 ? "agent" : "agents"}</span></PanelProp>
+          <PanelProp label="Used in"><span className="text-body leading-5 text-fg-primary">{used.length} {used.length === 1 ? "agent" : "agents"}</span></PanelProp>
         </dl>
       </div>
-      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto border-t border-solid border-[#ececec] px-5 py-5 text-sm">
+      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto border-t border-solid border-[#ececec] px-5 py-5 text-body">
         <PanelSection title="What it does">
-          <p className="text-[0.875rem] leading-[21px] text-pretty text-[#101112]">{a.role}.</p>
+          <p className="text-body leading-[21px] text-pretty text-fg-primary">{a.role}.</p>
         </PanelSection>
         {subOutcomes[kind] && (
           <PanelSection title="Outcomes">
@@ -86,7 +86,7 @@ export function SubAgentDetail({ kind, color, mark, categories, nav, template, o
         )}
         <PanelSection title="Part of" gap="md">
           {used.length === 0 ? (
-            <p className="text-muted-foreground">No agent uses it yet.</p>
+            <p className="text-fg-secondary">No agent uses it yet.</p>
           ) : (
             <ul className="divide-y divide-hairline overflow-hidden rounded-xl border bg-card">
               {used.map((sa) => {
@@ -96,10 +96,10 @@ export function SubAgentDetail({ kind, color, mark, categories, nav, template, o
                     <button onClick={() => onOpenAgent(sa)} className="flex w-full cursor-pointer items-center gap-3 px-3.5 py-2.5 text-left transition-colors hover:bg-wash/45">
                       <ColorTile color={colorFor(sa.name)} icon={SaIcon} size="sm" />
                       <span className="min-w-0 flex-1">
-                        <span className="block font-medium">{sa.name}</span>
-                        <span className="block text-xs text-muted-foreground">{sa.custom ? "Your agent" : "Rival template"}</span>
+                        <span className="block text-body font-medium text-fg-primary">{sa.name}</span>
+                        <span className="block text-small text-fg-secondary">{sa.custom ? "Your agent" : "Rival template"}</span>
                       </span>
-                      <ChevronRight className="size-3.5 text-muted-foreground" />
+                      <ChevronRight className="size-3.5 text-fg-secondary" />
                     </button>
                   </li>
                 )
