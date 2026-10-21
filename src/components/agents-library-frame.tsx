@@ -605,10 +605,10 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
       onClick={onSelect}
       aria-pressed={selected}
       {...tilt}
-      className="tilt-card group relative flex h-[12.5625rem] cursor-pointer flex-col items-stretch overflow-hidden rounded-[4px] border border-solid border-[#f0f0f0] bg-white text-left whitespace-nowrap hover:border-[#e4e4e4] aria-pressed:border-[#2e4eca]/40"
+      className="tilt-card group relative flex cursor-pointer flex-col items-stretch overflow-hidden rounded-[4px] border border-solid border-[#f0f0f0] bg-white text-left whitespace-nowrap hover:border-[#e4e4e4] aria-pressed:border-[#2e4eca]/40"
     >
       <span aria-hidden className="tilt-light" />
-      <span className={cn("flex w-full flex-1 flex-col items-start justify-between gap-3 p-5 transition-opacity", off && "opacity-50")}>
+      <span className={cn("flex w-full flex-col items-start gap-4 p-5 transition-opacity", off && "opacity-50")}>
         <span className="flex w-full min-w-0 items-center gap-3.5">
           <IdeaAMark index={ideaIndex(from)} size={60} />
           <span className="flex min-w-0 flex-1 flex-col justify-center gap-2">
