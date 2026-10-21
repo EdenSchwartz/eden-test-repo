@@ -130,13 +130,12 @@ export function IdeaASquareMark({ index }: { index: number }) {
   const [fill, edge] = ideaAColors[index % ideaAColors.length]
   const m = markFor(index)
   return (
-    <span aria-hidden className="grid size-[2.625rem] shrink-0 place-items-center overflow-hidden rounded-[4px] border-[1.5px] border-solid shadow-[0px_2px_0px_0px_#efeff0]" style={{ background: fill, borderColor: edge }}>
-      <span className="grid size-6 place-items-center">
-        <span className="grid place-items-center" style={{ transform: "scale(0.8)" }}>
-          {m < figmaMarks.length
-            ? <img alt="" src={figmaMarks[m].src} width={figmaMarks[m].w} height={figmaMarks[m].h} className="block max-w-none" />
-            : <GridMark rows={gridMarks[m - figmaMarks.length]} />}
-        </span>
+    <span aria-hidden className="relative block size-[2.625rem] shrink-0 overflow-hidden rounded-[4px] border-[1.5px] border-solid shadow-[0px_2px_0px_0px_#efeff0]" style={{ background: fill, borderColor: edge }}>
+      {/* dead centre of the square, whatever the shape's own size (scaled to ~24px) */}
+      <span className="absolute top-1/2 left-1/2 block" style={{ transform: "translate(-50%, -50%) scale(0.8)" }}>
+        {m < figmaMarks.length
+          ? <img alt="" src={figmaMarks[m].src} width={figmaMarks[m].w} height={figmaMarks[m].h} className="block max-w-none" />
+          : <GridMark rows={gridMarks[m - figmaMarks.length]} />}
       </span>
     </span>
   )

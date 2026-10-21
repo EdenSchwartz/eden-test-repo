@@ -343,7 +343,7 @@ export function DrawerTabs<T extends string>({ tabs, active, onChange }: { tabs:
           style={{
             width: line.width,
             transform: `translateX(${line.left}px)`,
-            transition: line.ready ? "transform 520ms cubic-bezier(0.22, 1, 0.36, 1), width 520ms cubic-bezier(0.22, 1, 0.36, 1)" : "none",
+            transition: line.ready ? "transform 280ms cubic-bezier(0.22, 1, 0.36, 1), width 280ms cubic-bezier(0.22, 1, 0.36, 1)" : "none",
           }}
         />
       )}
