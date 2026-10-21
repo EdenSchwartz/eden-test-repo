@@ -3,6 +3,7 @@ import { agents, type AgentKind } from "@/components/chat/agents"
 import { colorFor } from "@/components/tasks/color-tile"
 import type { Outcome } from "@/data/outcomes"
 import { cn } from "@/lib/utils"
+import { Hint } from "@/components/ui/hint"
 import { PixelType } from "@/components/tasks/pixel-type"
 import { FluidGrid } from "@/components/fluid-grid"
 
@@ -96,9 +97,9 @@ export const PanelPrompt = ({ text, play = true }: { text: string; play?: boolea
 
 // How it works: each step a small pill as in Figma (24 high, 2px left / 8px right, gap 6; white 80%, a #E5E3E3 edge
 // drawn inside so it takes no room — the 20px icon square has 2px all round — 6px corners, soft shadow) with its icon on a
-// tinted 20px square and the name (Geist Regular 14), then what it does under it (14/16 #525252, 28px in). A faint rail
-// (#E5E3E3 at 70%) runs down through the icons. Steps that run together are joined by a blue line with a "Parallel" pill
-// on it, and sit further apart (68px instead of 20).
+// tinted 20px square and the name (Geist Regular 14); what it does shows in a tooltip to its right, and clicking it
+// opens the sub agent. 12px apart. A faint rail (#E5E3E3 at 70%) runs down through the icons. Steps that run together
+// are joined by a blue line with a "Parallel" pill on it, and sit 36px apart to make room for it.
 const stepLook: Partial<Record<AgentKind, { src: string; bg: string }>> = {
   correlation: { src: "/panel/step-correlation.svg", bg: "rgba(239,176,118,0.2)" },
   exploitability: { src: "/panel/step-exploitability.svg", bg: "#fcf8e3" },
@@ -136,23 +137,27 @@ export function PanelSteps({ pattern, onOpen }: { pattern: AgentKind[][]; onOpen
   const items = pattern.flatMap((group) => group.map((kind, i) => ({ kind, withPrev: i > 0 })))
   return (
     <ol className="relative flex flex-col items-start">
-      <span aria-hidden className="absolute top-[25px] bottom-10 left-3 w-px bg-[#e5e3e3]/70" />
+      <span aria-hidden className="absolute top-[25px] bottom-4 left-3 w-px bg-[#e5e3e3]/70" />
       {items.map(({ kind, withPrev }, i) => {
         const next = items[i + 1]
         return (
-          <li key={kind} className={cn("relative flex flex-col items-start gap-2", i > 0 && (withPrev ? "mt-[68px]" : "mt-5"))}>
+          <li key={kind} className={cn("relative flex flex-col items-start", i > 0 && (withPrev ? "mt-9" : "mt-3"))}>
             {(() => {
               const pill = "relative flex h-6 items-center gap-1.5 rounded-[6px] bg-white/80 pr-2 pl-0.5 shadow-[inset_0_0_0_1px_#e5e3e3,0px_1px_1px_0px_rgba(56,61,69,0.08)]"
               const body = <><StepIcon kind={kind} /><span className="text-body leading-5 font-normal whitespace-nowrap text-fg-primary">{agents[kind].name.replace(/ agent$/, "")}</span></>
-              return onOpen
-                ? <button onClick={() => onOpen(kind)} className={cn(pill, "cursor-pointer transition-shadow hover:bg-white hover:shadow-[inset_0_0_0_1px_#d6d3d1,0px_1px_2px_0px_rgba(56,61,69,0.12)]")}>{body}</button>
-                : <span className={pill}>{body}</span>
+              // what it does, in a tooltip to the right; the pill itself opens the sub agent
+              return (
+                <Hint label={agents[kind].short} side="right">
+                  {onOpen
+                    ? <button onClick={() => onOpen(kind)} className={cn(pill, "cursor-pointer transition-shadow hover:bg-white hover:shadow-[inset_0_0_0_1px_#d6d3d1,0px_1px_2px_0px_rgba(56,61,69,0.12)]")}>{body}</button>
+                    : <span className={pill}>{body}</span>}
+                </Hint>
+              )
             })()}
-            <span className="pr-8 pl-7 text-body leading-4 whitespace-nowrap text-fg-secondary">{agents[kind].short}</span>
             {next?.withPrev && (
               <>
-                <span aria-hidden className="absolute top-6 left-3 h-[92px] w-px bg-[#0350d0]" />
-                <span className="absolute top-[72px] left-0 flex h-4 items-center rounded-full border border-solid border-[#c6dbff] bg-[#ecf3ff] px-1.5 text-small whitespace-nowrap text-[#0350d0]">Parallel</span>
+                <span aria-hidden className="absolute top-6 left-3 h-9 w-px bg-[#0350d0]" />
+                <span className="absolute top-[34px] left-0 flex h-4 items-center rounded-full border border-solid border-[#c6dbff] bg-[#ecf3ff] px-1.5 text-small whitespace-nowrap text-[#0350d0]">Parallel</span>
               </>
             )}
           </li>
