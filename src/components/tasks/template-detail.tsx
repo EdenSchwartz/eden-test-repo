@@ -66,7 +66,7 @@ export function TemplateDetail({ sa, color, mark, nav, categories, capabilities,
 
       {/* ---------- Name + properties ---------- */}
       <div className={cn("flex shrink-0 flex-col items-start gap-5 py-5", pad)}>
-        {/* the mark (40px, centred: its edges meet the visible top and bottom of the two lines), then the name (20/20) and 6px under it the one-line description
+        {/* the mark (44px, centred on the two lines), then the name (20/20) and 6px under it the one-line description
             (14/20, secondary) */}
         <div className="flex w-full min-w-0 items-center gap-3">
           {mark ?? <ColorTile color={accent} icon={Icon} />}

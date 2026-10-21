@@ -76,11 +76,12 @@ const markCount = gridMarks.length
 const designOrder = [2, 0, 1, 3, 1, 0]
 const markFor = (i: number) => i < designOrder.length ? designOrder[i] : (4 + (i - designOrder.length)) % markCount
 
-function GridMark({ rows, color = "#fff" }: { rows: string[]; color?: string }) {
+// fill: take the size of its box (the square marks set it on the pixel grid); otherwise 30px
+function GridMark({ rows, color = "#fff", fill }: { rows: string[]; color?: string; fill?: boolean }) {
   const n = GRID
   const cell = 30 / n
   return (
-    <svg aria-hidden viewBox="0 0 30 30" className="size-[1.875rem] shrink-0">
+    <svg aria-hidden viewBox="0 0 30 30" shapeRendering="crispEdges" className={fill ? "block size-full" : "size-[1.875rem] shrink-0"}>
       {rows.flatMap((r, y) => [...r].map((c, x) => c === "#" && (
         <rect key={`${x}-${y}`} x={(x + (n - r.length) / 2) * cell} y={(y + (n - rows.length) / 2) * cell} width={cell} height={cell} fill={color} />
       )))}
@@ -129,14 +130,21 @@ export function IdeaBMark({ index, size = 64 }: { index: number; size?: number }
 // agent's colour (10%) with a hairline in it (22%), flat (no shadow), and the pixel shape in the colour's deep tone
 // (the shapes are the hero, the colour only a quiet cue). 42px with 4px corners in the panel; `size` scales it for
 // the cards (60px, 6px corners), the shape keeping the same share of the square.
+// The pixels sit on whole pixels: the cell is a whole number of px (about 60% of the inside), the square is nudged
+// up 1px if needed so the space around the shape is even, and the shape is placed at a whole-pixel offset — crisp,
+// no half-pixel blur, every block the same size.
 export function IdeaASquareMark({ index, size = 42 }: { index: number; size?: number }) {
   const [fill, edge] = ideaAColors[index % ideaAColors.length]
   const m = markFor(index)
+  const cell = Math.max(2, Math.round(((size - 2) * 0.6) / GRID))
+  const shape = cell * GRID
+  const box = (size - 2 - shape) % 2 === 0 ? size : size + 1
+  const offset = (box - 2 - shape) / 2
+  const rem = (px: number) => `${px / 16}rem`
   return (
-    <span aria-hidden className="relative block shrink-0 overflow-hidden border border-solid" style={{ width: `${size / 16}rem`, height: `${size / 16}rem`, borderRadius: size > 42 ? 6 : 4, background: `color-mix(in oklch, ${fill} 10%, white)`, borderColor: `color-mix(in oklch, ${fill} 22%, white)` }}>
-      {/* dead centre of the square (the 30px shape box scaled to ~24px), in the deep tone */}
-      <span className="absolute top-1/2 left-1/2 block" style={{ transform: `translate(-50%, -50%) scale(${(0.8 * size) / 42})` }}>
-        <GridMark rows={gridMarks[m]} color={edge} />
+    <span aria-hidden className="relative block shrink-0 overflow-hidden border border-solid" style={{ width: rem(box), height: rem(box), borderRadius: box > 46 ? 6 : 4, background: `color-mix(in oklch, ${fill} 10%, white)`, borderColor: `color-mix(in oklch, ${fill} 22%, white)` }}>
+      <span className="absolute block" style={{ left: rem(offset), top: rem(offset), width: rem(shape), height: rem(shape) }}>
+        <GridMark rows={gridMarks[m]} color={edge} fill />
       </span>
     </span>
   )
