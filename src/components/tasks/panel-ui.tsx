@@ -99,7 +99,7 @@ export const PanelPrompt = ({ text, play = true }: { text: string; play?: boolea
 // drawn inside so it takes no room — the 20px icon square has 2px all round — 6px corners, soft shadow) with its icon on a
 // tinted 20px square and the name (Geist Regular 14); what it does shows in a tooltip to its right, and clicking it
 // opens the sub agent. 20px apart. A faint rail (#E5E3E3 at 70%) runs down through the icons. Steps that run together
-// are joined by a blue line with a "Parallel" pill on it, and sit 48px apart to make room for it.
+// are joined by a blue line with a "Parallel" pill on it, and sit 60px apart to make room for it.
 const stepLook: Partial<Record<AgentKind, { src: string; bg: string }>> = {
   correlation: { src: "/panel/step-correlation.svg", bg: "rgba(239,176,118,0.2)" },
   exploitability: { src: "/panel/step-exploitability.svg", bg: "#fcf8e3" },
@@ -141,7 +141,7 @@ export function PanelSteps({ pattern, onOpen }: { pattern: AgentKind[][]; onOpen
       {items.map(({ kind, withPrev }, i) => {
         const next = items[i + 1]
         return (
-          <li key={kind} className={cn("relative flex flex-col items-start", i > 0 && (withPrev ? "mt-12" : "mt-5"))}>
+          <li key={kind} className={cn("relative flex flex-col items-start", i > 0 && (withPrev ? "mt-15" : "mt-5"))}>
             {(() => {
               const pill = "relative flex h-6 items-center gap-1.5 rounded-[6px] bg-white/80 pr-2 pl-0.5 shadow-[inset_0_0_0_1px_#e5e3e3,0px_1px_1px_0px_rgba(56,61,69,0.08)]"
               const body = <><StepIcon kind={kind} /><span className="text-body leading-5 font-normal whitespace-nowrap text-fg-primary">{agents[kind].name.replace(/ agent$/, "")}</span></>
@@ -163,8 +163,8 @@ export function PanelSteps({ pattern, onOpen }: { pattern: AgentKind[][]; onOpen
             })()}
             {next?.withPrev && (
               <>
-                <span aria-hidden className="absolute top-6 left-3 h-12 w-px bg-[#0350d0]" />
-                <span className="absolute top-10 left-0 flex h-4 items-center rounded-full border border-solid border-[#c6dbff] bg-[#ecf3ff] px-1.5 text-small whitespace-nowrap text-[#0350d0]">Parallel</span>
+                <span aria-hidden className="absolute top-6 left-3 h-15 w-px bg-[#0350d0]" />
+                <span className="absolute top-[46px] left-0 flex h-4 items-center rounded-full border border-solid border-[#c6dbff] bg-[#ecf3ff] px-1.5 text-small whitespace-nowrap text-[#0350d0]">Parallel</span>
               </>
             )}
           </li>
