@@ -72,13 +72,13 @@ const markCount = figmaMarks.length + gridMarks.length
 const designOrder = [0, 2, 1, 3, 1, 0]
 const markFor = (i: number) => i < designOrder.length ? designOrder[i] : (figmaMarks.length + (i - designOrder.length)) % markCount
 
-function GridMark({ rows }: { rows: string[] }) {
+function GridMark({ rows, color = "#fff" }: { rows: string[]; color?: string }) {
   const n = Math.max(rows.length, ...rows.map((r) => r.length))
   const cell = 30 / n
   return (
     <svg aria-hidden width="30" height="30" viewBox="0 0 30 30" className="shrink-0">
       {rows.flatMap((r, y) => [...r].map((c, x) => c === "#" && (
-        <rect key={`${x}-${y}`} x={(x + (n - r.length) / 2) * cell} y={(y + (n - rows.length) / 2) * cell} width={cell} height={cell} fill="#fff" />
+        <rect key={`${x}-${y}`} x={(x + (n - r.length) / 2) * cell} y={(y + (n - rows.length) / 2) * cell} width={cell} height={cell} fill={color} />
       )))}
     </svg>
   )
@@ -124,19 +124,21 @@ export function IdeaBMark({ index, size = 64 }: { index: number; size?: number }
   )
 }
 
-// The side panel's mark (Figma "20.10 - Side Panel", node 68:17737): a 42px rounded square (4px corners) in the
-// agent's colour, a 1.5px darker edge, a 2px #EFEFF0 shadow under it, the pixel shape at 24px
-// `size` scales it for the cards (60px there, corners 6px); the shape keeps the same share of the square
+// The square mark (side panel, Figma node 68:17737; idea A cards): tinted, not filled — a very light wash of the
+// agent's colour (10%) with a hairline in it (22%), flat (no shadow), and the pixel shape in the colour's deep tone
+// (the shapes are the hero, the colour only a quiet cue). 42px with 4px corners in the panel; `size` scales it for
+// the cards (60px, 6px corners), the shape keeping the same share of the square.
 export function IdeaASquareMark({ index, size = 42 }: { index: number; size?: number }) {
   const [fill, edge] = ideaAColors[index % ideaAColors.length]
   const m = markFor(index)
   return (
-    <span aria-hidden className="relative block shrink-0 overflow-hidden border-[1.5px] border-solid shadow-[0px_2px_0px_0px_#efeff0]" style={{ width: size, height: size, borderRadius: size > 42 ? 6 : 4, background: fill, borderColor: edge }}>
-      {/* dead centre of the square, whatever the shape's own size (scaled to ~24px) */}
+    <span aria-hidden className="relative block shrink-0 overflow-hidden border border-solid" style={{ width: size, height: size, borderRadius: size > 42 ? 6 : 4, background: `color-mix(in oklch, ${fill} 10%, white)`, borderColor: `color-mix(in oklch, ${fill} 22%, white)` }}>
+      {/* dead centre of the square, whatever the shape's own size (scaled to ~24px); the Figma shapes are white
+          SVGs, so they're drawn as a mask filled with the deep tone */}
       <span className="absolute top-1/2 left-1/2 block" style={{ transform: `translate(-50%, -50%) scale(${(0.8 * size) / 42})` }}>
         {m < figmaMarks.length
-          ? <img alt="" src={figmaMarks[m].src} width={figmaMarks[m].w} height={figmaMarks[m].h} className="block max-w-none" />
-          : <GridMark rows={gridMarks[m - figmaMarks.length]} />}
+          ? <span className="block" style={{ width: figmaMarks[m].w, height: figmaMarks[m].h, background: edge, mask: `url(${figmaMarks[m].src}) center / 100% 100% no-repeat`, WebkitMask: `url(${figmaMarks[m].src}) center / 100% 100% no-repeat` }} />
+          : <GridMark rows={gridMarks[m - figmaMarks.length]} color={edge} />}
       </span>
     </span>
   )
