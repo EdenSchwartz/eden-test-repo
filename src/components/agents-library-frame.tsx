@@ -17,6 +17,8 @@ import type { TaskStatus } from "@/lib/task-status"
 import { cn } from "@/lib/utils"
 import { APP, CLOUD, GRC, THREATS, VM, CategoryTag } from "@/components/category-tag"
 import { CapabilityMarks, type Capability } from "@/components/capability"
+import { IdeaALogoChip, IdeaAMark, IdeaATag, figmaLogos, ideaAColors } from "@/components/agent-card-a"
+import { setCardLook, useCardLook, type CardLook } from "@/lib/card-look"
 
 /*
  * The header box's grid lit by a fluid. A small Navier-Stokes simulation (Jos Stam's "stable fluids":
@@ -253,7 +255,8 @@ export function AgentsLibraryFrame() {
   const agent = picked?.agent ? getSuperAgent(picked.agent) : undefined
   // The drawer's icon tile keeps the picked card's colour
   const pickedLib = [...library, ...subLibrary].find((a) => a.name === picked?.name)
-  const pickedColor = pickedLib ? colorOf(pickedLib) : undefined
+  const look = useCardLook()
+  const pickedColor = pickedLib ? (look === "a" ? ideaAColors[ideaIndex(pickedLib) % ideaAColors.length][0] : colorOf(pickedLib)) : undefined
   // The drawer's ↓ 1 / 9 ↑: steps through the cards on screen (this tab, after the search), in their order
   const at = list.findIndex((a) => a.name === picked?.name)
   const nav = { index: at, total: list.length, onPrev: () => at > 0 && pick(list[at - 1]), onNext: () => at < list.length - 1 && pick(list[at + 1]) }
@@ -275,7 +278,10 @@ export function AgentsLibraryFrame() {
             <button key={id} role="tab" aria-selected={tab === id} onClick={() => switchTab(id)} className="lib-tab">{label}</button>
           ))}
         </div>
-        <LibrarySearch value={query} onChange={setQuery} />
+        <div className="ml-auto flex items-center gap-4">
+          <CardLookSwitch />
+          <LibrarySearch value={query} onChange={setQuery} />
+        </div>
       </div>
       {/* The cards area: plain white space around the cards, nothing in the margins */}
       <div className="relative flex w-full flex-1">
@@ -304,6 +310,23 @@ export function AgentsLibraryFrame() {
           {stackedAgent && <TemplateDetail key={stackedAgent.id} sa={stackedAgent} {...drawerProps(library.find((l) => l.templateId === stackedAgent.id))} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={() => setStackedOpen(false)} />}
         </SheetContent>
       </Sheet>
+    </div>
+  )
+}
+
+// While we explore card ideas: Current · Idea A · Idea B, as small tabs left of Search (remembered in this browser)
+function CardLookSwitch() {
+  const look = useCardLook()
+  const opts: [CardLook, string][] = [["current", "Current"], ["a", "Idea A"], ["b", "Idea B"]]
+  return (
+    <div role="tablist" aria-label="Card idea" className="flex items-center gap-1">
+      <span className="mr-1 text-[0.75rem] leading-4 text-[#a2a4a8]">Card</span>
+      {opts.map(([id, label]) => (
+        <button key={id} role="tab" aria-selected={look === id} disabled={id === "b"} title={id === "b" ? "Coming next" : undefined} onClick={() => withTransition(() => setCardLook(id))}
+          className="lib-tab !h-6 !text-[0.75rem] disabled:cursor-default disabled:opacity-40 disabled:hover:border-transparent disabled:hover:bg-transparent">
+          {label}
+        </button>
+      ))}
     </div>
   )
 }
@@ -465,11 +488,11 @@ function AgentTile({ seed, hue }: { seed: string; hue: number }) {
  *           Labels Geist 11 uppercase #A2A4A8, values 14 #121212. One line, never wraps.
  * Click: opens its side panel.
  */
-type Tool = "wiz" | "snyk" | "github" | "defender" | "paloalto" | "semgrep"
+type Tool = "wiz" | "snyk" | "github" | "defender" | "paloalto" | "semgrep" | "okta"
 // category: one or two; ctx: the integrations it pulls its data from (sources only)
 type Meta = { categories: string[]; cap: Capability[]; ctx: Tool[] }
 const meta: Record<string, Meta> = {
-  "Triage Hunter": { categories: [APP, VM], cap: ["memory", "graph"], ctx: ["defender", "paloalto"] },
+  "Triage Hunter": { categories: [APP, VM], cap: ["memory", "graph"], ctx: ["defender", "okta", "paloalto"] },
   "Code CVE Exploitability": { categories: [VM, APP], cap: ["graph", "sandbox"], ctx: ["snyk", "github"] },
   "Cloud Exploitability": { categories: [CLOUD, VM], cap: ["graph", "internet"], ctx: ["wiz", "defender", "paloalto"] },
   "Code SAST Exploitability": { categories: [APP], cap: ["graph", "sandbox"], ctx: ["semgrep", "github"] },
@@ -508,9 +531,9 @@ const drawerProps = (a?: LibraryAgent) => {
 }
 
 // Small marks for the tools an agent reads from, in each tool's colours (simplified, not the official logos)
-const toolNames: Record<Tool, string> = { wiz: "Wiz", snyk: "Snyk", github: "GitHub", defender: "Microsoft Defender", paloalto: "Palo Alto Prisma", semgrep: "Semgrep" }
+const toolNames: Record<Tool, string> = { wiz: "Wiz", snyk: "Snyk", github: "GitHub", defender: "Microsoft Defender", paloalto: "Palo Alto Prisma", semgrep: "Semgrep", okta: "Okta" }
 function ToolMark({ tool }: { tool: Tool }) {
-  const art: Record<Tool, React.ReactNode> = {
+  const art: Record<Exclude<Tool, "okta">, React.ReactNode> = {
     defender: <path d="M8 1.2 2.6 3.1v4.3c0 3.4 2.3 6.1 5.4 7.4 3.1-1.3 5.4-4 5.4-7.4V3.1L8 1.2Zm-.6 2.1v4.4H3.8V4.1l3.6-.8Zm1.2 0 3.6.8v3.6H8.6V3.3ZM3.9 8.9h3.5v4.2C5.5 12.1 4.2 10.6 3.9 8.9Zm4.7 0h3.5c-.3 1.7-1.6 3.2-3.5 4.2V8.9Z" fill="#0078d4" />,
     paloalto: <g fill="#fa582d"><path d="m6.2 2.4 3 3-5.3 5.3-3-3z" /><path d="m11.1 5.3 3 3-5.3 5.3-3-3z" /></g>,
     wiz: <><rect x="1" y="1" width="14" height="14" rx="3.5" fill="#1b4dff" /><text x="8" y="11.6" textAnchor="middle" fontSize="9.5" fontWeight="800" fontFamily="Geist, sans-serif" fill="#fff">W</text></>,
@@ -518,12 +541,25 @@ function ToolMark({ tool }: { tool: Tool }) {
     semgrep: <><circle cx="8" cy="8" r="7" fill="#2bc28a" /><circle cx="8" cy="8" r="2.6" fill="#fff" /></>,
     github: <><circle cx="8" cy="8" r="6.6" fill="#24292f" /><path d="M6.2 11.6v-1.4c-1.6.3-2-.7-2-.7-.3-.7-.7-.9-.7-.9-.6-.4 0-.4 0-.4.6 0 1 .7 1 .7.5.9 1.4.7 1.7.5 0-.4.2-.7.4-.8-1.3-.1-2.6-.6-2.6-2.8 0-.6.2-1.1.6-1.5-.1-.2-.3-.8 0-1.5 0 0 .5-.2 1.6.6a5.4 5.4 0 0 1 2.9 0c1.1-.8 1.6-.6 1.6-.6.3.7.1 1.3 0 1.5.4.4.6.9.6 1.5 0 2.2-1.3 2.7-2.6 2.8.2.2.4.5.4 1v1.9" fill="#fff" /></>,
   }
+  if (tool === "okta") return <span title={toolNames.okta} className="relative size-4 shrink-0">{figmaLogos.okta}</span>
   return (
     <span title={toolNames[tool]} className="grid size-4 shrink-0 place-items-center">
       <svg viewBox="0 0 16 16" className="size-4" role="img" aria-label={toolNames[tool]}>{art[tool]}</svg>
     </span>
   )
 }
+
+// Idea A's context logos: the design's own three where they exist, else the same marks as above, 14px
+function IdeaALogo({ tool }: { tool: Tool }) {
+  if (tool === "defender" || tool === "okta" || tool === "paloalto") return figmaLogos[tool]
+  return <span className="absolute inset-0"><ToolMarkArt tool={tool} /></span>
+}
+function ToolMarkArt({ tool }: { tool: Exclude<Tool, "okta" | "defender" | "paloalto"> }) {
+  const m = <ToolMark tool={tool} />
+  return <span className="[&>span]:size-3.5 [&_svg]:size-3.5">{m}</span>
+}
+// An agent's index in the library (agents, then sub agents): its colour and mark in idea A
+const ideaIndex = (a: LibraryAgent) => { const i = [...library, ...subLibrary].indexOf(a); return i >= 0 ? i : hash(a.name) % ideaAColors.length }
 
 /*
  * The cards' hover, after the reference video: the card turns toward the pointer in real perspective (6° at most),
@@ -563,6 +599,35 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
   const tint = colors.has(from) ? colorOf(from) : colorFor(a.name)
   const { isEnabled } = useEnabled()
   const off = !!mine && !isEnabled(mine.enabledKey)
+  const look = useCardLook()
+  if (look === "a") return (
+    <button
+      onClick={onSelect}
+      aria-pressed={selected}
+      {...tilt}
+      className="tilt-card group relative flex cursor-pointer flex-col items-stretch overflow-hidden rounded-[4px] border border-solid border-[#f0f0f0] bg-white text-left whitespace-nowrap hover:border-[#e4e4e4] aria-pressed:border-[#2e4eca]/40"
+    >
+      <span aria-hidden className="tilt-light" />
+      <span className={cn("flex w-full flex-col items-start gap-3 p-4 transition-opacity", off && "opacity-50")}>
+        <span className="flex w-full min-w-0 items-center gap-3">
+          <IdeaAMark index={ideaIndex(from)} />
+          <span className="flex min-w-0 flex-1 flex-col justify-center gap-1.5">
+            <span className="flex w-full min-w-0 items-center">
+              <span className="min-w-0 flex-1 truncate text-[1rem] leading-4 font-medium text-[#121212]">{a.name}</span>
+              {mine && <span className="mr-2 shrink-0"><StatusChip status={mine.status} /></span>}
+              <span className="flex shrink-0 items-center">
+                {m.ctx.map((t, i) => <IdeaALogoChip key={t} name={toolNames[t]} last={i === m.ctx.length - 1}><IdeaALogo tool={t} /></IdeaALogoChip>)}
+              </span>
+            </span>
+            <span className="flex min-w-0 items-start gap-1.5 overflow-hidden">
+              {m.categories.map((c) => <IdeaATag key={c}>{c}</IdeaATag>)}
+            </span>
+          </span>
+        </span>
+        <span className="line-clamp-2 min-h-8 w-full text-[0.875rem] leading-4 whitespace-normal text-pretty text-[#6c6a68]">{a.tagline}</span>
+      </span>
+    </button>
+  )
   return (
     <button
       onClick={onSelect}
