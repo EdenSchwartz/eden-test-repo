@@ -3,6 +3,7 @@ import { agents, type AgentKind } from "@/components/chat/agents"
 import { colorFor } from "@/components/tasks/color-tile"
 import type { Outcome } from "@/data/outcomes"
 import { cn } from "@/lib/utils"
+import { PixelType } from "@/components/tasks/pixel-type"
 
 /*
  * The agent side panel, after the Figma design "Agent side panel — Triage Hunter (idea A)" (page "20.10 - Side Panel",
@@ -77,7 +78,8 @@ export function PanelOutcomes({ items }: { items: Outcome[] }) {
 // The prompt: #FAFAFA box, #ECECEC edge, 6px corners, 12px padding, Geist Mono 12/18 #7C7C7C
 export const PanelPrompt = ({ text }: { text: string }) => (
   <div className="w-full rounded-[6px] border border-solid border-[#ececec] bg-[#fafafa] p-3">
-    <p className="font-mono text-small leading-[1.125rem] text-fg-secondary">{text}</p>
+    {/* types itself in with a pixel edge each time the panel shows an agent (pixel-type.tsx) */}
+    <PixelType key={text} text={text} className="font-mono text-small leading-[1.125rem] text-fg-secondary" />
   </div>
 )
 
