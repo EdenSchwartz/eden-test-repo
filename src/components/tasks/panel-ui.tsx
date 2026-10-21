@@ -89,8 +89,8 @@ export const PanelPrompt = ({ text, play = true }: { text: string; play?: boolea
   </div>
 )
 
-// How it works: each step a small pill (white 80%, #E5E3E3 edge, 6px corners, 26 high so the icon has 2px all round,
-// soft shadow) with its icon on a
+// How it works: each step a small pill as in Figma (24 high, 2px left / 8px right, gap 6; white 80%, a #E5E3E3 edge
+// drawn inside so it takes no room — the 20px icon square has 2px all round — 6px corners, soft shadow) with its icon on a
 // tinted 20px square and the name (Geist Regular 14), then what it does under it (14/16 #525252, 28px in). A faint rail
 // (#E5E3E3 at 70%) runs down through the icons. Steps that run together are joined by a blue line with a "Parallel" pill
 // on it, and sit further apart (68px instead of 20).
@@ -108,7 +108,7 @@ function StepIcon({ kind }: { kind: AgentKind }) {
   const Icon = agents[kind].icon
   return (
     <span className="grid size-5 shrink-0 place-items-center rounded-[4px]" style={{ background: look?.bg ?? `color-mix(in oklch, ${color} 14%, white)` }}>
-      {look ? <img alt="" src={look.src} width={14} height={14} className="block" /> : <Icon className="size-3.5" style={{ color }} strokeWidth={2} />}
+      {look ? <img alt="" src={look.src} width={14} height={14} className="block size-3.5" /> : <Icon className="size-3.5" style={{ color }} strokeWidth={2} />}
     </span>
   )
 }
@@ -116,20 +116,20 @@ export function PanelSteps({ pattern }: { pattern: AgentKind[][] }) {
   const items = pattern.flatMap((group) => group.map((kind, i) => ({ kind, withPrev: i > 0 })))
   return (
     <ol className="relative flex flex-col items-start">
-      <span aria-hidden className="absolute top-[27px] bottom-10 left-3 w-px bg-[#e5e3e3]/70" />
+      <span aria-hidden className="absolute top-[25px] bottom-10 left-3 w-px bg-[#e5e3e3]/70" />
       {items.map(({ kind, withPrev }, i) => {
         const next = items[i + 1]
         return (
           <li key={kind} className={cn("relative flex flex-col items-start gap-2", i > 0 && (withPrev ? "mt-[68px]" : "mt-5"))}>
-            <span className="relative flex h-[26px] items-center gap-1.5 rounded-[6px] border border-solid border-[#e5e3e3] bg-white/80 pr-2 pl-0.5 shadow-[0px_1px_1px_0px_rgba(56,61,69,0.08)]">
+            <span className="relative flex h-6 items-center gap-1.5 rounded-[6px] bg-white/80 pr-2 pl-0.5 shadow-[inset_0_0_0_1px_#e5e3e3,0px_1px_1px_0px_rgba(56,61,69,0.08)]">
               <StepIcon kind={kind} />
               <span className="text-body leading-5 font-normal whitespace-nowrap text-fg-primary">{agents[kind].name.replace(/ agent$/, "")}</span>
             </span>
             <span className="pr-8 pl-7 text-body leading-4 whitespace-nowrap text-fg-secondary">{agents[kind].short}</span>
             {next?.withPrev && (
               <>
-                <span aria-hidden className="absolute top-[26px] left-3 h-[92px] w-px bg-[#0350d0]" />
-                <span className="absolute top-[76px] left-0 flex h-4 items-center rounded-full border border-solid border-[#c6dbff] bg-[#ecf3ff] px-1.5 text-small whitespace-nowrap text-[#0350d0]">Parallel</span>
+                <span aria-hidden className="absolute top-6 left-3 h-[92px] w-px bg-[#0350d0]" />
+                <span className="absolute top-[72px] left-0 flex h-4 items-center rounded-full border border-solid border-[#c6dbff] bg-[#ecf3ff] px-1.5 text-small whitespace-nowrap text-[#0350d0]">Parallel</span>
               </>
             )}
           </li>
