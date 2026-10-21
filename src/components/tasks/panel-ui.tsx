@@ -39,10 +39,10 @@ export const PanelRival = () => (
   <span className="flex h-5 items-center gap-2 text-body leading-5 text-fg-primary"><img alt="" src="/panel/rival-mark.svg" width={12} height={13} className="block" />Rival</span>
 )
 
-// A tag (category), coloured like shadcn's neutral (secondary) Badge in the stone theme: stone-100 #F5F5F4 with
-// stone-900 text. 20 high, 4px sides, 2px corners, 12/16; 6 apart
+// A tag (category), coloured like shadcn's neutral (secondary) Badge in the stone theme: stone-100 #F5F5F4, with
+// the chip text colour (stone-600, between primary and secondary). 20 high, 4px sides, 2px corners, 12/16; 6 apart
 export const PanelTag = ({ children }: { children: React.ReactNode }) => (
-  <span className="flex h-5 shrink-0 items-center rounded-[2px] bg-[#f5f5f4] px-1 text-small leading-4 whitespace-nowrap text-fg-primary">{children}</span>
+  <span className="flex h-5 shrink-0 items-center rounded-[2px] bg-[#f5f5f4] px-1 text-small leading-4 whitespace-nowrap text-fg-chip">{children}</span>
 )
 export const PanelTags = ({ items }: { items: string[] }) => <span className="flex items-start gap-1.5">{items.map((c) => <PanelTag key={c}>{c}</PanelTag>)}</span>
 
@@ -56,7 +56,7 @@ export function PanelSection({ title, gap = "sm", grow, children }: { title: str
   )
 }
 
-// Outcomes: the same neutral chip (stone-100, stone-900 text; 20 high, 6px sides) with a 2 × 10 bar in the outcome's
+// Outcomes: the same neutral chip (stone-100, stone-600 text; 20 high, 6px sides) with a 2 × 10 bar in the outcome's
 // colour, then the name in title case
 const toneBar: Record<Outcome["tone"], string> = { good: "#4fa90b", clear: "#0170fd", warn: "#fda501", risk: "#db0509", failed: "#db0509", unclear: "#a3a3a3" }
 const small = new Set(["a", "an", "and", "as", "at", "by", "for", "in", "of", "on", "or", "the", "to"])
@@ -65,7 +65,7 @@ export function PanelOutcomes({ items }: { items: Outcome[] }) {
   return (
     <ul className="flex flex-wrap items-center gap-1.5">
       {items.map((o) => (
-        <li key={o.label} className="flex h-5 items-center gap-1.5 rounded-[2px] bg-[#f5f5f4] px-1.5 text-small leading-4 whitespace-nowrap text-fg-primary">
+        <li key={o.label} className="flex h-5 items-center gap-1.5 rounded-[2px] bg-[#f5f5f4] px-1.5 text-small leading-4 whitespace-nowrap text-fg-chip">
           <span aria-hidden className="h-2.5 w-0.5 shrink-0" style={{ background: toneBar[o.tone] }} />
           {titleCase(o.label)}
         </li>

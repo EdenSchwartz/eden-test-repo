@@ -11,6 +11,7 @@
     --color-fg-primary: #1c1917;   /* stone-900: names, values, body */
     --color-fg-secondary: #78716c; /* stone-500: labels, descriptions, icons */
     --color-fg-tertiary: #a8a29e;  /* stone-400: the quietest, almost disabled */
+    --color-fg-chip: #57534e;      /* stone-600: text inside neutral chips (on stone-100), between primary and secondary */
     --text-small: 0.75rem;   /* 12: small details (chips, tags, counts, labels) */
     --text-small--line-height: 1rem;
     --text-body: 0.875rem;   /* 14: the base */
