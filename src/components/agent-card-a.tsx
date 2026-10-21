@@ -6,6 +6,8 @@
  *         right (14px logos in 20px white circles, #F7F7F8 edge, soft shadow, overlapping by 4px), and under the name
  *         the categories (#F7F7F8 tags, 20 high, 4px sides, 2px corners, Geist 12/16 #68696C, 6 apart)
  *   Then: the description (Geist 14/16, #6C6A68), always two lines tall
+ * In the demo it's set to the current card's size (342 × 201): 20px padding, a 60px mark, the description (14/20) at
+ * the bottom, so both ideas fill the grid the same way.
  * No footer. Every agent gets its own colour and mark (in library order, agents then sub agents): the first six as in
  * the design, the rest new colours in the same bright, saturated tone, and new pixel shapes in the same spirit
  * (white squares on a small grid, roughly round, abstract).
