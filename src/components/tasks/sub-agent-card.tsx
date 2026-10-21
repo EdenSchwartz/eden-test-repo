@@ -54,7 +54,7 @@ export function SubAgentCard({ kind, status, template, selected, delay, onSelect
   )
 }
 
-export function SubAgentDetail({ kind, color, categories, nav, template, onClose, onOpenAgent }: { kind: AgentKind; color?: string; categories?: string[]; nav?: DrawerNav; template?: boolean; onClose: () => void; onOpenAgent: (sa: SuperAgent) => void }) {
+export function SubAgentDetail({ kind, color, mark, categories, nav, template, onClose, onOpenAgent }: { kind: AgentKind; color?: string; categories?: string[]; nav?: DrawerNav; mark?: React.ReactNode; template?: boolean; onClose: () => void; onOpenAgent: (sa: SuperAgent) => void }) {
   const { convs } = useConversations()
   const a = agents[kind]
   const Icon = a.icon
@@ -67,7 +67,7 @@ export function SubAgentDetail({ kind, color, categories, nav, template, onClose
       </DrawerTopBar>
       <div className="shrink-0 space-y-5 px-5 pt-5 pb-5">
         <div className="flex items-center gap-3">
-          <ColorTile color={color ?? colorFor(`sub:${kind}`)} icon={Icon} />
+          {mark ?? <ColorTile color={color ?? colorFor(`sub:${kind}`)} icon={Icon} />}
           <h2 className="min-w-0 font-title text-2xl leading-[1.1] font-medium tracking-[-0.015em] [--title-wght:450]">{subName(kind)}</h2>
         </div>
         <dl className="flex flex-nowrap gap-x-8 overflow-hidden">

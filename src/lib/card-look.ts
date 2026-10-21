@@ -12,5 +12,6 @@ export const setCardLook = (v: CardLook) => {
   try { localStorage.setItem(KEY, v) } catch { /* ok */ }
   listeners.forEach((l) => l())
 }
+export const getCardLook = () => value
 export const useCardLook = () =>
   useSyncExternalStore((cb) => { listeners.add(cb); return () => listeners.delete(cb) }, () => value)

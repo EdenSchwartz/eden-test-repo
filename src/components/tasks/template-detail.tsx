@@ -29,9 +29,10 @@ import { CategoryList } from "@/components/category-tag"
 
 type Tab = "overview" | "skills" | "triggers" | "schedule"
 
-export function TemplateDetail({ sa, color, nav, categories, capabilities, context, onUse, onClose, wide }: {
+export function TemplateDetail({ sa, color, mark, nav, categories, capabilities, context, onUse, onClose, wide }: {
   sa: SuperAgent; color?: string; onUse: (sa: SuperAgent) => void; onClose: () => void; wide?: boolean
   nav?: DrawerNav // step through the cards it was opened from
+  mark?: React.ReactNode // the card idea's round mark, in place of the colour tile
   categories?: string[] // as on its card
   capabilities?: React.ReactNode // as on its card (the icons); else "Read only"
   context?: React.ReactNode // its sources as on its card (the tool marks); else the source stack
@@ -62,7 +63,7 @@ export function TemplateDetail({ sa, color, nav, categories, capabilities, conte
       {/* ---------- Name + properties ---------- */}
       <div className={cn("shrink-0 space-y-5 pt-5 pb-5", pad)}>
         <div className="flex items-center gap-3">
-          <ColorTile color={accent} icon={Icon} />
+          {mark ?? <ColorTile color={accent} icon={Icon} />}
           <h2 className="min-w-0 font-title text-2xl leading-[1.1] font-medium tracking-[-0.015em] [--title-wght:450]">{sa.name}</h2>
           {setup && (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-wash px-2 py-px text-xs font-semibold whitespace-nowrap text-warning">

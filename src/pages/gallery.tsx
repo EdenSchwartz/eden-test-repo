@@ -5,7 +5,7 @@ import { StepsLine } from "@/components/tasks/empty-state"
 import { SubAgentCard, SubAgentDetail, subName } from "@/components/tasks/sub-agent-card"
 import { TaskTable } from "@/components/tasks/task-table"
 import { TemplateCard } from "@/components/tasks/template-card"
-import { MyAgentCard, MySubAgentCard, agentDrawerProps, subCategories } from "@/components/agents-library-frame"
+import { MyAgentCard, MySubAgentCard, agentDrawerProps, subCategories, subMark } from "@/components/agents-library-frame"
 import { TemplateDetail } from "@/components/tasks/template-detail"
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger,
@@ -184,7 +184,7 @@ function Gallery({ mode }: { mode: "explore" | "mine" }) {
                 <TemplateDetail key={nested.id} sa={nested} {...agentDrawerProps(nested)} onUse={use} onClose={close} />
               </div>
             </div>
-          ) : <SubAgentDetail key={subId} kind={subId} categories={subCategories(subId)} template={explore} onClose={close} onOpenAgent={openAgent} />)
+          ) : <SubAgentDetail key={subId} kind={subId} categories={subCategories(subId)} mark={subMark(subId)} template={explore} onClose={close} onOpenAgent={openAgent} />)
           : selected && <TemplateDetail key={selected.id} sa={selected} {...agentDrawerProps(selected)} onUse={use} onClose={close} />}
       >
         <header className="space-y-1" style={{ viewTransitionName: "templates-head" }}>

@@ -17,8 +17,8 @@ import type { TaskStatus } from "@/lib/task-status"
 import { cn } from "@/lib/utils"
 import { APP, CLOUD, GRC, THREATS, VM, CategoryTag } from "@/components/category-tag"
 import { CapabilityMarks, type Capability } from "@/components/capability"
-import { IdeaALogoChip, IdeaAMark, IdeaATag, figmaLogos, ideaAColors } from "@/components/agent-card-a"
-import { setCardLook, useCardLook, type CardLook } from "@/lib/card-look"
+import { IdeaALogoChip, IdeaAMark, IdeaBMark, IdeaATag, figmaLogos, ideaAColors } from "@/components/agent-card-a"
+import { getCardLook, setCardLook, useCardLook, type CardLook } from "@/lib/card-look"
 
 /*
  * The header box's grid lit by a fluid. A small Navier-Stokes simulation (Jos Stam's "stable fluids":
@@ -256,7 +256,7 @@ export function AgentsLibraryFrame() {
   // The drawer's icon tile keeps the picked card's colour
   const pickedLib = [...library, ...subLibrary].find((a) => a.name === picked?.name)
   const look = useCardLook()
-  const pickedColor = pickedLib ? (look === "a" ? ideaAColors[ideaIndex(pickedLib) % ideaAColors.length][0] : colorOf(pickedLib)) : undefined
+  const pickedColor = pickedLib ? (look !== "current" ? ideaAColors[ideaIndex(pickedLib) % ideaAColors.length][0] : colorOf(pickedLib)) : undefined
   // The drawer's ↓ 1 / 9 ↑: steps through the cards on screen (this tab, after the search), in their order
   const at = list.findIndex((a) => a.name === picked?.name)
   const nav = { index: at, total: list.length, onPrev: () => at > 0 && pick(list[at - 1]), onNext: () => at < list.length - 1 && pick(list[at + 1]) }
@@ -300,7 +300,7 @@ export function AgentsLibraryFrame() {
           <SheetTitle className="sr-only">{picked?.name}</SheetTitle>
           {agent
             ? <TemplateDetail key={agent.id} sa={agent} color={pickedColor} nav={nav} {...drawerProps(pickedLib)} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={close} />
-            : picked?.kind && <SubAgentDetail key={picked.name} kind={picked.kind} color={pickedColor} categories={pickedLib && metaOf(pickedLib).categories} nav={nav} template onClose={close} onOpenAgent={(sa) => { setStacked(sa.id); setStackedOpen(true) }} />}
+            : picked?.kind && <SubAgentDetail key={picked.name} kind={picked.kind} color={pickedColor} categories={pickedLib && metaOf(pickedLib).categories} mark={pickedLib && drawerMark(pickedLib, look)} nav={nav} template onClose={close} onOpenAgent={(sa) => { setStacked(sa.id); setStackedOpen(true) }} />}
         </SheetContent>
       </Sheet>
       {/* Narrower than the first, so the first drawer's edge stays in sight underneath; its overlay only adds a light dim */}
@@ -322,7 +322,7 @@ function CardLookSwitch() {
     <div role="tablist" aria-label="Card idea" className="flex items-center gap-1">
       <span className="mr-1 text-[0.75rem] leading-4 text-[#a2a4a8]">Card</span>
       {opts.map(([id, label]) => (
-        <button key={id} role="tab" aria-selected={look === id} disabled={id === "b"} title={id === "b" ? "Coming next" : undefined} onClick={() => withTransition(() => setCardLook(id))}
+        <button key={id} role="tab" aria-selected={look === id} onClick={() => withTransition(() => setCardLook(id))}
           className="lib-tab !h-6 !text-[0.75rem] disabled:cursor-default disabled:opacity-40 disabled:hover:border-transparent disabled:hover:bg-transparent">
           {label}
         </button>
@@ -519,11 +519,18 @@ const subMeta: Partial<Record<AgentKind, Meta>> = {
 const metaOf = (a: LibraryAgent): Meta =>
   meta[a.name] ?? ((a.partOf !== undefined && a.kind && subMeta[a.kind]) || { categories: [VM], cap: ["memory"], ctx: ["github"] })
 
+// The side panel's mark under the card ideas: the same round mark as the card (48px), else the colour tile
+const drawerMark = (a: LibraryAgent, look: CardLook) =>
+  look === "a" ? <IdeaAMark index={ideaIndex(a)} size={48} />
+  : look === "b" ? <span className="grid size-12 shrink-0 place-items-center"><span className="scale-75"><IdeaBMark index={ideaIndex(a)} /></span></span>
+  : undefined
+
 // What an agent's drawer shows as Category, Capabilities and Context: the same as its card
 const drawerProps = (a?: LibraryAgent) => {
   if (!a) return {}
   const m = metaOf(a)
   return {
+    mark: drawerMark(a, getCardLook()),
     categories: m.categories,
     capabilities: <CapabilityMarks caps={m.cap} />,
     context: <span className="flex items-center gap-1.5">{m.ctx.map((t) => <ToolMark key={t} tool={t} />)}</span>,
@@ -628,6 +635,26 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
       </span>
     </button>
   )
+  // Idea B (Figma 64:16242): centred; the mark sits half above the card's top edge (33px), name, tags, one-line description
+  if (look === "b") return (
+    <button
+      onClick={onSelect}
+      aria-pressed={selected}
+      {...tilt}
+      className="tilt-card group relative mt-[2.0625rem] flex cursor-pointer flex-col items-stretch rounded-[4px] border border-solid border-[#e5e5e5] bg-white text-center whitespace-nowrap [box-shadow:0px_1px_1px_rgba(0,0,0,0.06)] hover:border-[#dcdcdc] aria-pressed:border-[#2e4eca]/40"
+    >
+      <span aria-hidden className="tilt-light rounded-[4px]" />
+      <span className={cn("absolute! top-[-2.0625rem] left-1/2 -translate-x-1/2 transition-opacity", off && "opacity-50")}><IdeaBMark index={ideaIndex(from)} /></span>
+      {mine && <span className="absolute! top-2 right-2"><StatusChip status={mine.status} /></span>}
+      <span className={cn("flex w-full flex-col items-center gap-3 px-[0.9375rem] pt-12 pb-4 transition-opacity", off && "opacity-50")}>
+        <span className="flex w-full min-w-0 flex-col items-center gap-1.5">
+          <span className="max-w-full truncate text-[1rem] leading-4 font-medium text-[#121212]">{a.name}</span>
+          <span className="flex items-start gap-1.5">{m.categories.map((c) => <IdeaATag key={c}>{c}</IdeaATag>)}</span>
+        </span>
+        <span className="w-full truncate text-[0.875rem] leading-4 text-[#6c6a68]">{a.tagline}</span>
+      </span>
+    </button>
+  )
   return (
     <button
       onClick={onSelect}
@@ -677,6 +704,7 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
 // The drawers on My Agents (pages/gallery.tsx) show the same as the library's: by the agent it's a copy of
 export const agentDrawerProps = (sa: SuperAgent) => drawerProps(library.find((l) => l.templateId === (sa.clonedFrom ?? sa.id)))
 export const subCategories = (kind: AgentKind) => { const a = subLibrary.find((l) => l.kind === kind); return a ? metaOf(a).categories : undefined }
+export const subMark = (kind: AgentKind) => { const a = subLibrary.find((l) => l.kind === kind); return a && drawerMark(a, getCardLook()) }
 
 // The same card on My Agents (pages/gallery.tsx), so an agent looks the same everywhere in the demo
 export function MyAgentCard({ sa, status, selected, onSelect }: { sa: SuperAgent; status: TaskStatus; selected: boolean; onSelect: () => void }) {
