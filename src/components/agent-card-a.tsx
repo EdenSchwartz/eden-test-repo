@@ -109,7 +109,7 @@ export function IdeaBMark({ index, size = 64 }: { index: number; size?: number }
   const m = markFor(index)
   return (
     <span aria-hidden className="relative grid shrink-0 place-items-center" style={{ width: size, height: size }}>
-    <span className="grid shrink-0 place-items-center" style={{ transform: size === 64 ? undefined : `scale(${size / 64})` }}>
+    <span className="absolute top-1/2 left-1/2 grid place-items-center" style={{ transform: `translate(-50%, -50%) scale(${size / 64})` }}>
     <span className="ideab-wheel relative grid size-16 shrink-0 place-items-center rounded-full border-[3px] border-solid border-black drop-shadow-[0px_3px_0px_#efeff0]" style={{ background: fill }}>
       <span className="grid place-items-center" style={{ transform: "scale(1.17)" }}>
         {m < figmaMarks.length
