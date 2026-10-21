@@ -79,13 +79,13 @@ export function PanelOutcomes({ items }: { items: Outcome[] }) {
 // The prompt: #ECECEC edge, 6px corners, 12px padding, Geist Mono 12/18 in the secondary colour
 // Its background is the Agents Library header's: the faint grid with fine grain, lit by the fluid where the pointer
 // moves (fluid-grid.tsx), with shorter fades to suit a small box (.alive-compact in index.css)
-export const PanelPrompt = ({ text }: { text: string }) => (
+export const PanelPrompt = ({ text, play = true }: { text: string; play?: boolean }) => (
   <div className="alive-box alive-compact relative isolate w-full overflow-hidden rounded-[6px] border border-solid border-[#ececec] bg-white p-3">
     <span aria-hidden className="alive-noise" />
     <span aria-hidden className="alive-base" />
     <FluidGrid />
-    {/* types itself in with a pixel edge each time the panel shows an agent (pixel-type.tsx) */}
-    <PixelType key={text} text={text} className="font-mono text-small leading-[1.125rem] text-fg-secondary" />
+    {/* types itself in with a pixel edge when an agent is picked; shown as is when you come back from another tab */}
+    <PixelType key={text} text={text} play={play} className="font-mono text-small leading-[1.125rem] text-fg-secondary" />
   </div>
 )
 

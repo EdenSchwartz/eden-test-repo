@@ -18,14 +18,15 @@ const PIXEL_FRAMES = 4 // steps a character stays pixelated
 const PAUSE: Record<string, number> = { ",": 5, ".": 10, ":": 10, "?": 10, "!": 10 } // extra steps after these
 const BLOCK = 2 // px, the mosaic's block size
 
-export function PixelType({ text, className }: { text: string; className?: string }) {
+// play: whether to type it in; read once when it mounts (a re-render mid-typing never cuts it short)
+export function PixelType({ text, className, play = true }: { text: string; className?: string; play?: boolean }) {
   const chars = [...text]
   // the step each character is reached at, with the thinking beats after punctuation
   const starts: number[] = []
   let t = 0
   for (const c of chars) { starts.push(t); t += 1 + (PAUSE[c] ?? 0) }
   const typed = t // step after the last character is reached
-  const still = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  const [still] = useState(() => !play || (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches))
   const [step, setStep] = useState(still ? Infinity : 0)
   useEffect(() => {
     if (still) return

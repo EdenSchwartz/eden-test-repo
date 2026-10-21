@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { Activity, Bot, ChevronRight, FileText, GitFork, Hand, Zap, type LucideIcon } from "lucide-react"
 
 import { MessageResponse } from "@/components/ai-elements/message"
@@ -38,6 +38,10 @@ export function TemplateDetail({ sa, color, mark, nav, categories, capabilities,
   context?: React.ReactNode // its sources as on its card (the tool marks); else the source stack
 }) {
   const [tab, setTab] = useState<Tab>("overview")
+  // The prompt types itself in once per agent picked (this panel mounts per agent); after that, switching tabs and
+  // coming back shows it as is
+  const promptShown = useRef(false)
+  useEffect(() => { if (tab === "overview") promptShown.current = true }, [tab])
   const [openSkill, setOpenSkill] = useState<SuperAgent["skills"][number] | null>(null)
   const Icon = sa.icon
   const accent = color ?? colorFor(sa.name) // the agent's colour (its tile, the prompt card)
@@ -102,7 +106,7 @@ export function TemplateDetail({ sa, color, mark, nav, categories, capabilities,
               </PanelSection>
             )}
             <PanelSection title="Prompt" gap="md">
-              <PanelPrompt text={sa.prompt ?? sa.briefs[0]} />
+              <PanelPrompt text={sa.prompt ?? sa.briefs[0]} play={!promptShown.current} />
             </PanelSection>
             <PanelSection title="How it works" gap="md" grow={wide}>
               {wide ? (
