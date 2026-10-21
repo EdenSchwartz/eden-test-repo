@@ -5,7 +5,7 @@ import { getSuperAgent, type SuperAgent } from "@/data/super-agents"
 import { RivalMark } from "@/components/nav-icons"
 import { useNav } from "@/lib/nav"
 import { agents, type AgentKind } from "@/components/chat/agents"
-import { SubAgentDetail, subName, usedBy } from "@/components/tasks/sub-agent-card"
+import { PartOfRow, SubAgentDetail, subName, usedBy } from "@/components/tasks/sub-agent-card"
 import { TemplateDetail } from "@/components/tasks/template-detail"
 import { withTransition } from "@/lib/view-transition"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
@@ -53,6 +53,10 @@ export function AgentsLibraryFrame() {
   const [dir, setDir] = useState<"in" | "back">("in")
   const back = () => { setDir("back"); setInner(null) }
   const into = (next: { sub: AgentKind } | { agent: string }) => { setDir("in"); setInner(next) }
+  // Part of: an agent with its own panel opens in place (breadcrumbs back); the others become the drawer's agent
+  // (the drawer's own agent, from a step's sub agent: just back to it)
+  const openPartOf = (a: LibraryAgent) => (a.templateId === picked?.agent && a.templateId ? back() : a.templateId ? into({ agent: a.templateId }) : pick(a))
+  const startSub = () => navigate("chat", { startChat: true })
   const agent = picked?.agent ? getSuperAgent(picked.agent) : undefined
   // The drawer's icon tile keeps the picked card's colour
   const pickedLib = [...library, ...subLibrary].find((a) => a.name === picked?.name)
@@ -103,7 +107,7 @@ export function AgentsLibraryFrame() {
           <div className={cn("flex h-full min-h-0 flex-col", inner ? "hidden" : dir === "back" && "panel-swap-back")}>
             {agent
               ? <TemplateDetail key={agent.id} sa={agent} color={pickedColor} nav={nav} onOpenStep={(k) => into({ sub: k })} {...drawerProps(pickedLib)} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={close} />
-              : picked?.kind && <SubAgentDetail key={picked.name} kind={picked.kind} color={pickedColor} categories={pickedLib && metaOf(pickedLib).categories} mark={pickedLib && drawerMark(pickedLib, look)} nav={nav} template onClose={close} onOpenAgent={(sa) => into({ agent: sa.id })} />}
+              : picked?.kind && <SubAgentDetail key={picked.name} kind={picked.kind} color={pickedColor} nav={nav} template {...subPanelProps(picked.kind, openPartOf)} onUse={startSub} onClose={close} onOpenAgent={(sa) => into({ agent: sa.id })} />}
           </div>
           {inner && "sub" in inner && (
             <div className="panel-swap-in flex h-full min-h-0 flex-col">
@@ -113,8 +117,8 @@ export function AgentsLibraryFrame() {
               template
               crumbs={[{ label: picked?.name ?? "", onClick: back }, { label: subName(inner.sub) }]}
               color={innerSubLib && (look !== "current" ? ideaAColors[ideaIndex(innerSubLib) % ideaAColors.length][0] : colorOf(innerSubLib))}
-              categories={innerSubLib && metaOf(innerSubLib).categories}
-              mark={<StepMark kind={inner.sub} />}
+              {...subPanelProps(inner.sub, openPartOf)}
+              onUse={startSub}
               onClose={close}
               onOpenAgent={back}
             />
@@ -518,6 +522,34 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
       </span>
     </button>
   )
+}
+
+// A sub agent's "Part of": four library agents that would use it, as rows with their own (square) marks. Picking one
+// opens it — in place, with breadcrumbs, when it has its own panel; else as the drawer's agent.
+const partOfNames: Record<AgentKind, string[]> = {
+  exploitability: ["Triage Hunter", "Red Team Simulation", "Remediation", "Cloud Exploitability"],
+  correlation: ["Triage Hunter", "App Inventory", "Finding Ownership", "Deployment Mapping"],
+  "threat-intel": ["Triage Hunter", "WAF Analysis", "Red Team Simulation", "Secret Validation"],
+  prioritization: ["Triage Hunter", "Remediation", "Finding Ownership", "Code SAST Exploitability"],
+  ownership: ["Triage Hunter", "Finding Ownership", "Remediation", "App Inventory"],
+  reporting: ["Triage Hunter", "Remediation", "App Inventory", "WAF Analysis"],
+  remediation: ["Triage Hunter", "Code CVE Exploitability", "Code SAST Exploitability", "Secret Validation"],
+  "red-team": ["Red Team Simulation", "Code CVE Exploitability", "Cloud Exploitability", "WAF Analysis"],
+  "asset-discovery": ["App Inventory", "Deployment Mapping", "Cloud Exploitability", "Finding Ownership"],
+  "data-leak": ["Secret Validation", "WAF Analysis", "Triage Hunter", "Red Team Simulation"],
+} as Record<AgentKind, string[]>
+const subPanelProps = (kind: AgentKind, open: (a: LibraryAgent) => void) => {
+  const lib = subLibrary.find((l) => l.kind === kind)
+  const rows = (partOfNames[kind] ?? []).map((n) => library.find((l) => l.name === n)).filter(Boolean) as LibraryAgent[]
+  return {
+    mark: <StepMark kind={kind} />,
+    capabilities: lib ? <CapabilityLabels caps={metaOf(lib).cap} /> : undefined,
+    partOf: (
+      <ul className="flex w-full flex-col gap-2">
+        {rows.map((a) => <li key={a.name}><PartOfRow name={a.name} mark={<IdeaASquareMark index={ideaIndex(a)} size={28} />} onClick={() => open(a)} /></li>)}
+      </ul>
+    ),
+  }
 }
 
 // The drawers on My Agents (pages/gallery.tsx) show the same as the library's: by the agent it's a copy of

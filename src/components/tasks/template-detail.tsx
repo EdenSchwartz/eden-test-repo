@@ -287,12 +287,12 @@ export function DrawerTopBar({ nav, crumbs, onClose, children }: { nav?: DrawerN
     <div className="flex shrink-0 items-center justify-between gap-3 border-b border-solid border-[#f0f0f0] px-4 py-2">
       <div className="flex min-h-6 min-w-0 flex-1 items-center gap-1">
         {crumbs ? (
-          <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-small leading-4 whitespace-nowrap">
+          <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1 text-small leading-4 whitespace-nowrap">
             {crumbs.map((c, i) => {
               const last = i === crumbs.length - 1
               return (
-                <span key={i} className="flex min-w-0 items-center gap-1.5">
-                  {i > 0 && <span aria-hidden className="text-fg-tertiary">/</span>}
+                <span key={i} className="flex min-w-0 items-center gap-1">
+                  {i > 0 && <span aria-hidden className="text-fg-primary">/</span>}
                   {last || !c.onClick
                     ? <span className={cn("truncate", last ? "text-fg-primary" : "text-fg-secondary")} aria-current={last ? "page" : undefined}>{c.label}</span>
                     : <button onClick={c.onClick} className="cursor-pointer truncate text-fg-secondary transition-colors hover:text-fg-primary">{c.label}</button>}
