@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 import { Activity, Bot, ChevronRight, FileText, GitFork, Hand, Zap, type LucideIcon } from "lucide-react"
 
 import { MessageResponse } from "@/components/ai-elements/message"
@@ -299,10 +299,25 @@ export function DrawerTopBar({ nav, onClose, children }: { nav?: DrawerNav; onCl
 
 // Tabs with an icon each; the active one in ink with an ink line under it, the rest muted
 export function DrawerTabs<T extends string>({ tabs, active, onChange }: { tabs: { id: T; label: string; icon: LucideIcon; count?: number }[]; active: T; onChange: (t: T) => void; pad?: string }) {
+  // One line for the row that glides to the selected tab: it measures the tab's content (the tab minus its 6px
+  // sides) and eases its position and width there, slowly and softly. Placed without motion the first time.
+  const row = useRef<HTMLDivElement>(null)
+  const [line, setLine] = useState<{ left: number; width: number; ready: boolean } | null>(null)
+  useLayoutEffect(() => {
+    const place = () => {
+      const el = row.current?.querySelector<HTMLElement>('[aria-selected="true"]')
+      if (!el) return
+      setLine((prev) => ({ left: el.offsetLeft + 6, width: el.offsetWidth - 12, ready: prev !== null }))
+    }
+    place()
+    const ro = new ResizeObserver(place)
+    if (row.current) ro.observe(row.current)
+    return () => ro.disconnect()
+  }, [active, tabs.length])
   return (
     // Figma 72:18210: 24px sides, a #ECECEC line under; tabs 12 apart, 6px top, 12 bottom, 6 sides, icon 16 + label
-    // Geist 14, 4 apart; the selected one (label and icon) in primary with a 1px line, the rest secondary; the count on #FAFAFA
-    <div role="tablist" className="flex shrink-0 gap-3 border-b border-solid border-[#ececec] bg-white px-6">
+    // Geist 14, 4 apart; the selected one (label and icon) in primary, the rest secondary; the count on #FAFAFA
+    <div ref={row} role="tablist" className="relative flex shrink-0 gap-3 border-b border-solid border-[#ececec] bg-white px-6">
       {tabs.map((t) => (
         <button
           key={t.id}
@@ -310,19 +325,28 @@ export function DrawerTabs<T extends string>({ tabs, active, onChange }: { tabs:
           aria-selected={active === t.id}
           onClick={() => onChange(t.id)}
           className={cn(
-            // the selected tab: a 2px line exactly as wide as its content (icon, label, count; the tab's 6px sides left
-            // out), on the row's bottom line
-            "relative flex shrink-0 cursor-pointer items-center justify-center gap-1 px-1.5 pt-1.5 pb-3 text-body leading-5 transition-colors",
-            "after:absolute after:inset-x-1.5 after:-bottom-px after:h-[2px] after:bg-fg-primary after:opacity-0 after:transition-opacity",
-            active === t.id ? "text-fg-primary after:opacity-100" : "text-fg-secondary hover:text-fg-primary",
+            "relative flex shrink-0 cursor-pointer items-center justify-center gap-1 px-1.5 pt-1.5 pb-3 text-body leading-5 transition-colors duration-300",
+            active === t.id ? "text-fg-primary" : "text-fg-secondary hover:text-fg-primary",
           )}
         >
-          <t.icon className={cn("size-4 shrink-0", active === t.id ? "text-fg-primary" : "text-fg-secondary")} strokeWidth={1.25} />
+          <t.icon className={cn("size-4 shrink-0 transition-colors duration-300", active === t.id ? "text-fg-primary" : "text-fg-secondary")} strokeWidth={1.25} />
           {t.label}
           {/* the count: grey on #FAFAFA; on the selected tab, the Parallel chip's blue (#0350D0 on #ECF3FF), same small square shape */}
-          {t.count !== undefined && <span className={cn("flex h-4 items-center rounded-[2px] px-1 text-small leading-4 tabular-nums transition-colors", active === t.id ? "bg-[#ecf3ff] text-[#0350d0]" : "bg-[#fafafa] text-fg-secondary")}>{t.count}</span>}
+          {t.count !== undefined && <span className={cn("flex h-4 items-center rounded-[2px] px-1 text-small leading-4 tabular-nums transition-colors duration-300", active === t.id ? "bg-[#ecf3ff] text-[#0350d0]" : "bg-[#fafafa] text-fg-secondary")}>{t.count}</span>}
         </button>
       ))}
+      {/* the selected tab's line: 2px, as wide as its content, on the row's bottom line */}
+      {line && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -bottom-px left-0 h-[2px] bg-fg-primary"
+          style={{
+            width: line.width,
+            transform: `translateX(${line.left}px)`,
+            transition: line.ready ? "transform 520ms cubic-bezier(0.22, 1, 0.36, 1), width 520ms cubic-bezier(0.22, 1, 0.36, 1)" : "none",
+          }}
+        />
+      )}
     </div>
   )
 }
