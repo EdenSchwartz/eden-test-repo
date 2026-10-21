@@ -636,7 +636,7 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
     </button>
   )
   // Idea B (Figma 64:16242): centred; the mark (52px) sits half above the card's top edge, name, tags, one-line
-  // description. Hover: no 3D tilt; the mark spins like a wheel pulling away, with speed lines behind it (index.css)
+  // description. Hover: no 3D tilt; the mark rolls a quarter turn like a wheel, faint speed lines right behind it (index.css)
   if (look === "b") return (
     <button
       onClick={onSelect}
