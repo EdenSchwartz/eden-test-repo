@@ -112,7 +112,8 @@ function StepIcon({ kind }: { kind: AgentKind }) {
     </span>
   )
 }
-export function PanelSteps({ pattern }: { pattern: AgentKind[][] }) {
+// onOpen: each pill is a button that opens its sub agent (a panel on top of this one)
+export function PanelSteps({ pattern, onOpen }: { pattern: AgentKind[][]; onOpen?: (kind: AgentKind) => void }) {
   const items = pattern.flatMap((group) => group.map((kind, i) => ({ kind, withPrev: i > 0 })))
   return (
     <ol className="relative flex flex-col items-start">
@@ -121,10 +122,13 @@ export function PanelSteps({ pattern }: { pattern: AgentKind[][] }) {
         const next = items[i + 1]
         return (
           <li key={kind} className={cn("relative flex flex-col items-start gap-2", i > 0 && (withPrev ? "mt-[68px]" : "mt-5"))}>
-            <span className="relative flex h-6 items-center gap-1.5 rounded-[6px] bg-white/80 pr-2 pl-0.5 shadow-[inset_0_0_0_1px_#e5e3e3,0px_1px_1px_0px_rgba(56,61,69,0.08)]">
-              <StepIcon kind={kind} />
-              <span className="text-body leading-5 font-normal whitespace-nowrap text-fg-primary">{agents[kind].name.replace(/ agent$/, "")}</span>
-            </span>
+            {(() => {
+              const pill = "relative flex h-6 items-center gap-1.5 rounded-[6px] bg-white/80 pr-2 pl-0.5 shadow-[inset_0_0_0_1px_#e5e3e3,0px_1px_1px_0px_rgba(56,61,69,0.08)]"
+              const body = <><StepIcon kind={kind} /><span className="text-body leading-5 font-normal whitespace-nowrap text-fg-primary">{agents[kind].name.replace(/ agent$/, "")}</span></>
+              return onOpen
+                ? <button onClick={() => onOpen(kind)} className={cn(pill, "cursor-pointer transition-shadow hover:bg-white hover:shadow-[inset_0_0_0_1px_#d6d3d1,0px_1px_2px_0px_rgba(56,61,69,0.12)]")}>{body}</button>
+                : <span className={pill}>{body}</span>
+            })()}
             <span className="pr-8 pl-7 text-body leading-4 whitespace-nowrap text-fg-secondary">{agents[kind].short}</span>
             {next?.withPrev && (
               <>

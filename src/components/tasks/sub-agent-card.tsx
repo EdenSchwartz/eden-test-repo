@@ -4,7 +4,7 @@ import { agents, type AgentKind } from "@/components/chat/agents"
 import { StatusChip } from "@/components/tasks/status-chip"
 import { CardShell } from "@/components/tasks/template-card"
 import { subOutcomes } from "@/data/outcomes"
-import { DrawerTopBar, EnabledToggle, type DrawerNav } from "@/components/tasks/template-detail"
+import { DrawerTopBar, EnabledToggle, type Crumb, type DrawerNav } from "@/components/tasks/template-detail"
 import { superAgents, type SuperAgent } from "@/data/super-agents"
 import { useConversations } from "@/lib/conversations"
 import { subAgentStatus, type TaskStatus } from "@/lib/task-status"
@@ -52,7 +52,7 @@ export function SubAgentCard({ kind, status, template, selected, delay, onSelect
   )
 }
 
-export function SubAgentDetail({ kind, color, mark, categories, nav, template, onClose, onOpenAgent }: { kind: AgentKind; color?: string; categories?: string[]; nav?: DrawerNav; mark?: React.ReactNode; template?: boolean; onClose: () => void; onOpenAgent: (sa: SuperAgent) => void }) {
+export function SubAgentDetail({ kind, color, mark, categories, nav, crumbs, template, onClose, onOpenAgent }: { kind: AgentKind; color?: string; categories?: string[]; nav?: DrawerNav; crumbs?: Crumb[]; mark?: React.ReactNode; template?: boolean; onClose: () => void; onOpenAgent: (sa: SuperAgent) => void }) {
   const { convs } = useConversations()
   const a = agents[kind]
   const Icon = a.icon
@@ -60,7 +60,7 @@ export function SubAgentDetail({ kind, color, mark, categories, nav, template, o
   const used = usedBy(kind)
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
-      <DrawerTopBar nav={nav} onClose={onClose}>
+      <DrawerTopBar nav={crumbs ? undefined : nav} crumbs={crumbs} onClose={onClose}>
         {!template && <EnabledToggle id={`sub:${kind}`} name={subName(kind)} />}
       </DrawerTopBar>
       {/* Same header as an agent's panel (template-detail.tsx, after the Figma side panel) */}

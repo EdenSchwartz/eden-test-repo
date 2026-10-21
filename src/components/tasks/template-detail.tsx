@@ -29,9 +29,11 @@ import { ChevronDownIcon, ChevronUpIcon, OverviewIcon, PanelOutcomes, PanelPromp
 
 type Tab = "overview" | "skills" | "triggers" | "schedule"
 
-export function TemplateDetail({ sa, color, mark, nav, categories, capabilities, context, onUse, onClose, wide }: {
+export function TemplateDetail({ sa, color, mark, nav, crumbs, onOpenStep, categories, capabilities, context, onUse, onClose, wide }: {
   sa: SuperAgent; color?: string; onUse: (sa: SuperAgent) => void; onClose: () => void; wide?: boolean
   nav?: DrawerNav // step through the cards it was opened from
+  crumbs?: Crumb[] // opened from inside another panel: breadcrumbs in place of the arrows
+  onOpenStep?: (kind: AgentKind) => void // a step in How it works opens its sub agent
   mark?: React.ReactNode // the card idea's round mark, in place of the colour tile
   categories?: string[] // as on its card
   capabilities?: React.ReactNode // as on its card (the icons); else "Read only"
@@ -60,7 +62,7 @@ export function TemplateDetail({ sa, color, mark, nav, categories, capabilities,
     // ⌘⏎ / Ctrl+⏎ anywhere in the panel uses it (on the panel, not the window, so only the focused drawer reacts)
     <div className="flex h-full min-h-0 flex-col bg-white" onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); onUse(sa) } }}>
       {/* ---------- Top bar: where you are, and the actions ---------- */}
-      <DrawerTopBar nav={nav} onClose={onClose} pad={pad}>
+      <DrawerTopBar nav={crumbs ? undefined : nav} crumbs={crumbs} onClose={onClose} pad={pad}>
         {sa.custom && <EnabledToggle id={sa.id} name={sa.name} />}
       </DrawerTopBar>
 
@@ -119,7 +121,7 @@ export function TemplateDetail({ sa, color, mark, nav, categories, capabilities,
                   <WorkflowCanvas sa={sa} noRoles scrollPage />
                 </div>
               ) : (
-                <PanelSteps pattern={sa.pattern} />
+                <PanelSteps pattern={sa.pattern} onOpen={onOpenStep} />
               )}
             </PanelSection>
           </div>
@@ -275,13 +277,30 @@ export function Section({ icon: Icon, title, grow, children }: { icon: typeof Bo
 // The drawer's top bar. Left: down / "1 / 9" / up, to step through the cards it was opened from (up = the next
 // number, down = the one before; off at either end). Right: actions, close. No breadcrumbs.
 export type DrawerNav = { index: number; total: number; onPrev: () => void; onNext: () => void }
-export function DrawerTopBar({ nav, onClose, children }: { nav?: DrawerNav; onClose: () => void; pad?: string; children?: React.ReactNode }) {
+// A panel opened from inside another (a step's sub agent, an agent a sub agent is part of) shows where you are
+// instead: text-only breadcrumbs, the earlier ones secondary and clickable (back), the current one primary.
+export type Crumb = { label: string; onClick?: () => void }
+export function DrawerTopBar({ nav, crumbs, onClose, children }: { nav?: DrawerNav; crumbs?: Crumb[]; onClose: () => void; pad?: string; children?: React.ReactNode }) {
   return (
     // Figma 72:17972: 8px top and bottom, 16px sides, a #F0F0F0 line under it. Chevrons 12px in 4px-padded buttons
     // (#525252, #BDBDBD at either end); "1" Geist Medium 12 #101112, "/ 9" 12 #7C7C7C; ✕ 14px in a 24px button
     <div className="flex shrink-0 items-center justify-between gap-3 border-b border-solid border-[#f0f0f0] px-4 py-2">
       <div className="flex min-h-6 min-w-0 flex-1 items-center gap-1">
-        {nav && nav.index >= 0 && (
+        {crumbs ? (
+          <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-small leading-4 whitespace-nowrap">
+            {crumbs.map((c, i) => {
+              const last = i === crumbs.length - 1
+              return (
+                <span key={i} className="flex min-w-0 items-center gap-1.5">
+                  {i > 0 && <span aria-hidden className="text-fg-tertiary">/</span>}
+                  {last || !c.onClick
+                    ? <span className={cn("truncate", last ? "text-fg-primary" : "text-fg-secondary")} aria-current={last ? "page" : undefined}>{c.label}</span>
+                    : <button onClick={c.onClick} className="cursor-pointer truncate text-fg-secondary transition-colors hover:text-fg-primary">{c.label}</button>}
+                </span>
+              )
+            })}
+          </nav>
+        ) : nav && nav.index >= 0 && (
           <>
             <button onClick={nav.onPrev} disabled={nav.index <= 0} aria-label="Previous agent" title="Previous" className="flex cursor-pointer items-center justify-center rounded-[4px] p-1 text-fg-secondary transition-colors hover:bg-[#f5f5f5] disabled:cursor-default disabled:text-fg-tertiary disabled:hover:bg-transparent">
               <ChevronDownIcon className="size-3" />

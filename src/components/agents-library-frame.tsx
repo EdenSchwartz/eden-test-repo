@@ -36,7 +36,7 @@ export function AgentsLibraryFrame() {
   const [picked, setPicked] = useState<{ agent?: string; kind?: AgentKind; name: string } | null>(null)
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<"agents" | "subs">("agents")
-  const switchTab = (t: typeof tab) => withTransition(() => { setTab(t); setOpen(false); setStackedOpen(false) })
+  const switchTab = (t: typeof tab) => withTransition(() => { setTab(t); setOpen(false); setStackedOpen(false); setStackedSubOpen(false) })
   const [query, setQuery] = useState("")
   const q = query.trim().toLowerCase()
   const list = (tab === "agents" ? library : subLibrary).filter((a) => !q || [a.name, a.tagline, ...a.outcomes.map((o) => o.label), ...a.runsOn].some((f) => f.toLowerCase().includes(q)))
@@ -46,6 +46,10 @@ export function AgentsLibraryFrame() {
   const [stacked, setStacked] = useState<string | null>(null)
   const [stackedOpen, setStackedOpen] = useState(false)
   const stackedAgent = stacked ? getSuperAgent(stacked) : undefined
+  // A step's sub agent opened from an agent's How it works: the same kind of drawer on top, breadcrumbs to go back
+  const [stackedSub, setStackedSub] = useState<AgentKind | null>(null)
+  const [stackedSubOpen, setStackedSubOpen] = useState(false)
+  const stackedSubLib = stackedSub ? subLibrary.find((l) => l.kind === stackedSub) : undefined
   const agent = picked?.agent ? getSuperAgent(picked.agent) : undefined
   // The drawer's icon tile keeps the picked card's colour
   const pickedLib = [...library, ...subLibrary].find((a) => a.name === picked?.name)
@@ -93,7 +97,7 @@ export function AgentsLibraryFrame() {
         <SheetContent showCloseButton={false} aria-describedby={undefined} onOpenAutoFocus={(e) => e.preventDefault()} className="w-full gap-0 overflow-hidden border-[#ecebe9] p-0 whitespace-normal sm:max-w-[35rem]">
           <SheetTitle className="sr-only">{picked?.name}</SheetTitle>
           {agent
-            ? <TemplateDetail key={agent.id} sa={agent} color={pickedColor} nav={nav} {...drawerProps(pickedLib)} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={close} />
+            ? <TemplateDetail key={agent.id} sa={agent} color={pickedColor} nav={nav} onOpenStep={(k) => { setStackedSub(k); setStackedSubOpen(true) }} {...drawerProps(pickedLib)} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={close} />
             : picked?.kind && <SubAgentDetail key={picked.name} kind={picked.kind} color={pickedColor} categories={pickedLib && metaOf(pickedLib).categories} mark={pickedLib && drawerMark(pickedLib, look)} nav={nav} template onClose={close} onOpenAgent={(sa) => { setStacked(sa.id); setStackedOpen(true) }} />}
         </SheetContent>
       </Sheet>
@@ -101,7 +105,25 @@ export function AgentsLibraryFrame() {
       <Sheet open={stackedOpen} onOpenChange={setStackedOpen}>
         <SheetContent showCloseButton={false} aria-describedby={undefined} onOpenAutoFocus={(e) => e.preventDefault()} overlayClassName="bg-white/40 dark:bg-black/15" className="w-full gap-0 overflow-hidden border-[#ecebe9] p-0 whitespace-normal sm:max-w-[32rem]">
           <SheetTitle className="sr-only">{stackedAgent?.name}</SheetTitle>
-          {stackedAgent && <TemplateDetail key={stackedAgent.id} sa={stackedAgent} {...drawerProps(library.find((l) => l.templateId === stackedAgent.id))} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={() => setStackedOpen(false)} />}
+          {stackedAgent && <TemplateDetail key={stackedAgent.id} sa={stackedAgent} crumbs={[{ label: picked?.name ?? "", onClick: () => setStackedOpen(false) }, { label: stackedAgent.name }]} {...drawerProps(library.find((l) => l.templateId === stackedAgent.id))} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={() => setStackedOpen(false)} />}
+        </SheetContent>
+      </Sheet>
+      <Sheet open={stackedSubOpen} onOpenChange={setStackedSubOpen}>
+        <SheetContent showCloseButton={false} aria-describedby={undefined} onOpenAutoFocus={(e) => e.preventDefault()} overlayClassName="bg-white/40 dark:bg-black/15" className="w-full gap-0 overflow-hidden border-[#ecebe9] p-0 whitespace-normal sm:max-w-[32rem]">
+          <SheetTitle className="sr-only">{stackedSub ? subName(stackedSub) : ""}</SheetTitle>
+          {stackedSub && (
+            <SubAgentDetail
+              key={stackedSub}
+              kind={stackedSub}
+              template
+              crumbs={[{ label: agent?.name ?? picked?.name ?? "", onClick: () => setStackedSubOpen(false) }, { label: subName(stackedSub) }]}
+              color={stackedSubLib && (look !== "current" ? ideaAColors[ideaIndex(stackedSubLib) % ideaAColors.length][0] : colorOf(stackedSubLib))}
+              categories={stackedSubLib && metaOf(stackedSubLib).categories}
+              mark={stackedSubLib && drawerMark(stackedSubLib, look)}
+              onClose={() => setStackedSubOpen(false)}
+              onOpenAgent={() => setStackedSubOpen(false)}
+            />
+          )}
         </SheetContent>
       </Sheet>
     </div>
