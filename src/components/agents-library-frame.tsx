@@ -314,9 +314,9 @@ const metaOf = (a: LibraryAgent): Meta =>
   meta[a.name] ?? ((a.partOf !== undefined && a.kind && subMeta[a.kind]) || { categories: [VM], cap: ["memory"], ctx: ["github"] })
 
 // The side panel's mark under the card ideas: the same round mark as the card (48px), else the colour tile
-// (Figma side panel: the 42px rounded square; idea B keeps its round dashed wheel, at the same 42px)
+// (the rounded square, 46px: as tall as the name + description beside it; idea B keeps its round dashed wheel)
 const drawerMark = (a: LibraryAgent, look: CardLook) =>
-  look === "b" ? <IdeaBMark index={ideaIndex(a)} size={42} /> : <IdeaASquareMark index={ideaIndex(a)} />
+  look === "b" ? <IdeaBMark index={ideaIndex(a)} size={46} /> : <IdeaASquareMark index={ideaIndex(a)} size={46} />
 
 // What an agent's drawer shows as Category, Capabilities and Context: the same as its card
 const drawerProps = (a?: LibraryAgent) => {

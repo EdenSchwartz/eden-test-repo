@@ -66,12 +66,13 @@ export function TemplateDetail({ sa, color, mark, nav, categories, capabilities,
 
       {/* ---------- Name + properties ---------- */}
       <div className={cn("flex shrink-0 flex-col items-start gap-5 py-5", pad)}>
-        {/* the mark, then the name with its one-line description under it (a subtitle, secondary, 4px under) */}
+        {/* the mark (46px, as tall as the two lines), then the name (20/20) and 6px under it the one-line description
+            (14/20, secondary) */}
         <div className="flex w-full min-w-0 items-center gap-3">
           {mark ?? <ColorTile color={accent} icon={Icon} />}
-          <div className="flex min-w-0 flex-col gap-1">
+          <div className="flex min-w-0 flex-col gap-1.5">
             <div className="flex items-center gap-3">
-              <h2 className="min-w-0 font-sans text-title font-medium tracking-[-0.3px] whitespace-nowrap text-fg-primary">{sa.name}</h2>
+              <h2 className="min-w-0 font-sans text-title leading-5 font-medium tracking-[-0.3px] whitespace-nowrap text-fg-primary">{sa.name}</h2>
               {setup && (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-wash px-2 py-px text-small font-semibold whitespace-nowrap text-warning">
                   <span aria-hidden className="size-1.5 rounded-full bg-warning" />
@@ -79,7 +80,7 @@ export function TemplateDetail({ sa, color, mark, nav, categories, capabilities,
                 </span>
               )}
             </div>
-            <p className="text-body text-pretty text-fg-secondary">{sa.tagline}</p>
+            <p className="text-body leading-5 text-pretty text-fg-secondary">{sa.tagline}</p>
           </div>
         </div>
         {/* Only what tells it apart: who made it, its category, what it may do, what it reads from (scope and trigger on your own) */}

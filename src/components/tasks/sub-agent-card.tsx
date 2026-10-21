@@ -67,9 +67,9 @@ export function SubAgentDetail({ kind, color, mark, categories, nav, template, o
       <div className="flex shrink-0 flex-col items-start gap-5 px-5 pt-5 pb-5">
         <div className="flex w-full min-w-0 items-center gap-3">
           {mark ?? <ColorTile color={color ?? colorFor(`sub:${kind}`)} icon={Icon} />}
-          <div className="flex min-w-0 flex-col gap-1">
-            <h2 className="min-w-0 font-sans text-title font-medium tracking-[-0.3px] whitespace-nowrap text-fg-primary">{subName(kind)}</h2>
-            <p className="text-body text-pretty text-fg-secondary">{a.role}.</p>
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <h2 className="min-w-0 font-sans text-title leading-5 font-medium tracking-[-0.3px] whitespace-nowrap text-fg-primary">{subName(kind)}</h2>
+            <p className="text-body leading-5 text-pretty text-fg-secondary">{a.role}.</p>
           </div>
         </div>
         <dl className="flex flex-nowrap items-center gap-x-10 overflow-hidden">
