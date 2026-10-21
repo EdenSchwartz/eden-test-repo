@@ -6,40 +6,55 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react"
  * (blocks dropping out, some half see-through, a new pattern every frame), then snaps to the crisp character in one
  * frame. Everything already typed stays crisp. Stepped, not smooth: ~30 frames a second, no fades.
  *
- * A long prompt can't take a tenth of a second per character, so the typing edge moves 2 characters a frame and
- * each character stays pixelated for 3 frames: a short shimmering band runs along the text (~2s for 115 characters).
- * The full text is laid out from the start (untyped characters invisible), so nothing reflows or wraps differently.
- * Plays once when it mounts or the text changes; shows the text straight away for reduced motion.
+ * Paced like an agent writing code, not a person typing: one character every 30ms with a short think after
+ * punctuation (a beat after ",", a longer one after "." / ":" / "?"), each character pixelated for 4 steps, so a
+ * small shimmering band runs along the text (~4–5s for a 115-character prompt). A solid block cursor rides the edge
+ * and blinks at the end once it's done. The full text is laid out from the start (untyped characters invisible),
+ * so nothing reflows or wraps differently. Plays when it mounts or the text changes; just shows the text (no cursor)
+ * for reduced motion.
  */
-const FRAME = 33 // ms per step
-const PER_FRAME = 2 // characters the edge advances each step
-const PIXEL_FRAMES = 3 // steps a character stays pixelated
+const FRAME = 30 // ms per step; the edge reaches one character per step
+const PIXEL_FRAMES = 4 // steps a character stays pixelated
+const PAUSE: Record<string, number> = { ",": 5, ".": 10, ":": 10, "?": 10, "!": 10 } // extra steps after these
 const BLOCK = 2 // px, the mosaic's block size
 
 export function PixelType({ text, className }: { text: string; className?: string }) {
   const chars = [...text]
-  const total = chars.length
+  // the step each character is reached at, with the thinking beats after punctuation
+  const starts: number[] = []
+  let t = 0
+  for (const c of chars) { starts.push(t); t += 1 + (PAUSE[c] ?? 0) }
+  const typed = t // step after the last character is reached
   const still = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
   const [step, setStep] = useState(still ? Infinity : 0)
   useEffect(() => {
     if (still) return
     setStep(0)
     let n = 0
-    const end = Math.ceil(total / PER_FRAME) + PIXEL_FRAMES + 1
+    const end = typed + PIXEL_FRAMES + 1
     const id = window.setInterval(() => { n += 1; setStep(n); if (n >= end) window.clearInterval(id) }, FRAME)
     return () => window.clearInterval(id)
-  }, [text, total, still])
-  const edge = step * PER_FRAME // characters reached so far
+  }, [text, typed, still])
+  const done = step >= typed + PIXEL_FRAMES
   return (
     <p className={className} aria-label={text}>
       {chars.map((c, i) => {
-        const age = step - Math.floor(i / PER_FRAME) // steps since this character was reached
-        if (i >= edge) return <span key={i} aria-hidden className="invisible">{c}</span>
-        if (age > PIXEL_FRAMES || c === " ") return <span key={i} aria-hidden>{c}</span>
-        return <PixelChar key={i} char={c} stage={age} seed={i * 31 + step * 7} />
+        const age = step - starts[i] // steps since this character was reached
+        const atEdge = !done && step >= starts[i] && (i === chars.length - 1 || step < starts[i + 1])
+        const cursor = atEdge ? <Cursor key={`c${i}`} /> : null
+        if (age < 0) return <span key={i} aria-hidden className="invisible">{c}</span>
+        if (age > PIXEL_FRAMES || c === " ") return [<span key={i} aria-hidden>{c}</span>, cursor]
+        return [<PixelChar key={i} char={c} stage={age} seed={i * 31 + step * 7} />, cursor]
       })}
+      {!still && done && <Cursor blink />}
     </p>
   )
+}
+
+// The block cursor: a solid bar one character wide-ish, in the text colour, sitting on the line (no layout space);
+// steady while typing, blinking (steps, not a fade) once the text is complete
+function Cursor({ blink }: { blink?: boolean }) {
+  return <span aria-hidden className={`relative inline-block h-[0.95em] w-0 align-[-0.12em] after:absolute after:inset-y-0 after:left-px after:w-[0.5em] after:bg-current after:opacity-70 ${blink ? "after:animate-[pixel-cursor_1s_steps(1)_infinite]" : ""}`} />
 }
 
 // One character mid-typing: its own glyph drawn at block resolution (from the live font and colour), with dropout.
