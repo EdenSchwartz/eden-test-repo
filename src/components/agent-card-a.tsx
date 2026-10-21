@@ -38,15 +38,19 @@ export const ideaAColors: [string, string][] = [
   ["#11B39A", "#0C7D6C"], // mint
 ]
 
-// Marks: the four from the design (Figma SVGs in /public/agent-marks, at their own size), then new ones drawn on a
-// grid ("#" = a white square), each fitted into a 30px box
-const figmaMarks = [
-  { src: "/agent-marks/mark-1.svg", w: 30.755, h: 32.001 }, // dotted ring
-  { src: "/agent-marks/mark-2.svg", w: 30.179, h: 30 }, // diamond ring
-  { src: "/agent-marks/mark-3.svg", w: 30, h: 30.165 }, // burst
-  { src: "/agent-marks/mark-4.svg", w: 28.751, h: 28.934 }, // open square
-]
+// Marks: every shape on the same 7 × 7 grid ("#" = a square), drawn in a 30px box, so the squares inside are the
+// same size for every agent and the shapes line up. The first four are the design's (Figma SVGs, read onto the grid),
+// then new ones in the same spirit.
+const GRID = 7
 const gridMarks: string[][] = [
+  // dotted ring (design)
+  ["...#...", ".#...#.", "#.....#", ".#...#.", "#.....#", ".#...#.", "...#..."],
+  // diamond ring (design)
+  ["..###..", ".#...#.", "#.....#", "#..#..#", "#.....#", ".#...#.", "..###.."],
+  // burst (design)
+  ["...#...", ".#...#.", "..#.#..", "#..#..#", "..#.#..", ".#...#.", "...#..."],
+  // open square (design)
+  ["..##.##", "..##.##", "##.....", "##.....", "##...##", "..###..", "..###.."],
   // ring of eight
   ["..#.#..", ".......", "#.....#", "...#...", "#.....#", ".......", "..#.#.."],
   // crossed circle
@@ -54,26 +58,26 @@ const gridMarks: string[][] = [
   // orbit
   ["...#...", ".#...#.", ".......", "#..#..#", ".......", ".#...#.", "...#..."],
   // eye
-  ["..###..", ".#...#.", "#..#..#", ".#...#.", "..###.."],
+  [".......", "..###..", ".#...#.", "#..#..#", ".#...#.", "..###..", "......."],
   // checker ring
   ["..#.#..", ".#.#.#.", "#.....#", ".#...#.", "#.....#", ".#.#.#.", "..#.#.."],
-  // core
-  [".####.", "#....#", "#.##.#", "#.##.#", "#....#", ".####."],
+  // split ring
+  [".##.##.", "#.....#", "#.....#", "...#...", "#.....#", "#.....#", ".##.##."],
   // petals
   [".#...#.", "##...##", ".......", "...#...", ".......", "##...##", ".#...#."],
   // crescent
-  ["..###.", ".#....", "#.....", "#.....", ".#....", "..###."],
+  ["..###..", ".#.....", "#......", "#......", "#......", ".#.....", "..###.."],
   // target
   [".#####.", "#.....#", "#.###.#", "#.#.#.#", "#.###.#", "#.....#", ".#####."],
 ]
 // Which mark each agent gets: the first six as in the design (dotted ring, burst, diamond ring, open square, diamond
-// ring, dotted ring), then the new grid marks in turn, then the design's again
-const markCount = figmaMarks.length + gridMarks.length
+// ring, dotted ring), then the new ones in turn, then round again
+const markCount = gridMarks.length
 const designOrder = [0, 2, 1, 3, 1, 0]
-const markFor = (i: number) => i < designOrder.length ? designOrder[i] : (figmaMarks.length + (i - designOrder.length)) % markCount
+const markFor = (i: number) => i < designOrder.length ? designOrder[i] : (4 + (i - designOrder.length)) % markCount
 
 function GridMark({ rows, color = "#fff" }: { rows: string[]; color?: string }) {
-  const n = Math.max(rows.length, ...rows.map((r) => r.length))
+  const n = GRID
   const cell = 30 / n
   return (
     <svg aria-hidden width="30" height="30" viewBox="0 0 30 30" className="shrink-0">
@@ -92,9 +96,7 @@ export function IdeaAMark({ index, size = 50 }: { index: number; size?: number }
   return (
     <span aria-hidden className="grid shrink-0 place-items-center rounded-full border-[1.5px] border-solid drop-shadow-[0px_2px_0px_#efeff0]" style={{ width: size, height: size, background: fill, borderColor: edge }}>
       <span className="grid place-items-center" style={{ transform: scale === 1 ? undefined : `scale(${scale})` }}>
-        {m < figmaMarks.length
-          ? <img alt="" src={figmaMarks[m].src} width={figmaMarks[m].w} height={figmaMarks[m].h} className="block max-w-none" />
-          : <GridMark rows={gridMarks[m - figmaMarks.length]} />}
+        <GridMark rows={gridMarks[m]} />
       </span>
     </span>
   )
@@ -113,9 +115,7 @@ export function IdeaBMark({ index, size = 64 }: { index: number; size?: number }
     <span className="absolute top-1/2 left-1/2 grid place-items-center" style={{ transform: `translate(-50%, -50%) scale(${size / 64})` }}>
     <span className="ideab-wheel relative grid size-16 shrink-0 place-items-center rounded-full border-[3px] border-solid border-black drop-shadow-[0px_3px_0px_#efeff0]" style={{ background: fill }}>
       <span className="grid place-items-center" style={{ transform: "scale(1.17)" }}>
-        {m < figmaMarks.length
-          ? <img alt="" src={figmaMarks[m].src} width={figmaMarks[m].w} height={figmaMarks[m].h} className="block max-w-none" />
-          : <GridMark rows={gridMarks[m - figmaMarks.length]} />}
+        <GridMark rows={gridMarks[m]} />
       </span>
       <img alt="" src="/agent-marks/ring-dashed.png" width={60} height={60} className="ideab-tyre absolute top-1/2 left-1/2 block size-[60px] max-w-none" style={{ transform: "translate(-50%, -50%)" }} />
     </span>
@@ -133,12 +133,9 @@ export function IdeaASquareMark({ index, size = 42 }: { index: number; size?: nu
   const m = markFor(index)
   return (
     <span aria-hidden className="relative block shrink-0 overflow-hidden border border-solid" style={{ width: size, height: size, borderRadius: size > 42 ? 6 : 4, background: `color-mix(in oklch, ${fill} 10%, white)`, borderColor: `color-mix(in oklch, ${fill} 22%, white)` }}>
-      {/* dead centre of the square, whatever the shape's own size (scaled to ~24px); the Figma shapes are white
-          SVGs, so they're drawn as a mask filled with the deep tone */}
+      {/* dead centre of the square (the 30px shape box scaled to ~24px), in the deep tone */}
       <span className="absolute top-1/2 left-1/2 block" style={{ transform: `translate(-50%, -50%) scale(${(0.8 * size) / 42})` }}>
-        {m < figmaMarks.length
-          ? <span className="block" style={{ width: figmaMarks[m].w, height: figmaMarks[m].h, background: edge, mask: `url(${figmaMarks[m].src}) center / 100% 100% no-repeat`, WebkitMask: `url(${figmaMarks[m].src}) center / 100% 100% no-repeat` }} />
-          : <GridMark rows={gridMarks[m - figmaMarks.length]} color={edge} />}
+        <GridMark rows={gridMarks[m]} color={edge} />
       </span>
     </span>
   )
