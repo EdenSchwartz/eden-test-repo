@@ -62,7 +62,7 @@ export function AgentsLibraryFrame({ mode = "library" }: { mode?: "library" | "m
     if (arrived) pick(arrived.a)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.superAgentId])
-  const pick = (a: LibraryAgent) => { setPicked(a.templateId ? { agent: a.templateId, name: a.name } : { kind: a.kind, name: a.name }); setInner(null); setDir("in"); setOpen(true) }
+  const pick = (a: LibraryAgent) => { setPicked(a.templateId ? { agent: a.templateId, name: a.name } : a.partOf === undefined ? { agent: `lib:${a.name}`, name: a.name } : { kind: a.kind, name: a.name }); setInner(null); setDir("in"); setOpen(true) }
   const close = () => setOpen(false)
   // Inside the drawer: a step's sub agent (from an agent's How it works) or an agent a sub agent is part of opens in
   // the same drawer, in place, with breadcrumbs back. The picked card's panel stays mounted underneath (hidden), so
@@ -78,7 +78,7 @@ export function AgentsLibraryFrame({ mode = "library" }: { mode?: "library" | "m
   // (the drawer's own agent, from a step's sub agent: just back to it)
   const openPartOf = (a: LibraryAgent) => (a.templateId === picked?.agent && a.templateId ? back() : a.templateId ? into({ agent: a.templateId }) : pick(a))
   const startSub = () => navigate("chat", { startChat: true })
-  const agent = picked?.agent ? getSuperAgent(picked.agent) : undefined
+  const agent = picked?.agent ? getAgent(picked.agent) : undefined
   // The drawer's icon tile keeps the picked card's colour (on My Agents: the template it was made from)
   const pickedLib = [...agentEntries, ...subEntries].find((e) => e.a.name === picked?.name)?.from
   const look = useCardLook()
@@ -132,8 +132,8 @@ export function AgentsLibraryFrame({ mode = "library" }: { mode?: "library" | "m
           {/* kept mounted (hidden) while a step is open, so it keeps its tab and typed prompt; it slides back in on return */}
           <div className={cn("flex h-full min-h-0 flex-col", inner ? "hidden" : dir === "back" && "panel-swap-back")}>
             {agent
-              ? <TemplateDetail key={agent.id} sa={agent} color={pickedColor} nav={nav} onOpenStep={(k) => into({ sub: k })} {...drawerProps(pickedLib)} onUse={(sa) => navigate("chat", { superAgentId: sa.id, startChat: true })} onClose={close} />
-              : picked?.kind && <SubAgentDetail key={picked.name} kind={picked.kind} color={pickedColor} nav={nav} template={!mineMode} {...subPanelProps(picked.kind, openPartOf)} onUse={startSub} onClose={close} onOpenAgent={(sa) => into({ agent: sa.id })} />}
+              ? <TemplateDetail key={agent.id} sa={agent} color={pickedColor} nav={nav} onOpenStep={(k) => into({ sub: k })} {...drawerProps(pickedLib)} outcomes={agent.id.startsWith("lib:") ? pickedLib?.outcomes : undefined} onUse={(sa) => navigate("chat", sa.id.startsWith("lib:") ? { startChat: true } : { superAgentId: sa.id, startChat: true })} onClose={close} />
+              : picked?.kind && <SubAgentDetail key={picked.name} kind={picked.kind} color={pickedColor} nav={nav} template={!mineMode} {...subPanelProps(picked.kind, openPartOf)} mark={pickedLib && drawerMark(pickedLib, look)} onUse={startSub} onClose={close} onOpenAgent={(sa) => into({ agent: sa.id })} />}
           </div>
           {inner && "sub" in inner && (
             <div className="panel-swap-in flex h-full min-h-0 flex-col">
@@ -550,6 +550,37 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
     </button>
   )
 }
+
+// Every library agent has its own agent panel. Triage Hunter has a full template; the others are built here from
+// their card (name, description, outcomes) on Triage Hunter's frame (skills, tools), with their own prompt and steps.
+const libPatterns: Partial<Record<AgentKind, AgentKind[][]>> = {
+  exploitability: [["correlation"], ["exploitability", "threat-intel"], ["prioritization"], ["reporting"]],
+  "red-team": [["exploitability"], ["red-team"], ["reporting"]],
+  ownership: [["asset-discovery"], ["ownership"], ["reporting"]],
+  remediation: [["prioritization"], ["remediation"], ["reporting"]],
+  "data-leak": [["data-leak", "threat-intel"], ["prioritization"], ["reporting"]],
+  "asset-discovery": [["asset-discovery"], ["correlation"], ["reporting"]],
+}
+const libPrompts: Record<string, string> = {
+  "Code CVE Exploitability": "Check this week's dependency CVEs and tell me which are really exploitable in our code. Skip the rest.",
+  "Cloud Exploitability": "Go through new cloud scanner findings and confirm which can actually be reached and exploited.",
+  "Code SAST Exploitability": "Trace this week's SAST findings and keep only the ones a user input can really reach.",
+  "Red Team Simulation": "Reproduce the top exploitable finding in an isolated replica and show me the proof of concept.",
+  "Finding Ownership": "Find the right owner for every open critical and high finding, and draft a note to each.",
+  "WAF Analysis": "For each exploitable finding, check whether our WAF rules already block its path in.",
+  "Remediation": "Fix the top three findings in a sandbox copy of the repo and open PRs for my review.",
+  "Secret Validation": "Check every leaked secret from this week: is it live, and what can it reach?",
+  "App Inventory": "List every deployable app and shared library we have, with its repo and owner.",
+  "Deployment Mapping": "Map our non-containerized apps to the cloud workloads they run on.",
+}
+const libSa = (a: LibraryAgent): SuperAgent => {
+  const base = getSuperAgent("triage")!
+  return {
+    ...base, id: `lib:${a.name}`, name: a.name, tagline: a.tagline, icon: a.icon, custom: false, clonedFrom: undefined,
+    prompt: libPrompts[a.name] ?? base.prompt, pattern: (a.kind && libPatterns[a.kind]) || base.pattern,
+  }
+}
+const getAgent = (id?: string) => (id?.startsWith("lib:") ? (() => { const a = library.find((l) => `lib:${l.name}` === id); return a && libSa(a) })() : getSuperAgent(id))
 
 // A sub agent's "Part of": four library agents that would use it, as rows with their own (square) marks. Picking one
 // opens it — in place, with breadcrumbs, when it has its own panel; else as the drawer's agent.

@@ -5,7 +5,7 @@ import { MessageResponse } from "@/components/ai-elements/message"
 import { agents, type AgentKind } from "@/components/chat/agents"
 
 import { WorkflowCanvas } from "@/components/tasks/workflow-canvas"
-import { agentOutcomes } from "@/data/outcomes"
+import { agentOutcomes, type Outcome } from "@/data/outcomes"
 import { ScheduleTab, skillMd, slug } from "@/components/super-agent-panel"
 import { TriggersSection } from "@/components/tasks/triggers"
 import { ColorTile, colorFor } from "@/components/tasks/color-tile"
@@ -29,11 +29,12 @@ import { ChevronDownIcon, ChevronUpIcon, OverviewIcon, PanelOutcomes, PanelPromp
 
 type Tab = "overview" | "skills" | "triggers" | "schedule"
 
-export function TemplateDetail({ sa, color, mark, nav, crumbs, onOpenStep, categories, capabilities, context, onUse, onClose, wide }: {
+export function TemplateDetail({ sa, color, mark, nav, crumbs, onOpenStep, outcomes: outcomesFor, categories, capabilities, context, onUse, onClose, wide }: {
   sa: SuperAgent; color?: string; onUse: (sa: SuperAgent) => void; onClose: () => void; wide?: boolean
   nav?: DrawerNav // step through the cards it was opened from
   crumbs?: Crumb[] // opened from inside another panel: breadcrumbs in place of the arrows
   onOpenStep?: (kind: AgentKind) => void // a step in How it works opens its sub agent
+  outcomes?: Outcome[] // the results it can end in, when not in the shared table (library agents without a template)
   mark?: React.ReactNode // the card idea's round mark, in place of the colour tile
   categories?: string[] // as on its card
   capabilities?: React.ReactNode // as on its card (the icons); else "Read only"
@@ -55,7 +56,7 @@ export function TemplateDetail({ sa, color, mark, nav, crumbs, onOpenStep, categ
   ]
   const pad = wide ? "px-6" : "px-5"
   const scope = scopeOf(sa)
-  const outcomes = agentOutcomes[sa.clonedFrom ?? sa.id]
+  const outcomes = outcomesFor ?? agentOutcomes[sa.clonedFrom ?? sa.id]
   const trigger = triggerLabel(useTriggers(sa))
 
   return (
