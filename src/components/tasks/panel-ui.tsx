@@ -130,9 +130,9 @@ export function PanelSteps({ pattern }: { pattern: AgentKind[][] }) {
   )
 }
 
-// Use Agent: #0350D0 with a #023FA3 edge, 4px corners, 10px top and bottom, Geist Medium 12 white, then ⌘⏎
+// Use Agent: #0350D0 with a #023FA3 edge, 4px corners, 7px top and bottom (34 high), Geist Medium 12 white, then ⌘⏎
 export const PanelUseButton = ({ onClick, wide }: { onClick: () => void; wide?: boolean }) => (
-  <button onClick={onClick} className={cn("flex cursor-pointer items-center justify-center gap-1.5 rounded-[4px] border border-solid border-[#023fa3] bg-[#0350d0] py-2.5 pr-2 pl-1.5 text-small leading-4 font-medium text-white drop-shadow-[0px_1px_0.5px_rgba(0,0,0,0.05)] transition-colors hover:bg-[#0a47b8]", wide ? "px-4" : "w-full")}>
+  <button onClick={onClick} className={cn("flex cursor-pointer items-center justify-center gap-1.5 rounded-[4px] border border-solid border-[#023fa3] bg-[#0350d0] py-[7px] pr-2 pl-1.5 text-small leading-4 font-medium text-white drop-shadow-[0px_1px_0.5px_rgba(0,0,0,0.05)] transition-colors hover:bg-[#0a47b8]", wide ? "px-4" : "w-full")}>
     Use Agent
     <kbd className="rounded-[4px] bg-white/15 px-[5px] py-px font-sans text-small leading-4 font-medium text-white/85">⌘⏎</kbd>
   </button>
