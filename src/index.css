@@ -602,3 +602,30 @@ html[data-vt="split"]::view-transition-group(*) {
 .tilt-card:hover .tilt-light { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .tilt-card, .tilt-card:hover { transform: none; transition: none; } }
 .tilt-card > :not(.tilt-light) { position: relative; } /* content above the light */
+
+/* Card idea B's hover (components/agents-library-frame.tsx): the mark is a wheel. It winds back a touch, then spins
+   forward a turn and a quarter and settles, like a tyre pulling away; three speed lines streak out behind it (left)
+   and fade. The card itself only firms its edge and shadow — no tilt. */
+.ideab-card { transition: border-color 200ms ease, box-shadow 200ms ease; }
+.ideab-card:hover { border-color: #d6d6d6; box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.06), 0 10px 24px -14px rgba(18, 18, 18, 0.25); }
+.ideab-card .ideab-wheel { transition: transform 600ms cubic-bezier(.3,.7,.2,1); }
+.ideab-card:hover .ideab-wheel { animation: ideab-spin 1100ms cubic-bezier(.25,.9,.25,1) both; }
+@keyframes ideab-spin {
+  0% { transform: rotate(0deg); }
+  14% { transform: rotate(-18deg); }
+  100% { transform: rotate(450deg); }
+}
+.ideab-speed { position: absolute; right: 100%; top: 50%; width: 22px; height: 16px; margin-top: -8px; margin-right: 4px; pointer-events: none; }
+.ideab-speed i { position: absolute; right: 0; height: 2px; border-radius: 2px; background: #121212; opacity: 0; transform-origin: right center; }
+.ideab-speed i:nth-child(1) { top: 1px; width: 12px; }
+.ideab-speed i:nth-child(2) { top: 7px; width: 20px; }
+.ideab-speed i:nth-child(3) { top: 13px; width: 9px; }
+.ideab-card:hover .ideab-speed i { animation: ideab-streak 700ms ease-out both; }
+.ideab-card:hover .ideab-speed i:nth-child(2) { animation-delay: 60ms; }
+.ideab-card:hover .ideab-speed i:nth-child(3) { animation-delay: 120ms; }
+@keyframes ideab-streak {
+  0% { opacity: 0; transform: translateX(6px) scaleX(0.2); }
+  35% { opacity: 0.55; transform: translateX(0) scaleX(1); }
+  100% { opacity: 0; transform: translateX(-10px) scaleX(0.6); }
+}
+@media (prefers-reduced-motion: reduce) { .ideab-card:hover .ideab-wheel, .ideab-card:hover .ideab-speed i { animation: none; } }

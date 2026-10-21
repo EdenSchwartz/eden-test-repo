@@ -101,18 +101,24 @@ export function IdeaAMark({ index, size = 50 }: { index: number; size?: number }
 
 // Idea B's mark (Figma node 64:16262): a 64px circle in the agent's colour with a 3px black edge, cut into dashes by a
 // white dashed ring (Figma's own image, /agent-marks/ring-dashed.png, 60px), a 3px #EFEFF0 shadow under it, and the
-// same pixel shape at 36px. Same colour and shape per agent as idea A.
-export function IdeaBMark({ index }: { index: number }) {
+// same pixel shape at 36px. Same colour and shape per agent as idea A. Drawn at 64 and scaled to `size` as a whole
+// (52 on the card, a little smaller than the design so it sits in balance with the card; 48 in the side panel).
+// The circle itself is the "wheel" (.ideab-wheel): on the card's hover it spins, see index.css.
+export function IdeaBMark({ index, size = 64 }: { index: number; size?: number }) {
   const [fill] = ideaAColors[index % ideaAColors.length]
   const m = markFor(index)
   return (
-    <span aria-hidden className="relative grid size-16 shrink-0 place-items-center rounded-full border-[3px] border-solid border-black drop-shadow-[0px_3px_0px_#efeff0]" style={{ background: fill }}>
+    <span aria-hidden className="relative grid shrink-0 place-items-center" style={{ width: size, height: size }}>
+    <span className="grid shrink-0 place-items-center" style={{ transform: size === 64 ? undefined : `scale(${size / 64})` }}>
+    <span className="ideab-wheel relative grid size-16 shrink-0 place-items-center rounded-full border-[3px] border-solid border-black drop-shadow-[0px_3px_0px_#efeff0]" style={{ background: fill }}>
       <span className="grid place-items-center" style={{ transform: "scale(1.17)" }}>
         {m < figmaMarks.length
           ? <img alt="" src={figmaMarks[m].src} width={figmaMarks[m].w} height={figmaMarks[m].h} className="block max-w-none" />
           : <GridMark rows={gridMarks[m - figmaMarks.length]} />}
       </span>
       <img alt="" src="/agent-marks/ring-dashed.png" width={60} height={60} className="absolute top-1/2 left-1/2 block size-[60px] max-w-none -translate-x-1/2 -translate-y-1/2" />
+    </span>
+    </span>
     </span>
   )
 }

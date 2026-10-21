@@ -522,7 +522,7 @@ const metaOf = (a: LibraryAgent): Meta =>
 // The side panel's mark under the card ideas: the same round mark as the card (48px), else the colour tile
 const drawerMark = (a: LibraryAgent, look: CardLook) =>
   look === "a" ? <IdeaAMark index={ideaIndex(a)} size={48} />
-  : look === "b" ? <span className="grid size-12 shrink-0 place-items-center"><span className="scale-75"><IdeaBMark index={ideaIndex(a)} /></span></span>
+  : look === "b" ? <IdeaBMark index={ideaIndex(a)} size={48} />
   : undefined
 
 // What an agent's drawer shows as Category, Capabilities and Context: the same as its card
@@ -635,18 +635,20 @@ function AgentCard({ a, from = a, selected, onSelect, mine }: {
       </span>
     </button>
   )
-  // Idea B (Figma 64:16242): centred; the mark sits half above the card's top edge (33px), name, tags, one-line description
+  // Idea B (Figma 64:16242): centred; the mark (52px) sits half above the card's top edge, name, tags, one-line
+  // description. Hover: no 3D tilt; the mark spins like a wheel pulling away, with speed lines behind it (index.css)
   if (look === "b") return (
     <button
       onClick={onSelect}
       aria-pressed={selected}
-      {...tilt}
-      className="tilt-card group relative mt-[2.0625rem] flex cursor-pointer flex-col items-stretch rounded-[4px] border border-solid border-[#e5e5e5] bg-white text-center whitespace-nowrap [box-shadow:0px_1px_1px_rgba(0,0,0,0.06)] hover:border-[#dcdcdc] aria-pressed:border-[#2e4eca]/40"
+      className="ideab-card group relative mt-[1.6875rem] flex cursor-pointer flex-col items-stretch rounded-[4px] border border-solid border-[#e5e5e5] bg-white text-center whitespace-nowrap [box-shadow:0px_1px_1px_rgba(0,0,0,0.06)] hover:border-[#dcdcdc] aria-pressed:border-[#2e4eca]/40"
     >
-      <span aria-hidden className="tilt-light rounded-[4px]" />
-      <span className={cn("absolute! top-[-2.0625rem] left-1/2 -translate-x-1/2 transition-opacity", off && "opacity-50")}><IdeaBMark index={ideaIndex(from)} /></span>
-      {mine && <span className="absolute! top-2 right-2"><StatusChip status={mine.status} /></span>}
-      <span className={cn("flex w-full flex-col items-center gap-3 px-[0.9375rem] pt-12 pb-4 transition-opacity", off && "opacity-50")}>
+      <span className={cn("absolute top-[-1.6875rem] left-1/2 -translate-x-1/2 transition-opacity", off && "opacity-50")}>
+        <span aria-hidden className="ideab-speed"><i /><i /><i /></span>
+        <IdeaBMark index={ideaIndex(from)} size={52} />
+      </span>
+      {mine && <span className="absolute top-2 right-2"><StatusChip status={mine.status} /></span>}
+      <span className={cn("flex w-full flex-col items-center gap-3 px-[0.9375rem] pt-[2.625rem] pb-4 transition-opacity", off && "opacity-50")}>
         <span className="flex w-full min-w-0 flex-col items-center gap-1.5">
           <span className="max-w-full truncate text-[1rem] leading-4 font-medium text-[#121212]">{a.name}</span>
           <span className="flex items-start gap-1.5">{m.categories.map((c) => <IdeaATag key={c}>{c}</IdeaATag>)}</span>
