@@ -4,6 +4,7 @@ import { colorFor } from "@/components/tasks/color-tile"
 import type { Outcome } from "@/data/outcomes"
 import { cn } from "@/lib/utils"
 import { PixelType } from "@/components/tasks/pixel-type"
+import { FluidGrid } from "@/components/fluid-grid"
 
 /*
  * The agent side panel, after the Figma design "Agent side panel — Triage Hunter (idea A)" (page "20.10 - Side Panel",
@@ -75,9 +76,14 @@ export function PanelOutcomes({ items }: { items: Outcome[] }) {
   )
 }
 
-// The prompt: #FAFAFA box, #ECECEC edge, 6px corners, 12px padding, Geist Mono 12/18 #7C7C7C
+// The prompt: #ECECEC edge, 6px corners, 12px padding, Geist Mono 12/18 in the secondary colour
+// Its background is the Agents Library header's: the faint grid with fine grain, lit by the fluid where the pointer
+// moves (fluid-grid.tsx), with shorter fades to suit a small box (.alive-compact in index.css)
 export const PanelPrompt = ({ text }: { text: string }) => (
-  <div className="w-full rounded-[6px] border border-solid border-[#ececec] bg-[#fafafa] p-3">
+  <div className="alive-box alive-compact relative isolate w-full overflow-hidden rounded-[6px] border border-solid border-[#ececec] bg-white p-3">
+    <span aria-hidden className="alive-noise" />
+    <span aria-hidden className="alive-base" />
+    <FluidGrid />
     {/* types itself in with a pixel edge each time the panel shows an agent (pixel-type.tsx) */}
     <PixelType key={text} text={text} className="font-mono text-small leading-[1.125rem] text-fg-secondary" />
   </div>

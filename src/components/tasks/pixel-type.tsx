@@ -9,7 +9,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react"
  * Paced like an agent writing code, not a person typing: one character every 30ms with a short think after
  * punctuation (a beat after ",", a longer one after "." / ":" / "?"), each character pixelated for 4 steps, so a
  * small shimmering band runs along the text (~4–5s for a 115-character prompt). A solid block cursor rides the edge
- * and blinks at the end once it's done. The full text is laid out from the start (untyped characters invisible),
+ * and blinks three times at the end once it's done, then goes. The full text is laid out from the start (untyped characters invisible),
  * so nothing reflows or wraps differently. Plays when it mounts or the text changes; just shows the text (no cursor)
  * for reduced motion.
  */
@@ -52,9 +52,9 @@ export function PixelType({ text, className }: { text: string; className?: strin
 }
 
 // The block cursor: a solid bar one character wide-ish, in the text colour, sitting on the line (no layout space);
-// steady while typing, blinking (steps, not a fade) once the text is complete
+// steady while typing; once the text is complete it blinks three times (steps, not a fade) and is gone
 function Cursor({ blink }: { blink?: boolean }) {
-  return <span aria-hidden className={`relative inline-block h-[0.95em] w-0 align-[-0.12em] after:absolute after:inset-y-0 after:left-px after:w-[0.5em] after:bg-current after:opacity-70 ${blink ? "after:animate-[pixel-cursor_1s_steps(1)_infinite]" : ""}`} />
+  return <span aria-hidden className={`relative inline-block h-[0.95em] w-0 align-[-0.12em] after:absolute after:inset-y-0 after:left-px after:w-[0.5em] after:bg-current after:opacity-70 ${blink ? "after:animate-[pixel-cursor_1s_steps(1)_3_forwards]" : ""}`} />
 }
 
 // One character mid-typing: its own glyph drawn at block resolution (from the live font and colour), with dropout.

@@ -126,13 +126,14 @@ export function IdeaBMark({ index, size = 64 }: { index: number; size?: number }
 
 // The side panel's mark (Figma "20.10 - Side Panel", node 68:17737): a 42px rounded square (4px corners) in the
 // agent's colour, a 1.5px darker edge, a 2px #EFEFF0 shadow under it, the pixel shape at 24px
-export function IdeaASquareMark({ index }: { index: number }) {
+// `size` scales it for the cards (60px there, corners 6px); the shape keeps the same share of the square
+export function IdeaASquareMark({ index, size = 42 }: { index: number; size?: number }) {
   const [fill, edge] = ideaAColors[index % ideaAColors.length]
   const m = markFor(index)
   return (
-    <span aria-hidden className="relative block size-[2.625rem] shrink-0 overflow-hidden rounded-[4px] border-[1.5px] border-solid shadow-[0px_2px_0px_0px_#efeff0]" style={{ background: fill, borderColor: edge }}>
+    <span aria-hidden className="relative block shrink-0 overflow-hidden border-[1.5px] border-solid shadow-[0px_2px_0px_0px_#efeff0]" style={{ width: size, height: size, borderRadius: size > 42 ? 6 : 4, background: fill, borderColor: edge }}>
       {/* dead centre of the square, whatever the shape's own size (scaled to ~24px) */}
-      <span className="absolute top-1/2 left-1/2 block" style={{ transform: "translate(-50%, -50%) scale(0.8)" }}>
+      <span className="absolute top-1/2 left-1/2 block" style={{ transform: `translate(-50%, -50%) scale(${(0.8 * size) / 42})` }}>
         {m < figmaMarks.length
           ? <img alt="" src={figmaMarks[m].src} width={figmaMarks[m].w} height={figmaMarks[m].h} className="block max-w-none" />
           : <GridMark rows={gridMarks[m - figmaMarks.length]} />}
