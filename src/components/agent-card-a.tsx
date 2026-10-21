@@ -15,8 +15,8 @@ import { Hint } from "@/components/ui/hint"
 
 // Colours: [fill, edge]. The first six from the design; the rest added in the same tone (edge ≈ 70% of the fill)
 export const ideaAColors: [string, string][] = [
-  ["#97B910", "#6E870C"], // lime (Triage Hunter; swapped with Code CVE)
-  ["#0177D7", "#015599"], // blue (Code CVE Exploitability)
+  ["#0177D7", "#015599"], // blue (Triage Hunter)
+  ["#97B910", "#6E870C"], // lime
   ["#FA582D", "#AD3D1F"], // red orange
   ["#C91977", "#85104F"], // magenta
   ["#7F5ACF", "#5A3F93"], // violet
