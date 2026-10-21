@@ -15,8 +15,8 @@ import { Hint } from "@/components/ui/hint"
 
 // Colours: [fill, edge]. The first six from the design; the rest added in the same tone (edge ≈ 70% of the fill)
 export const ideaAColors: [string, string][] = [
-  ["#0177D7", "#015599"], // blue (Triage Hunter)
-  ["#97B910", "#6E870C"], // lime
+  ["#97B910", "#6E870C"], // lime (Triage Hunter; swapped with Code CVE)
+  ["#0177D7", "#015599"], // blue (Code CVE Exploitability)
   ["#FA582D", "#AD3D1F"], // red orange
   ["#C91977", "#85104F"], // magenta
   ["#7F5ACF", "#5A3F93"], // violet
@@ -39,7 +39,7 @@ export const ideaAColors: [string, string][] = [
 ]
 
 // Marks: every shape on the same 7 × 7 grid ("#" = a square), drawn in a 30px box, so the squares inside are the
-// same size for every agent and the shapes line up. The first four are the design's (Figma SVGs, read onto the grid),
+// same size for every agent and the shapes line up. The first three are the design's (Figma SVGs, read onto the grid),
 // then new ones in the same spirit.
 const GRID = 7
 const gridMarks: string[][] = [
@@ -49,8 +49,8 @@ const gridMarks: string[][] = [
   ["..###..", ".#...#.", "#.....#", "#..#..#", "#.....#", ".#...#.", "..###.."],
   // burst (design)
   ["...#...", ".#...#.", "..#.#..", "#..#..#", "..#.#..", ".#...#.", "...#..."],
-  // open square (design)
-  ["..##.##", "..##.##", "##.....", "##.....", "##...##", "..###..", "..###.."],
+  // nested diamond (in place of the design's open square)
+  ["...#...", "..#.#..", ".#.#.#.", "#.#.#.#", ".#.#.#.", "..#.#..", "...#..."],
   // ring of eight
   ["..#.#..", ".......", "#.....#", "...#...", "#.....#", ".......", "..#.#.."],
   // crossed circle
@@ -70,10 +70,10 @@ const gridMarks: string[][] = [
   // target
   [".#####.", "#.....#", "#.###.#", "#.#.#.#", "#.###.#", "#.....#", ".#####."],
 ]
-// Which mark each agent gets: the first six as in the design (dotted ring, burst, diamond ring, open square, diamond
-// ring, dotted ring), then the new ones in turn, then round again
+// Which mark each agent gets: the first six from the design (burst for Triage Hunter and dotted ring for Code CVE —
+// swapped from the design — then diamond ring, nested diamond, diamond ring, dotted ring), then the new ones in turn, then round again
 const markCount = gridMarks.length
-const designOrder = [0, 2, 1, 3, 1, 0]
+const designOrder = [2, 0, 1, 3, 1, 0]
 const markFor = (i: number) => i < designOrder.length ? designOrder[i] : (4 + (i - designOrder.length)) % markCount
 
 function GridMark({ rows, color = "#fff" }: { rows: string[]; color?: string }) {
