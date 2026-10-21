@@ -287,6 +287,13 @@ export function DrawerTopBar({ nav, crumbs, onClose, children }: { nav?: DrawerN
     <div className="flex shrink-0 items-center justify-between gap-3 border-b border-solid border-[#f0f0f0] px-4 py-2">
       <div className="flex min-h-6 min-w-0 flex-1 items-center gap-1">
         {crumbs ? (
+          <>
+          {/* back: a small chevron that does what the previous crumb does */}
+          {crumbs.length > 1 && crumbs[crumbs.length - 2].onClick && (
+            <button onClick={crumbs[crumbs.length - 2].onClick} aria-label={`Back to ${crumbs[crumbs.length - 2].label}`} title="Back" className="-ml-1 flex cursor-pointer items-center justify-center rounded-[4px] p-1 text-fg-secondary transition-colors hover:bg-[#f5f5f5] hover:text-fg-primary">
+              <svg viewBox="0 0 12 12" fill="none" aria-hidden className="size-3"><path d="M7.5 2L3.85355 5.64644C3.65829 5.8417 3.65829 6.15828 3.85355 6.35354L7.5 10" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </button>
+          )}
           <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1 text-small leading-4 whitespace-nowrap">
             {crumbs.map((c, i) => {
               const last = i === crumbs.length - 1
@@ -300,6 +307,7 @@ export function DrawerTopBar({ nav, crumbs, onClose, children }: { nav?: DrawerN
               )
             })}
           </nav>
+          </>
         ) : nav && nav.index >= 0 && (
           <>
             <button onClick={nav.onPrev} disabled={nav.index <= 0} aria-label="Previous agent" title="Previous" className="flex cursor-pointer items-center justify-center rounded-[4px] p-1 text-fg-secondary transition-colors hover:bg-[#f5f5f5] disabled:cursor-default disabled:text-fg-tertiary disabled:hover:bg-transparent">
