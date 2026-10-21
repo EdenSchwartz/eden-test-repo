@@ -80,7 +80,7 @@ export const PanelPrompt = ({ text }: { text: string }) => (
 )
 
 // How it works: each step a small pill (white 80%, #E5E3E3 edge, 6px corners, 24 high, soft shadow) with its icon on a
-// tinted 20px square and the name (Geist Medium 14), then what it does under it (14/16 #525252, 28px in). A faint rail
+// tinted 20px square and the name (Geist Regular 14), then what it does under it (14/16 #525252, 28px in). A faint rail
 // (#E5E3E3 at 70%) runs down through the icons. Steps that run together are joined by a blue line with a "Parallel" pill
 // on it, and sit further apart (68px instead of 20).
 const stepLook: Partial<Record<AgentKind, { src: string; bg: string }>> = {
@@ -112,7 +112,7 @@ export function PanelSteps({ pattern }: { pattern: AgentKind[][] }) {
           <li key={kind} className={cn("relative flex flex-col items-start gap-2", i > 0 && (withPrev ? "mt-[68px]" : "mt-5"))}>
             <span className="relative flex h-6 items-center gap-1.5 rounded-[6px] border border-solid border-[#e5e3e3] bg-white/80 pr-2 pl-0.5 shadow-[0px_1px_1px_0px_rgba(56,61,69,0.08)]">
               <StepIcon kind={kind} />
-              <span className="text-[0.875rem] leading-5 font-medium whitespace-nowrap text-[#101112]">{agents[kind].name.replace(/ agent$/, "")}</span>
+              <span className="text-[0.875rem] leading-5 font-normal whitespace-nowrap text-[#101112]">{agents[kind].name.replace(/ agent$/, "")}</span>
             </span>
             <span className="pr-8 pl-7 text-[0.875rem] leading-4 whitespace-nowrap text-[#525252]">{agents[kind].short}</span>
             {next?.withPrev && (
