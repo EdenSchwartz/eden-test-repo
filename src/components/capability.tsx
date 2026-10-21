@@ -1,4 +1,5 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { Hint } from "@/components/ui/hint"
 
 /*
  * The agent capabilities, in this order: Memory · Context graph · Sandbox · Internet Access. The only four.
@@ -63,11 +64,11 @@ const shortNames: Record<Capability, string> = { memory: "Memory", graph: "Graph
 export function CapabilityLabels({ caps }: { caps: Capability[] }) {
   return (
     <span className="flex items-start gap-2">
-      {order.filter((c) => caps.includes(c)).map((c) => (
-        <span key={c} title={capabilityNames[c]} className="flex items-center gap-1 text-body leading-5 text-fg-primary">
-          <CapabilityIcon cap={c} className="size-3.5" />{shortNames[c]}
-        </span>
-      ))}
+      {order.filter((c) => caps.includes(c)).map((c) => {
+        const label = <span key={c} className="flex items-center gap-1 text-body leading-5 text-fg-primary"><CapabilityIcon cap={c} className="size-3.5" />{shortNames[c]}</span>
+        // the full name on hover where the label is short ("Graph" → Context graph)
+        return shortNames[c] === capabilityNames[c] ? label : <Hint key={c} label={capabilityNames[c]}>{label}</Hint>
+      })}
     </span>
   )
 }

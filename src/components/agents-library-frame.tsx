@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useEnabled } from "@/lib/enabled"
 import type { TaskStatus } from "@/lib/task-status"
 import { cn } from "@/lib/utils"
+import { Hint } from "@/components/ui/hint"
 import { APP, CLOUD, GRC, THREATS, VM, CategoryTag } from "@/components/category-tag"
 import { CapabilityLabels, CapabilityMarks, type Capability } from "@/components/capability"
 import { IdeaALogoChip, IdeaAMark, IdeaASquareMark, IdeaBMark, IdeaATag, figmaLogos, ideaAColors } from "@/components/agent-card-a"
@@ -539,7 +540,7 @@ const drawerProps = (a?: LibraryAgent) => {
 
 // Small marks for the tools an agent reads from, in each tool's colours (simplified, not the official logos)
 const toolNames: Record<Tool, string> = { wiz: "Wiz", snyk: "Snyk", github: "GitHub", defender: "Microsoft Defender", paloalto: "Palo Alto Prisma", semgrep: "Semgrep", okta: "Okta" }
-function ToolMark({ tool }: { tool: Tool }) {
+function ToolMark({ tool, bare }: { tool: Tool; bare?: boolean }) {
   const art: Record<Exclude<Tool, "okta">, React.ReactNode> = {
     defender: <path d="M8 1.2 2.6 3.1v4.3c0 3.4 2.3 6.1 5.4 7.4 3.1-1.3 5.4-4 5.4-7.4V3.1L8 1.2Zm-.6 2.1v4.4H3.8V4.1l3.6-.8Zm1.2 0 3.6.8v3.6H8.6V3.3ZM3.9 8.9h3.5v4.2C5.5 12.1 4.2 10.6 3.9 8.9Zm4.7 0h3.5c-.3 1.7-1.6 3.2-3.5 4.2V8.9Z" fill="#0078d4" />,
     paloalto: <g fill="#fa582d"><path d="m6.2 2.4 3 3-5.3 5.3-3-3z" /><path d="m11.1 5.3 3 3-5.3 5.3-3-3z" /></g>,
@@ -548,12 +549,11 @@ function ToolMark({ tool }: { tool: Tool }) {
     semgrep: <><circle cx="8" cy="8" r="7" fill="#2bc28a" /><circle cx="8" cy="8" r="2.6" fill="#fff" /></>,
     github: <><circle cx="8" cy="8" r="6.6" fill="#24292f" /><path d="M6.2 11.6v-1.4c-1.6.3-2-.7-2-.7-.3-.7-.7-.9-.7-.9-.6-.4 0-.4 0-.4.6 0 1 .7 1 .7.5.9 1.4.7 1.7.5 0-.4.2-.7.4-.8-1.3-.1-2.6-.6-2.6-2.8 0-.6.2-1.1.6-1.5-.1-.2-.3-.8 0-1.5 0 0 .5-.2 1.6.6a5.4 5.4 0 0 1 2.9 0c1.1-.8 1.6-.6 1.6-.6.3.7.1 1.3 0 1.5.4.4.6.9.6 1.5 0 2.2-1.3 2.7-2.6 2.8.2.2.4.5.4 1v1.9" fill="#fff" /></>,
   }
-  if (tool === "okta") return <span title={toolNames.okta} className="relative size-4 shrink-0">{figmaLogos.okta}</span>
-  return (
-    <span title={toolNames[tool]} className="grid size-4 shrink-0 place-items-center">
-      <svg viewBox="0 0 16 16" className="size-4" role="img" aria-label={toolNames[tool]}>{art[tool]}</svg>
-    </span>
-  )
+  const mark = tool === "okta"
+    ? <span aria-label={toolNames.okta} className="relative size-4 shrink-0">{figmaLogos.okta}</span>
+    : <span className="grid size-4 shrink-0 place-items-center"><svg viewBox="0 0 16 16" className="size-4" role="img" aria-label={toolNames[tool]}>{art[tool]}</svg></span>
+  // its name in a tooltip under it (not when it sits inside a chip that has its own)
+  return bare ? mark : <Hint label={toolNames[tool]}>{mark}</Hint>
 }
 
 // Idea A's context logos: the design's own three where they exist, else the same marks as above, 14px
@@ -562,7 +562,7 @@ function IdeaALogo({ tool }: { tool: Tool }) {
   return <span className="absolute inset-0"><ToolMarkArt tool={tool} /></span>
 }
 function ToolMarkArt({ tool }: { tool: Exclude<Tool, "okta" | "defender" | "paloalto"> }) {
-  const m = <ToolMark tool={tool} />
+  const m = <ToolMark tool={tool} bare />
   return <span className="[&>span]:size-3.5 [&_svg]:size-3.5">{m}</span>
 }
 // An agent's index in the library (agents, then sub agents): its colour and mark in idea A

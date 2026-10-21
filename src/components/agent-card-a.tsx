@@ -11,6 +11,7 @@
  * the design, the rest new colours in the same bright, saturated tone, and new pixel shapes in the same spirit
  * (white squares on a small grid, roughly round, abstract).
  */
+import { Hint } from "@/components/ui/hint"
 
 // Colours: [fill, edge]. The first six from the design; the rest added in the same tone (edge ≈ 70% of the fill)
 export const ideaAColors: [string, string][] = [
@@ -144,9 +145,11 @@ export function IdeaASquareMark({ index }: { index: number }) {
 // A context logo in its little white circle (overlapping the next by 4px)
 export function IdeaALogoChip({ name, children, last, edge = "#f7f7f8" }: { name: string; children: React.ReactNode; last?: boolean; edge?: string }) {
   return (
-    <span title={name} style={{ borderColor: edge }} className={`relative grid size-5 shrink-0 place-items-center rounded-[26px] border border-solid bg-white ${edge === "#f7f7f8" ? "drop-shadow-[0px_1px_0.5px_rgba(56,61,69,0.07)]" : "drop-shadow-[0px_1px_0.5px_rgba(56,61,69,0.08)]"} ${last ? "" : "-mr-1"}`}>
-      <span className="relative size-3.5 shrink-0 overflow-hidden">{children}</span>
-    </span>
+    <Hint label={name}>
+      <span aria-label={name} style={{ borderColor: edge }} className={`relative grid size-5 shrink-0 place-items-center rounded-[26px] border border-solid bg-white ${edge === "#f7f7f8" ? "drop-shadow-[0px_1px_0.5px_rgba(56,61,69,0.07)]" : "drop-shadow-[0px_1px_0.5px_rgba(56,61,69,0.08)]"} ${last ? "" : "-mr-1"}`}>
+        <span className="relative size-3.5 shrink-0 overflow-hidden">{children}</span>
+      </span>
+    </Hint>
   )
 }
 
