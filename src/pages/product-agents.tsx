@@ -3,14 +3,15 @@ import { createPortal } from "react-dom"
 import {
   IconActivity, IconAffiliate, IconAlertCircle, IconAlertSquareRounded, IconAlertSquareRoundedOff, IconAlertTriangle,
   IconArrowsMaximize, IconBolt, IconBrain, IconBug, IconBulb, IconChevronRight, IconCircleDot, IconCircleMinus, IconClock,
-  IconDots, IconFileDescription, IconFlag, IconFolderCode, IconGitBranch, IconKey, IconListDetails, IconMessageCircle,
-  IconPrompt, IconQuestionMark, IconRobot, IconSearch, IconShieldCheck, IconShieldX, IconSitemap, IconSwords, IconWorldSearch, IconX,
+  IconCode, IconDots, IconFileDescription, IconFlag, IconFolderCode, IconGitBranch, IconKey, IconListDetails, IconLoader2, IconMessageCircle,
+  IconPrompt, IconQuestionMark, IconRobot, IconSearch, IconServer, IconShieldCheck, IconShieldX, IconSitemap, IconSwords, IconUsers, IconWorldSearch, IconX,
   type Icon,
 } from "@tabler/icons-react"
 import {
   findProductAgent, myAgents, rivalAgents, rivalSubAgents,
-  type Capability, type OutcomeIcon, type ProductAgent, type RunsOn,
+  type Capability, type Outcome, type OutcomeIcon, type ProductAgent, type RunsOn,
 } from "@/data/product-agents"
+import { productRuns, runStarted, type ProductRun, type RunTarget } from "@/data/product-activity"
 import { RivalMark } from "@/components/nav-icons"
 import { useNav } from "@/lib/nav"
 import { useTilt } from "@/lib/tilt"
@@ -191,6 +192,84 @@ function Prompt({ text }: { text: string }) {
   )
 }
 
+// An outcome as the product draws it: a pill in the outcome's colours, its icon and label
+function OutcomeChip({ outcome: o }: { outcome: Outcome }) {
+  const I = outcomeIcon[o.icon]
+  return (
+    <span className="flex h-6 shrink-0 items-center gap-1 rounded-full border ps-1.5 pe-2 whitespace-nowrap" style={{ backgroundColor: `var(--${o.tone}-fill)`, borderColor: `var(--${o.tone}-stroke, transparent)`, color: `var(--${o.tone}-text)` }}>
+      <I className="size-3.5" /><span className="text-xs">{o.label}</span>
+    </span>
+  )
+}
+
+// Activity: the agent's runs as a timeline (data/product-activity.ts), newest first, grouped by day. Each run hangs off
+// one rail by a small node in its outcome's colour (blue and breathing while it runs); beside it the target it ran on,
+// the outcome, the time (how long ago on hover), what it found, and which agent ran it (sub-agents) and how long it took.
+const targetIcon: Record<RunTarget, Icon> = { cve: IconBug, sast: IconCode, secret: IconKey, branch: IconGitBranch, repo: IconFolderCode, asset: IconServer, identity: IconUsers }
+const dayLabel = (d: Date) => {
+  const start = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime()
+  const diff = Math.round((start(new Date()) - start(d)) / 86_400_000)
+  return diff === 0 ? "Today" : diff === 1 ? "Yesterday" : d.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" })
+}
+const ago = (m: number) => m < 1 ? "just now" : m < 60 ? `${m} minutes ago` : m < 1440 ? `about ${Math.round(m / 60)} hours ago` : `${Math.round(m / 1440)} days ago`
+const took = (s: number) => s < 60 ? `${s}s` : `${Math.round(s / 60)}m`
+
+function Activity({ agent }: { agent: ProductAgent }) {
+  const runs = productRuns[agent.id] ?? []
+  if (!runs.length) return <p className="py-10 text-center text-sm text-muted-foreground">No runs yet</p>
+  const days: { label: string; runs: (ProductRun & { at: Date })[] }[] = []
+  for (const r of runs) {
+    const at = runStarted(r), label = dayLabel(at)
+    if (days.at(-1)?.label !== label) days.push({ label, runs: [] })
+    days.at(-1)!.runs.push({ ...r, at })
+  }
+  let n = 0 // the entrance stagger
+  return (
+    <div className="flex flex-col gap-6">
+      {days.map((day) => (
+        <section key={day.label} className="flex flex-col gap-1">
+          <h4 className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            {day.label}<span className="text-muted-foreground/60">· {day.runs.length} {day.runs.length === 1 ? "run" : "runs"}</span>
+          </h4>
+          <ol>
+            {day.runs.map((r, i) => {
+              const I = targetIcon[r.target[0]]
+              const outcome = r.outcome ? agent.outcomes.find((o) => o.label === r.outcome) : undefined
+              const node = r.running ? "var(--palette-blue-text)" : outcome ? `var(--${outcome.tone}-text)` : "var(--muted-foreground)"
+              return (
+                <li key={i} className="activity-in group/run relative flex py-3 pl-8" style={{ animationDelay: `${n++ * 40}ms` }}>
+                  {i < day.runs.length - 1 && <span aria-hidden className="absolute top-[26px] -bottom-[26px] left-2 w-px bg-border" />}
+                  <span aria-hidden className="absolute top-[19px] left-0 grid size-4 place-items-center rounded-full border bg-background transition-colors group-hover/run:border-foreground/25">
+                    {r.running && <span className="absolute size-2 animate-ping rounded-full opacity-40 motion-reduce:hidden" style={{ background: node }} />}
+                    <span className="relative size-2 rounded-full" style={{ background: node, opacity: outcome || r.running ? 1 : 0.5 }} />
+                  </span>
+                  <div className="flex min-w-0 flex-1 flex-col gap-1">
+                    <div className="flex min-h-7 min-w-0 items-center gap-2">
+                      <span className="flex min-w-0 items-center gap-1.5 rounded-md border border-foreground/12 bg-foreground/5 px-1.5 py-0.5 text-sm text-foreground/80">
+                        <I className="size-4 shrink-0" /><span className="truncate">{r.target[1]}</span>
+                      </span>
+                      {r.running
+                        ? <span className="flex h-6 shrink-0 items-center gap-1 rounded-full border ps-1.5 pe-2 text-xs whitespace-nowrap" style={{ backgroundColor: "var(--palette-blue-fill)", borderColor: "var(--palette-blue-stroke)", color: "var(--palette-blue-text)" }}><IconLoader2 className="size-3.5 animate-spin motion-reduce:animate-none" />Running</span>
+                        : outcome && <OutcomeChip outcome={outcome} />}
+                      <span title={r.running ? "Started just now" : ago(r.ago)} className="ml-auto shrink-0 pl-2 text-sm whitespace-nowrap text-muted-foreground tabular-nums">
+                        {r.running ? "now" : r.at.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </div>
+                    <p className="text-[15px] leading-relaxed text-pretty">{r.summary}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {[r.via && `via ${r.via}`, r.secs !== undefined && `Took ${took(r.secs)}`].filter(Boolean).join(" · ") || "Running"}
+                    </p>
+                  </div>
+                </li>
+              )
+            })}
+          </ol>
+        </section>
+      ))}
+    </div>
+  )
+}
+
 type DrawerTab = "overview" | "triggers" | "activity"
 // The details drawer, from the right (55vw, 45vw on wide screens), over a dimmed page
 function AgentDrawer({ agent, onClose, onOpen, enabled, onToggle }: { agent: ProductAgent; onClose: () => void; onOpen: (id: string) => void; enabled?: boolean; onToggle?: (on: boolean) => void }) {
@@ -262,14 +341,7 @@ function AgentDrawer({ agent, onClose, onOpen, enabled, onToggle }: { agent: Pro
               {agent.outcomes.length > 0 && (
                 <Section icon={IconFlag} title="Outcomes">
                   <div className="flex flex-wrap items-center gap-2">
-                    {agent.outcomes.map((o) => {
-                      const I = outcomeIcon[o.icon]
-                      return (
-                        <span key={o.label} className="flex h-6 shrink-0 items-center gap-1 rounded-full border ps-1.5 pe-2 whitespace-nowrap" style={{ backgroundColor: `var(--${o.tone}-fill)`, borderColor: `var(--${o.tone}-stroke)`, color: `var(--${o.tone}-text)` }}>
-                          <I className="size-3.5" /><span className="text-xs">{o.label}</span>
-                        </span>
-                      )
-                    })}
+                    {agent.outcomes.map((o) => <OutcomeChip key={o.label} outcome={o} />)}
                   </div>
                 </Section>
               )}
@@ -299,7 +371,7 @@ function AgentDrawer({ agent, onClose, onOpen, enabled, onToggle }: { agent: Pro
             </div>
           )}
           {tab === "triggers" && <p className="py-10 text-center text-sm text-muted-foreground">This agent has no triggers</p>}
-          {tab === "activity" && <p className="py-10 text-center text-sm text-muted-foreground">No runs yet</p>}
+          {tab === "activity" && <Activity agent={agent} />}
         </div>
 
         {!mine && (
