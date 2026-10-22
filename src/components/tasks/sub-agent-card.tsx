@@ -137,12 +137,13 @@ export function SubAgentDetail({ kind, color, mark, nav, crumbs, template, capab
 
 // A row in Part of (Figma 86:21772): white 80%, a #E5E3E3 edge inside, 6px corners, a soft shadow; 6px padding, the
 // agent's mark (28px), its name, a chevron at the end; 8 apart. The whole row opens that agent.
+// Hover, like the How it works steps but quieter: the row nudges 1px right, its edge firms, the chevron steps 2px on.
 export function PartOfRow({ mark, name, onClick }: { mark: React.ReactNode; name: string; onClick: () => void }) {
   return (
-    <button onClick={onClick} className="flex w-full cursor-pointer items-center gap-3 rounded-[6px] bg-white/80 p-1.5 text-left shadow-[inset_0_0_0_1px_#e5e3e3,0px_1px_1px_0px_rgba(56,61,69,0.08)] transition-shadow hover:bg-white hover:shadow-[inset_0_0_0_1px_#d6d3d1,0px_1px_2px_0px_rgba(56,61,69,0.12)]">
+    <button onClick={onClick} className="group/row flex w-full cursor-pointer items-center gap-3 rounded-[6px] bg-white/80 p-1.5 text-left shadow-[inset_0_0_0_1px_#e5e3e3,0px_1px_1px_0px_rgba(56,61,69,0.08)] transition-[transform,box-shadow,background-color] duration-200 ease-out hover:translate-x-px hover:bg-white hover:shadow-[inset_0_0_0_1px_#d6d3d1,0px_2px_4px_0px_rgba(56,61,69,0.1)] motion-reduce:hover:translate-x-0">
       {mark}
       <span className="min-w-0 flex-1 truncate text-body leading-5 font-medium text-fg-primary">{name}</span>
-      <span aria-hidden className="grid place-items-center p-1 text-fg-secondary"><svg viewBox="0 0 12 12" fill="none" className="size-3"><path d="M4.5 2L8.14645 5.64644C8.34171 5.8417 8.34171 6.15828 8.14645 6.35354L4.5 10" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
+      <span aria-hidden className="grid place-items-center p-1 text-fg-secondary transition-transform duration-200 ease-out group-hover/row:translate-x-0.5 motion-reduce:group-hover/row:translate-x-0"><svg viewBox="0 0 12 12" fill="none" className="size-3"><path d="M4.5 2L8.14645 5.64644C8.34171 5.8417 8.34171 6.15828 8.14645 6.35354L4.5 10" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
     </button>
   )
 }
