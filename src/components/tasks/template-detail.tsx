@@ -15,7 +15,8 @@ import { days, ordinal, useTriggers, when, type Schedule } from "@/lib/triggers"
 import { EnableSwitch } from "@/components/tasks/enable-switch"
 import { useEnabled } from "@/lib/enabled"
 import { cn } from "@/lib/utils"
-import { ChevronDownIcon, ChevronUpIcon, OverviewIcon, PanelOutcomes, PanelPrompt, PanelProp, PanelRival, PanelSection, PanelSteps, PanelTags, PanelUseButton, SkillsIcon } from "@/components/tasks/panel-ui"
+import { ActivityEmpty, ActivityTimeline, agentRuns } from "@/components/tasks/activity-timeline"
+import { ActivityIcon, ChevronDownIcon, ChevronUpIcon, OverviewIcon, PanelOutcomes, PanelPrompt, PanelProp, PanelRival, PanelSection, PanelSteps, PanelTags, PanelUseButton, SkillsIcon } from "@/components/tasks/panel-ui"
 
 /*
  * One task template, in a panel on the right of the Task templates page (pages/gallery.tsx), styled like the
@@ -23,11 +24,12 @@ import { ChevronDownIcon, ChevronUpIcon, OverviewIcon, PanelOutcomes, PanelPromp
  * hairline dividers, ink tabs with icons, section headers with their icon in a soft square. Kept light:
  *   Name, its properties (created by, capabilities, context as on its card; scope and trigger on your own),
  *   Use Agent at the bottom.
- *   Tabs: Overview (description, outcomes a run ends in, the prompt it runs with, how it works) · Skills (n), plus Schedule on your own tasks.
+ *   Tabs: Overview (description, outcomes a run ends in, the prompt it runs with, how it works) · Skills (n) · Activity (its runs
+ *   as a timeline, activity-timeline.tsx); your own tasks have Triggers and their schedule's Activity instead.
  * wide: the workflow as the zoomable flow chart (workflow-canvas.tsx) instead of the timeline.
  */
 
-type Tab = "overview" | "skills" | "triggers" | "schedule"
+type Tab = "overview" | "skills" | "activity" | "triggers" | "schedule"
 
 export function TemplateDetail({ sa, color, mark, nav, crumbs, onOpenStep, outcomes: outcomesFor, categories, capabilities, context, onUse, onClose, wide }: {
   sa: SuperAgent; color?: string; onUse: (sa: SuperAgent) => void; onClose: () => void; wide?: boolean
@@ -52,7 +54,7 @@ export function TemplateDetail({ sa, color, mark, nav, crumbs, onOpenStep, outco
   const tabs: { id: Tab; label: string; icon: LucideIcon; count?: number }[] = [
     { id: "overview", label: "Overview", icon: OverviewIcon },
     { id: "skills", label: "Skills", icon: SkillsIcon, count: sa.skills.length },
-    ...(sa.custom ? [{ id: "triggers" as const, label: "Triggers", icon: Zap }, { id: "schedule" as const, label: "Activity", icon: Activity }] : []),
+    ...(sa.custom ? [{ id: "triggers" as const, label: "Triggers", icon: Zap }, { id: "schedule" as const, label: "Activity", icon: Activity }] : [{ id: "activity" as const, label: "Activity", icon: ActivityIcon }]),
   ]
   const pad = wide ? "px-6" : "px-5"
   const scope = scopeOf(sa)
@@ -147,6 +149,10 @@ export function TemplateDetail({ sa, color, mark, nav, crumbs, onOpenStep, outco
           </ul>
         )}
 
+        {tab === "activity" && (() => {
+          const list = agentRuns(sa.name, sa.pattern.flat(), outcomes)
+          return list.length ? <ActivityTimeline runs={list} own /> : <ActivityEmpty name={sa.name} />
+        })()}
         {tab === "triggers" && sa.custom && <TriggersSection sa={sa} />}
         {tab === "schedule" && sa.custom && <ScheduleTab sa={sa} noTriggers />}
       </div>

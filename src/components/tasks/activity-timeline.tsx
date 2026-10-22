@@ -72,6 +72,65 @@ const runs: Partial<Record<AgentKind, Run[]>> = {
   ],
 }
 
+// Agents whose runs are their own story (not one step's), by name; the rest are built from their steps' runs
+const agentOwn: Record<string, Run[]> = {
+  "Triage Hunter": [
+    { ago: 2, target: ["repo", "This week's findings · 214"], running: true, summary: "Merging scanner findings and ranking them by real risk…", via: "Triage Hunter" },
+    { ago: 18, target: ["cve", "CVE-2026-94545"], outcome: o("Tickets filed", "good"), summary: "Exploitable and on CISA KEV: STORE-1182 filed for the Storefront team, due in 48 hours.", via: "Triage Hunter", secs: 46 },
+    { ago: 4 * H, target: ["cve", "CVE-2026-61002"], outcome: o("Needs approval", "warn"), summary: "A public PoC on 3 internet-facing assets; the tickets are drafted and wait for your OK.", via: "Triage Hunter", secs: 38 },
+    { ago: 6 * H, target: ["cve", "CVE-2024-4068"], outcome: o("Nothing to fix", "clear"), summary: "Only reachable from build tooling; tracked with no SLA.", via: "Triage Hunter", secs: 21 },
+    { ago: D + 2 * H, target: ["repo", "billing-service"], outcome: o("Nothing to fix", "clear"), summary: "9 findings, all duplicates of issues already filed.", via: "Triage Hunter", secs: 17 },
+    { ago: D + 4 * H, target: ["sast", "SQL injection · orders.ts:88"], outcome: o("Tickets filed", "good"), summary: "Ranked P2: ORD-331 filed for the Orders team, due in 14 days.", via: "Triage Hunter", secs: 52 },
+    { ago: 2 * D, target: ["asset", "admin-portal"], outcome: o("Failed", "failed"), summary: "Jira rejected the tickets (the project key changed); nothing was filed.", via: "Triage Hunter", secs: 12 },
+  ],
+  "Code CVE Exploitability": [
+    { ago: 6 * H, target: ["cve", "CVE-2024-4068"], outcome: o("Not exploitable", "clear"), summary: "braces is only loaded by the build tooling; nothing reaches it at runtime.", via: "", secs: 42 },
+    { ago: D + 9 * H, target: ["cve", "CVE-2025-29927"], outcome: o("Exploitable", "risk"), summary: "The Next.js middleware bypass works on admin-portal; the header isn't stripped at the edge.", via: "", secs: 37 },
+    { ago: 2 * D, target: ["cve", "CVE-2024-21538"], outcome: o("Unclear", "unclear"), summary: "cross-spawn is called with user input in one script, but only behind an admin flag.", via: "", secs: 58 },
+  ],
+  "Cloud Exploitability": [
+    { ago: 1, target: ["cve", "CVE-2026-61002"], running: true, summary: "Checking 14 internet-facing assets against the affected versions…", via: "" },
+    { ago: 7 * H, target: ["cve", "CVE-2026-94545"], outcome: o("Exploitable", "risk"), summary: "storefront-prod-1 runs imgproc 4.1.7 and is reachable from the internet.", via: "", secs: 18 },
+    { ago: D + 3 * H, target: ["asset", "payments-api · Wiz finding"], outcome: o("Not exploitable", "clear"), summary: "The instance sits in a private subnet with no route from the internet.", via: "", secs: 26 },
+  ],
+  "Code SAST Exploitability": [
+    { ago: 3 * H, target: ["sast", "Path traversal · files.ts:41"], outcome: o("Exploitable", "risk"), summary: "The download route joins the file name from the query string without normalising it.", via: "", secs: 49 },
+    { ago: D + 3 * H, target: ["sast", "SQL injection · orders.ts:88"], outcome: o("Unclear", "unclear"), summary: "The query is reachable, but an upstream validator may already reject the payload.", via: "", secs: 64 },
+    { ago: 3 * D, target: ["sast", "XSS · profile.tsx:120"], outcome: o("Not exploitable", "clear"), summary: "React escapes the value; the flagged sink is never given raw HTML.", via: "", secs: 31 },
+  ],
+  "Red Team Simulation": [
+    { ago: 3 * H, target: ["cve", "CVE-2025-29927"], outcome: o("Exploit demonstrated", "risk"), summary: "Reached /admin on the staging replica without a session.", via: "", secs: 190 },
+    { ago: 2 * D, target: ["sast", "Path traversal · files.ts:41"], outcome: o("Not reproduced", "unclear"), summary: "The staging proxy rejected every encoded path we tried.", via: "", secs: 150 },
+  ],
+  "Finding Ownership": [
+    { ago: 20, target: ["cve", "CVE-2026-94545"], outcome: o("Owner found", "good"), summary: "Storefront team (on call: Maya R.), from CODEOWNERS and the deploy history.", via: "", secs: 6 },
+    { ago: 5 * H, target: ["sast", "SQL injection · orders.ts:88"], outcome: o("Owner found", "good"), summary: "Orders team; they wrote 90% of the file in the last year.", via: "", secs: 5 },
+    { ago: D + 5 * H, target: ["asset", "legacy-cron-02"], outcome: o("No owner", "warn"), summary: "No CODEOWNERS and no deploys in a year; flagged for a decision.", via: "", secs: 11 },
+  ],
+  "WAF Analysis": [
+    { ago: 2 * H, target: ["sast", "SQL injection · orders.ts:88"], outcome: o("Mitigated", "clear"), summary: "The managed SQLi rule set blocks every payload on the /orders path.", via: "", secs: 22 },
+    { ago: D + H, target: ["cve", "CVE-2025-29927"], outcome: o("Suggestion", "warn"), summary: "No rule strips x-middleware-subrequest; a one-line custom rule would block it.", via: "", secs: 19 },
+    { ago: 3 * D, target: ["cve", "CVE-2024-4068"], outcome: o("Irrelevant", "unclear"), summary: "Not reachable over HTTP, so the WAF has nothing to do here.", via: "", secs: 8 },
+  ],
+  "Remediation": [
+    { ago: 40, target: ["cve", "CVE-2026-94545"], outcome: o("Easy", "clear"), summary: "Bumped imgproc to 4.1.9 in a sandbox copy; tests pass. PR #412 is ready.", via: "", secs: 210 },
+    { ago: D + 6 * H, target: ["sast", "SQL injection · orders.ts:88"], outcome: o("Medium", "warn"), summary: "Switched to a parameterised query; 2 callers need a small change.", via: "", secs: 340 },
+    { ago: 2 * D, target: ["cve", "CVE-2025-29927"], outcome: o("Hard", "risk"), summary: "The fix needs Next.js 15; 31 files use APIs that changed.", via: "", secs: 420 },
+  ],
+  "Secret Validation": [
+    { ago: 50, target: ["secret", "AWS key · infra/.env"], outcome: o("Yes", "risk"), summary: "A live key, committed 3 days ago and still valid.", via: "", secs: 8 },
+    { ago: D + 7 * H, target: ["secret", "Stripe key · README.md"], outcome: o("No", "good"), summary: "A documented test key; nothing to rotate.", via: "", secs: 5 },
+  ],
+  "App Inventory": [
+    { ago: 2 * H, target: ["branch", "main · 6 repositories"], outcome: o("New assets", "warn"), summary: "2 new deployable apps and 1 shared library found.", via: "", secs: 95 },
+    { ago: 3 * D, target: ["branch", "main · 6 repositories"], outcome: o("No change", "clear"), summary: "The same 14 apps and 5 libraries as last week.", via: "", secs: 88 },
+  ],
+  "Deployment Mapping": [
+    { ago: 5 * H, target: ["asset", "AWS · prod account"], outcome: o("Mapped", "good"), summary: "3 EC2 apps tied to their repositories through their deploy scripts.", via: "", secs: 130 },
+    { ago: 2 * D, target: ["asset", "AWS · prod account"], outcome: o("No change", "clear"), summary: "Every workload is already mapped.", via: "", secs: 120 },
+  ],
+}
+
 const dayLabel = (d: Date) => {
   const start = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime()
   const diff = Math.round((start(new Date()) - start(d)) / 86_400_000)
@@ -81,10 +140,34 @@ const clock = (d: Date) => d.toLocaleTimeString([], { hour: "2-digit", minute: "
 const ago = (m: number) => m < 1 ? "just now" : m < H ? `${m} min ago` : m < D ? `${Math.round(m / H)} hours ago` : `${Math.round(m / D)} days ago`
 const took = (s: number) => s < 60 ? `${s}s` : `${Math.round(s / 60)}m`
 
-export const hasActivity = (kind: AgentKind) => Boolean(runs[kind]?.length)
+// A sub agent's runs; an agent's: the runs it made through its steps (newest first, each target once), or, for one
+// that made none here, its first step's runs as its own
+export const subRuns = (kind: AgentKind) => runs[kind] ?? []
+// outcomes: the agent's own (as in its Overview); each run ends in one of them — a failed run in Failed, the others
+// in the one of the same tone (runs with none that fits are left out) — so a step's result never shows as the agent's
+export function agentRuns(name: string, kinds: AgentKind[], outcomes?: Outcome[]): Run[] {
+  if (agentOwn[name]) return agentOwn[name]
+  const seen = new Set<string>()
+  // its runs through its steps, keeping those whose result is one of its own outcomes (when it lists any)
+  const mine = (r: Run) => !outcomes?.length || !r.outcome || outcomes.some((x) => x.label.toLowerCase() === r.outcome!.label.toLowerCase())
+  let list = Object.values(runs).flat().filter((r) => r.via === name && mine(r)).sort((a, b) => a.ago - b.ago)
+    .filter((r) => !seen.has(r.target[1]) && seen.add(r.target[1]))
+  if (!list.length) {
+    const first = kinds.find((k) => runs[k]?.length)
+    list = first ? runs[first]!.map((r) => ({ ...r, via: name })) : []
+  }
+  if (!outcomes?.length) return list
+  const ends = outcomes.filter((x) => x.tone !== "failed")
+  return list.flatMap((r) => {
+    if (!r.outcome) return [r]
+    const same = outcomes.find((x) => x.label.toLowerCase() === r.outcome!.label.toLowerCase())
+    const end = same ?? (r.outcome.tone === "failed" ? outcomes.find((x) => x.tone === "failed") : ends.find((x) => x.tone === r.outcome!.tone))
+    return end ? [{ ...r, outcome: end }] : [] // no outcome of its own that fits: left out rather than mislabelled
+  })
+}
 
-export function ActivityTimeline({ kind, bars }: { kind: AgentKind; bars?: Partial<Record<Outcome["tone"], string>> }) {
-  const list = runs[kind] ?? []
+// own: the agent's own panel, where "via" would only repeat its name, so the line just says how long it took
+export function ActivityTimeline({ runs: list, bars, own }: { runs: Run[]; bars?: Partial<Record<Outcome["tone"], string>>; own?: boolean }) {
   const days: { label: string; items: (Run & { at: Date })[] }[] = []
   for (const r of list) {
     const at = minutesAgo(r.ago)
@@ -127,7 +210,7 @@ export function ActivityTimeline({ kind, bars }: { kind: AgentKind; bars?: Parti
                     </div>
                     <p className="text-body leading-5 text-pretty text-fg-secondary">{r.summary}</p>
                     <p className="text-small leading-4 text-fg-tertiary">
-                      via {r.via}{r.secs !== undefined && ` · ${took(r.secs)}`}
+                      {own ? (r.secs !== undefined ? `Took ${took(r.secs)}` : "Running for a minute") : <>via {r.via}{r.secs !== undefined && ` · ${took(r.secs)}`}</>}
                     </p>
                   </div>
                 </li>
