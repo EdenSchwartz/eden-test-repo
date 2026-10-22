@@ -13,6 +13,7 @@ import {
 } from "@/data/product-agents"
 import { RivalMark } from "@/components/nav-icons"
 import { useNav } from "@/lib/nav"
+import { useTilt } from "@/lib/tilt"
 import { cn } from "@/lib/utils"
 
 /*
@@ -114,16 +115,20 @@ function SearchBox({ value, onChange }: { value: string; onChange: (v: string) =
   )
 }
 
-// A card: mark, name (and runs-on tags, or your switch and menu), three lines of description; hover lifts it and shows a chevron rail
+// A card: mark, name (and runs-on tags, or your switch and menu), three lines of description. Hover = the harness
+// demo's float (lib/tilt.ts, .tilt-card in index.css): it turns toward the pointer, lifts, its mark catches the light;
+// plus the product's chevron rail
 function AgentCard({ agent, onOpen, enabled, onToggle }: { agent: ProductAgent; onOpen: () => void; enabled?: boolean; onToggle?: (on: boolean) => void }) {
+  const tilt = useTilt()
   const mine = onToggle !== undefined
   const off = mine && !enabled
   return (
-    <article className="group relative flex flex-col gap-3 rounded-2xl border bg-card p-4 pr-8 shadow-xs transition-[border-color,box-shadow,translate] duration-200 ease-out hover:-translate-y-1 hover:border-foreground/30 hover:shadow-lg hover:shadow-foreground/10">
+    <article {...tilt} onClick={onOpen} className="tilt-card group relative flex cursor-pointer flex-col gap-3 overflow-hidden rounded-2xl border bg-card p-4 pr-8 hover:border-foreground/20">
+      <span aria-hidden className="tilt-light" />
       <div className="flex items-center gap-3">
-        <PixelMark agent={agent} className={cn("size-11", off && "opacity-50")} />
+        <PixelMark agent={agent} className={cn("tile-gloss size-11", off && "opacity-50")} />
         <div className="flex min-w-0 flex-1 flex-col">
-          <button type="button" onClick={onOpen} className={cn("cursor-pointer truncate text-left text-base leading-snug font-medium outline-none after:absolute after:inset-0 after:rounded-2xl group-hover:text-foreground", off && "text-muted-foreground")}>
+          <button type="button" className={cn("cursor-pointer truncate text-left text-base leading-snug font-medium outline-none group-hover:text-foreground", off && "text-muted-foreground")}>
             {agent.name}
           </button>
           {!mine && agent.runsOn.length > 0 && (
@@ -133,14 +138,14 @@ function AgentCard({ agent, onOpen, enabled, onToggle }: { agent: ProductAgent; 
         {mine && (
           <div className="relative z-10 flex shrink-0 items-center gap-1">
             <Switch on={!!enabled} onChange={onToggle} label={`Enabled: ${agent.name}`} />
-            <button type="button" aria-label="More actions" className="flex size-7 cursor-pointer items-center justify-center rounded-sm text-muted-foreground hover:bg-muted">
+            <button type="button" aria-label="More actions" onClick={(e) => e.stopPropagation()} className="flex size-7 cursor-pointer items-center justify-center rounded-sm text-muted-foreground hover:bg-muted">
               <IconDots className="size-4" />
             </button>
           </div>
         )}
       </div>
       <p className="mt-1 line-clamp-3 text-[15px] leading-relaxed text-foreground/70 transition-colors group-hover:text-foreground/85">{agent.description}</p>
-      <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 flex w-8 items-center justify-center rounded-r-2xl border-l border-foreground/8 bg-foreground/3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+      <span aria-hidden className="pointer-events-none absolute! inset-y-0 right-0 flex w-8 items-center justify-center rounded-r-2xl border-l border-foreground/8 bg-foreground/3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
         <span className="-translate-x-2.5 transition-[translate] delay-200 duration-0 group-hover:translate-x-0 group-hover:delay-0 group-hover:duration-200">
           <IconChevronRight className="size-4" />
         </span>
