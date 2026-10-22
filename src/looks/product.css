@@ -11,6 +11,7 @@
   --muted: #f5f5f5;
   --muted-foreground: #737373;
   --primary: #171717;
+  --radius: 0.625rem; /* the product's; the Hex look's 0.25rem made cards and marks squarer */
 
   --severity-high-fill: #fff7e8;   --severity-high-text: #b54708;   --severity-high-stroke: #f2a86f;
   --severity-medium-fill: #fffeec; --severity-medium-text: #a18000; --severity-medium-stroke: #ecc735;
