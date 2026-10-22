@@ -1,0 +1,43 @@
+/*
+ * The real product's look, scoped to .product (pages/product-agents.tsx): Rubik, shadcn's neutral greys,
+ * and the product's own color pairs for agent marks and outcome chips (read from its :root on 2026-10-22).
+ */
+.product {
+  --background: #fff;
+  --foreground: #0a0a0a;
+  --card: #fff;
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --muted: #f5f5f5;
+  --muted-foreground: #737373;
+  --primary: #171717;
+
+  --severity-high-fill: #fff7e8;   --severity-high-text: #b54708;   --severity-high-stroke: #f2a86f;
+  --severity-medium-fill: #fffeec; --severity-medium-text: #a18000; --severity-medium-stroke: #ecc735;
+  --severity-low-fill: #f5f6fa;    --severity-low-text: #2e3034;    --severity-low-stroke: #b1b4ba;
+  --palette-green-fill: #37ffbc1a; --palette-green-text: #00a26c;
+  --palette-blue-fill: #e3f2fd;    --palette-blue-text: #3b82f6;    --palette-blue-stroke: #3b82f64d;
+  --remplan-fill: #f0fdfa;         --remplan-text: #0f766e;
+  --tag-purple-fill: #f5eaff;      --tag-purple-text: #a562e8;
+  --type-wiz-fill: #f0f8ff;        --type-wiz-text: #4c7ce3;
+  --info-disclosure-fill: #fffbeb; --info-disclosure-text: #b45309;
+  --vulnerable-fill: #fff0f0;      --vulnerable-text: #b4231a;      --vulnerable-stroke: #ef44444d;
+  --safe-fill: #f0f3ff;            --safe-text: #3f4bb8;            --safe-stroke: #3f4bb84d;
+  --unknown-fill: #f5f6fa;         --unknown-text: #2e3034;         --unknown-stroke: #b1b4ba;
+  --failed-fill: #fff0f0;          --failed-text: #b4231a;          --failed-stroke: #ef44444d;
+  --effort-easy-fill: #f0f3ff;     --effort-easy-text: #3f4bb8;     --effort-easy-stroke: #3f4bb84d;
+  --effort-medium-fill: #fffeec;   --effort-medium-text: #a18000;   --effort-medium-stroke: #ecc735;
+  --effort-hard-fill: #fff7e8;     --effort-hard-text: #b54708;     --effort-hard-stroke: #f2a86f;
+
+  font-family: "Rubik Variable", Rubik, sans-serif;
+  color: var(--foreground);
+  background: var(--background);
+}
+
+/* The Hex look sets small uppercase labels in a mono font; the product keeps them in Rubik */
+:root[data-look] .product .uppercase {
+  font-family: inherit;
+  letter-spacing: 0.05em;
+  font-size: 12px;
+  font-weight: 400;
+}

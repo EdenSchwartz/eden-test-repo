@@ -11,11 +11,13 @@
   },
   "dependencies": {
     "@faker-js/faker": "^10.6.0",
+    "@fontsource-variable/rubik": "^5.3.0",
     "@radix-ui/react-use-controllable-state": "^1.2.6",
     "@streamdown/cjk": "^1.0.4",
     "@streamdown/code": "^2.0.0",
     "@streamdown/math": "^1.0.3",
     "@streamdown/mermaid": "^1.0.3",
+    "@tabler/icons-react": "^3.49.0",
     "@tailwindcss/vite": "^4.3.3",
     "ai": "^7.0.130",
     "class-variance-authority": "^0.7.1",

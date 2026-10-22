@@ -4,9 +4,9 @@ import AgentsPage from "@/pages/agents"
 import ChatPage from "@/pages/chat"
 import ClonePage from "@/pages/clone"
 import FindingsPage from "@/pages/findings"
-import { AgentsLibraryFrame } from "@/components/agents-library-frame"
-// My Agents: the Agents Library page in its "mine" mode (the older page is still in pages/gallery.tsx)
-const MyAgentsFrame = () => <AgentsLibraryFrame mode="mine" />
+// My Agents and Rival Agents as the real product draws them (product-agents branch). The demo's own versions
+// (components/agents-library-frame.tsx, pages/gallery.tsx) are kept but no longer in the sidebar.
+import { MyAgentsPage, RivalAgentsPage } from "@/pages/product-agents"
 import MemoryPage from "@/pages/memory"
 import ScheduledPage from "@/pages/scheduled"
 
@@ -19,8 +19,8 @@ const soon = (text: string) => () => <ComingSoon text={text} />
 export const pages = [
   { id: "chat", title: "New chat", icon: MessageSquare, component: ChatPage, hideFab: true },
   { id: "waiting", title: "Waiting", icon: Hand, component: soon("Everything waiting on you in one place: approvals, questions from your agents, and runs that need a hand."), hideFab: true },
-  { id: "gallery", title: "My Agents", icon: Bot, component: MyAgentsFrame, hideFab: true }, // your agents (pages/gallery.tsx)
-  { id: "explorer", title: "Agents Library", icon: Compass, component: AgentsLibraryFrame, hideFab: true }, // Rival's templates to start from; Home's "Browse agent templates"
+  { id: "gallery", title: "My Agents", icon: Bot, component: MyAgentsPage, hideFab: true }, // your organization's agents
+  { id: "explorer", title: "Rival Agents", icon: Compass, component: RivalAgentsPage, hideFab: true }, // Rival's built-in agents and sub-agents; Home's "Browse agent templates"
   { id: "agents", title: "Activity", icon: Activity, component: AgentsPage },
   { id: "scheduled", title: "Scheduled", icon: CalendarClock, component: ScheduledPage },
   { id: "memory", title: "Memory", icon: Brain, component: MemoryPage },

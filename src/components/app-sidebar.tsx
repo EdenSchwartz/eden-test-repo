@@ -28,7 +28,7 @@ const groups: { id: string; label: string; icon: React.ComponentType<{ className
   {
     id: "agents", label: "Agents", icon: AgentsIcon,
     items: [
-      { label: "Waiting", page: "waiting" }, { label: "Agents Library", page: "explorer" }, { label: "My Agents", page: "gallery" },
+      { label: "Waiting", page: "waiting" }, { label: "Rival Agents", page: "explorer" }, { label: "My Agents", page: "gallery" },
       { label: "Activity", page: "agents" }, { label: "Memory", page: "memory" }, { label: "Usage", page: "usage" },
     ],
   },

@@ -533,6 +533,8 @@ html[data-vt="split"]::view-transition-group(*) {
 
 /* Alternative looks (the Rival | Hex switch in the header) */
 @import "./looks/hex.css";
+/* The real product's look, only on its agent pages (pages/product-agents.tsx) */
+@import "./looks/product.css";
 
 
 /* The side margins of the Agents Library cards area (components/agents-library-frame.tsx): 2rem strips of
