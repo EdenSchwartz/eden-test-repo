@@ -72,15 +72,18 @@ const titleCase = (s: string) => s.split(" ").map((w, i) => (i > 0 && small.has(
 export function PanelOutcomes({ items, bars }: { items: Outcome[]; bars?: Partial<Record<Outcome["tone"], string>> }) {
   return (
     <ul className="flex flex-wrap items-center gap-1.5">
-      {items.map((o) => (
-        <li key={o.label} className="flex h-5 items-center gap-1.5 rounded-[2px] bg-[#f5f5f4] px-1.5 text-small leading-4 whitespace-nowrap text-fg-chip">
-          <span aria-hidden className="h-2.5 w-0.5 shrink-0" style={{ background: bars?.[o.tone] ?? toneBar[o.tone] }} />
-          {titleCase(o.label)}
-        </li>
-      ))}
+      {items.map((o) => <li key={o.label}><PanelOutcomeChip outcome={o} bar={bars?.[o.tone]} /></li>)}
     </ul>
   )
 }
+// One outcome chip (also the result of each run on the Activity timeline)
+export const PanelOutcomeChip = ({ outcome: o, bar }: { outcome: Outcome; bar?: string }) => (
+  <span className="flex h-5 shrink-0 items-center gap-1.5 rounded-[2px] bg-[#f5f5f4] px-1.5 text-small leading-4 whitespace-nowrap text-fg-chip">
+    <span aria-hidden className="h-2.5 w-0.5 shrink-0" style={{ background: bar ?? toneBar[o.tone] }} />
+    {titleCase(o.label)}
+  </span>
+)
+export const outcomeColor = (tone: Outcome["tone"]) => toneBar[tone]
 
 // The prompt: #ECECEC edge, 6px corners, 12px padding, Geist Mono 12/18 in the secondary colour
 // Its background is the Agents Library header's: the faint grid with fine grain, lit by the fluid where the pointer

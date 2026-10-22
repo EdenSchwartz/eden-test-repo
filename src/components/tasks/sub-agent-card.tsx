@@ -10,6 +10,7 @@ import { superAgents, type SuperAgent } from "@/data/super-agents"
 import { useConversations } from "@/lib/conversations"
 import { subAgentStatus, type TaskStatus } from "@/lib/task-status"
 import { ColorTile, colorFor } from "@/components/tasks/color-tile"
+import { ActivityEmpty, ActivityTimeline, hasActivity } from "@/components/tasks/activity-timeline"
 
 /*
  * Sub agents on the Agents page (pages/gallery.tsx, "Sub agents" in the switch): the single-mission helpers
@@ -123,7 +124,7 @@ export function SubAgentDetail({ kind, color, mark, nav, crumbs, template, capab
             </PanelSection>
           </div>
         ) : (
-          <p className="text-body leading-5 text-fg-secondary">No activity yet. Runs of {subName(kind)} will show here.</p>
+          hasActivity(kind) ? <ActivityTimeline kind={kind} bars={subBars} /> : <ActivityEmpty name={subName(kind)} />
         )}
       </div>
       {onUse && (
